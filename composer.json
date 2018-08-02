@@ -1,0 +1,28 @@
+{
+    "name": "pizepei/staging",
+    "description": "staging",
+    "keywords": ["staging","miniature","distributed"],
+    "homepage": "https://org.heil.top/",
+    "authors": [
+        {
+            "name": "pizepei",
+            "email": "pizepei@pizepei.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0.0",
+        "pizepei/config-ng": "dev-master",
+        "pizepei/model": "dev-master",
+        "pizepei/func": "dev-master",
+        "workerman/gateway-worker": "^3.0",
+        "workerman/gatewayclient":"dev-master"
+    },
+
+    "autoload": {
+        "psr-4": {
+            "app\\": "app/",
+            "": "extend/"
+        }
+
+    }
+}
