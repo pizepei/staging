@@ -17,8 +17,7 @@
         "workerman/gateway-worker": "^3.0",
         "workerman/gatewayclient":"dev-master",
         "filp/whoops": "^2.2",
-        "monolog/monolog": "^1.23",
-        "pizepei/terminal-info":"dev"
+        "monolog/monolog": "^1.23"
     },
 
     "autoload": {
