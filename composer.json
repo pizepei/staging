@@ -18,8 +18,7 @@
         "workerman/gatewayclient":"dev-master",
         "filp/whoops": "^2.2",
         "monolog/monolog": "^1.23",
-        "minimum-stability": "dev",
-        "pizepei/terminal-info":"dev-master"
+        "pizepei/terminal-info":"dev"
     },
 
     "autoload": {
