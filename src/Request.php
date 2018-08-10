@@ -31,10 +31,15 @@ class Request
         /**
          * 释放内存
          */
-        $_GET = null;
-//        $_COOKIE = null;
-        $_POST = null;
-//        $this->FILES = $_FILES;
+        /**
+         * 判断模式exploit调试模式不释放$_POST、$_GET内存
+         */
+        if(__INIT__['pattern'] != 'exploit'){
+            $_POST = null;
+//            $_GET = null;
+            //$_COOKIE = null;
+            //$this->FILES = $_FILES;
+        }
     }
 
     /**
@@ -88,5 +93,41 @@ class Request
         static::$object =  new static();
         return static::$object;
     }
+    /**
+     * 重定向请求
+     * @param $url
+     */
+    public function Redirect($url)
+    {
+        header("Location: {$url}",true,301);
+    }
+
+    /**
+     * 设置产生url
+     *
+     * @param $route    路由地址
+     * @param $data     需要传递的参数
+     */
+    public function setUrl($route,$data =[])
+    {
+        /**
+         * 判断是否有参数
+         */
+        $para = '';
+        if(!empty($data)){
+            /**
+             * 拼接
+             */
+            foreach ($data as $k=>$v){
+                $para .= $k.'='.$v.'&';
+            }
+            $para = rtrim($para, "&");
+            $route = $route.'?'.$para;
+        }
+        $http = $_SERVER['HTTPS'] == 'on'?'https://':'http://';
+        return $http.$_SERVER['HTTP_HOST'].$route;
+
+    }
+
 
 }

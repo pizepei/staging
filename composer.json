@@ -16,6 +16,7 @@
         "pizepei/func": "dev-master",
         "workerman/gateway-worker": "^3.0",
         "workerman/gatewayclient":"dev-master",
+        "pizepei/terminal-info":"dev-master",
         "filp/whoops": "^2.2",
         "monolog/monolog": "^1.23"
     },

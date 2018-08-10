@@ -7,13 +7,12 @@
  * @title 控制器基类
  */
 namespace pizepei\staging;
-
+use Whoops\Run;
 class Controller
 {
     /**
      * 初始化
      */
-
 
     /**
      * 模板渲染、输出json等等
@@ -23,9 +22,10 @@ class Controller
      * 权限控制
      */
 
+    public function __construct()
+    {
 
-    
-
+    }
 
 
 }

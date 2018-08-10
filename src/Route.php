@@ -36,7 +36,7 @@ class Route
      */
     protected $method = '';
     /**
-     * 当前路径
+     * 当前路径(控制器)
      * @var string
      */
     protected $atpath = '';
@@ -50,25 +50,23 @@ class Route
      * 路由数据
      * @var null
      */
-    protected $routeData = null;
-
-
-
+    protected $routeData = array();
 
     /**
      *构造方法
      */
     protected function __construct()
     {
-//        $this->getRouteConfig();
-
-        $s = isset($_GET['s'])?$_GET['s']:'/'.__ROUTE__['expanded'];
-        $this->atroute = &$s;
-        unset($_GET['s']);
         /**
          * 获取路由
          */
-        $routeData = require('../'.__APP__.'/route/index.php');
+        $this->getRouteConfig();
+
+        $s = isset($_GET['s'])?$_GET['s']:'/'.__ROUTE__['expanded'];
+
+        $this->atroute = &$s;
+        unset($_GET['s']);
+
         /**
          * 获取到
          */
@@ -79,7 +77,7 @@ class Route
                 /**
                  * 如果路由没有expanded
                  */
-                echo $s = '/'.__ROUTE__['expanded'];
+                 $s = '/'.__ROUTE__['expanded'];
             }
         }
         /**
@@ -98,52 +96,60 @@ class Route
         /**
          * 判断路由是否存在
          */
-        $rtrim = str_replace(__ROUTE__['expanded'],'',$s);
+        $this->atroute = str_replace(__ROUTE__['expanded'],'',$this->atroute);
 
-        if(isset($routeData[$rtrim])){
+        if(isset($this->routeData[$this->atroute])){
             /**
              * 判断请求类型
              */
-
-            if($routeData[$rtrim][2] != 'all'){
-                if($routeData[$rtrim][2] != $_SERVER['REQUEST_METHOD']) {
-                    echo  '不存在的请求';
-                    exit;
+            if($this->routeData[$this->atroute][2] != 'all'){
+                if($this->routeData[$this->atroute][2] != $_SERVER['REQUEST_METHOD']) {
+                    throw new \Exception('不存在的请求');
                 }
             }
             /**
              * 获取类命名空间
              */
-
-            $atpath = __APP__.'\\'.$routeData[$rtrim][0];
+            $this->controller = &$this->routeData[$this->atroute][0];
+            $this->atpath = __APP__.'\\'.$this->controller;
             /**
-             * 实例化控制器
+             * 获取控制器方法
              */
-            $new = new $atpath;
-            $this->atpath = &$atpath;
-
-            $method = &$routeData[$rtrim][1];
-            $this->method = &$method;
-            /**
-             * 控制器方法
-             */
-            $new->$method();
+            $this->method = &$this->routeData[$this->atroute][1];
 
         }else{
-            echo '不存在';
-            exit;
+            throw new \Exception('路由不存在');
+
 
         }
     }
 
     /**
-     * 启动请求转移
+     * 获取property
+     * @param $propertyName
+     */
+    public function __get($propertyName)
+    {
+        if(isset($this->$propertyName)){
+            return $this->$propertyName;
+        }
+        return null;
+    }
+
+        /**
+     * 启动请求转移（实例化控制器）
      */
     protected function begin()
     {
-
-
-
+        /**
+         * 实例化控制器
+         */
+        $new = new $this->atpath;
+        $method = &$this->method;
+        /**
+         * 控制器方法
+         */
+        return $new->$method();
     }
 
     /**
@@ -159,20 +165,27 @@ class Route
         /**
          * 打开route目录
          */
+        $file_dir = scandir( __ROUTE__['file_dir']);
+        foreach ($file_dir as $k =>$v){
 
-
-        /**
-         * 打开
-         */
+            if(!is_dir(__ROUTE__['file_dir'].__DS__.$v)){
+                /**
+                 * 合并【按文件字母升序排列】
+                 */
+                $this->routeData = array_merge($this->routeData,require(__ROUTE__['file_dir'].__DS__.$v));
+            }else{
+                //echo '目录'.$v;
+            }
+        }
 
     }
 
-
-
     /**
      * 初始化
+     * @param bool $status
+     * @return null|static
      */
-    public static  function init()
+    public static  function init($status = false)
     {
         /**
          * 判断是否已经有这个对象
@@ -181,6 +194,9 @@ class Route
             return static::$object;
         }
         $New = new static();
+        if($status == true){
+            return $New->begin();
+        }
         return $New;
     }
 
