@@ -29,8 +29,6 @@ class Start
      *启动路由
      *
      */
-
-
     /**
      *
      */
@@ -50,15 +48,8 @@ class Start
             exit('PHP版本必须<=7,当前版本'.PHP_VERSION);
         }
         /**
-         * 服务器版本
+         * 服务器版本php_uname('s').php_uname('r');
          */
-       // php_uname('s').php_uname('r');
-        /**
-         * 最大执行时间
-         *
-         */
-        //get_cfg_var("max_execution_time")."秒 ";
-
         /**
          * 设置初始化配置
          */
@@ -136,23 +127,27 @@ class Start
                     /**
                      * 控制器return的是array ['code'=>001,'msg'=>'比如这样']
                      */
-                    $data['SYSTEMSTATUS'] = $this->getSystemStatus();
+                    if( __INIT__['pattern']=='exploit'){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
                     echo json_encode($data,JSON_UNESCAPED_UNICODE );
                 }else{
                     /**
                      * 控制器returnd 的是字符串
                      */
-                    echo json_encode(['data'=>$data,'SYSTEMSTATUS'=>$this->getSystemStatus()],JSON_UNESCAPED_UNICODE );
+                    if( __INIT__['pattern']=='exploit'){
+                        echo json_encode(['data'=>$data,'SYSTEMSTATUS'=>$this->getSystemStatus()],JSON_UNESCAPED_UNICODE );
+                    }else{
+                        echo json_encode(['data'=>$data],JSON_UNESCAPED_UNICODE );
+                    }
                 }
             }else{
                 /**
                  * 控制器没有return;
                  */
-                echo json_encode(['SYSTEMSTATUS'=>$this->getSystemStatus()],JSON_UNESCAPED_UNICODE );
+                if( __INIT__['pattern']=='exploit'){
+                    echo json_encode(['SYSTEMSTATUS'=>$this->getSystemStatus()],JSON_UNESCAPED_UNICODE );
+                }
             }
-
         }
-
     }
 
     /**
@@ -183,16 +178,13 @@ class Start
             /**
              * 历史slq
              */
-            'sql' =>isset($GLOBALS['DBTABASE']['slqLog'])?$GLOBALS['DBTABASE']['slqLog']:'',
+            'sql' =>isset($GLOBALS['DBTABASE']['sqlLog'])?$GLOBALS['DBTABASE']['sqlLog']:'',
             /**
-             * 历史变量
+             * 系统状态
              */
-            'sqlvariable' => isset($GLOBALS['DBTABASE']['variableLog'])?$GLOBALS['DBTABASE']['variableLog']:'',
-
-
             '系统开始时的内存(K)'=>__INIT_MEMORY_GET_USAGE__,
-            '系统结束时的内存(K)'=>memory_get_usage()/1024,
-            '系统内存峰值(K)' =>memory_get_peak_usage()/1024,
+            '系统结束时的内存(KB)'=>round(memory_get_usage()/1024/1024,5),
+            '系统内存峰值(KB)' =>round(memory_get_peak_usage()/1024/1024,5),
             '执行耗时(S)' =>round(microtime(true)-__INIT_MICROTIME__,4),
         ];
 

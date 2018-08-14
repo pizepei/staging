@@ -111,7 +111,7 @@ class Route
              * 获取类命名空间
              */
             $this->controller = &$this->routeData[$this->atroute][0];
-            $this->atpath = __APP__.'\\'.$this->controller;
+            $this->atpath = '\\'.__APP__.'\\'.$this->controller;
             /**
              * 获取控制器方法
              */
@@ -144,6 +144,7 @@ class Route
         /**
          * 实例化控制器
          */
+        $atpath = &$this->atpath;
         $new = new $this->atpath;
         $method = &$this->method;
         /**
