@@ -84,12 +84,9 @@ class Request
         /**
          * 判断是否已经有这个对象
          */
-//        if(isset($GLOBALS['Request'])){
         if(static::$object != null){
-//            return $GLOBALS['Request'];
             return static::$object;
         }
-//        $GLOBALS['Request'] = new static();
         static::$object =  new static();
         return static::$object;
     }
@@ -128,6 +125,14 @@ class Request
         return $http.$_SERVER['HTTP_HOST'].$route;
 
     }
-
+    /**
+     * 自定义响应header
+     */
+    public function setHeader($header)
+    {
+        foreach ($header as $k=>$v){
+            header("{$k}: {$v}");
+        }
+    }
 
 }

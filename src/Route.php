@@ -51,6 +51,11 @@ class Route
      * @var null
      */
     protected $routeData = array();
+    /**
+     * 当前路由数据
+     * @var array
+     */
+    protected $routeArr = array();
 
     /**
      *构造方法
@@ -63,8 +68,8 @@ class Route
         $this->getRouteConfig();
 
         $s = isset($_GET['s'])?$_GET['s']:'/'.__ROUTE__['expanded'];
+        $this->atroute = $s;
 
-        $this->atroute = &$s;
         unset($_GET['s']);
 
         /**
@@ -100,10 +105,15 @@ class Route
 
         if(isset($this->routeData[$this->atroute])){
             /**
+             * 获取控制器权限数据
+             */
+            $this->routeArr = &$this->routeData[$this->atroute];
+            /**
+             *
              * 判断请求类型
              */
-            if($this->routeData[$this->atroute][2] != 'all'){
-                if($this->routeData[$this->atroute][2] != $_SERVER['REQUEST_METHOD']) {
+            if(strtoupper($this->routeData[$this->atroute][2]) != 'ALL'){
+                if(strtoupper($this->routeData[$this->atroute][2]) != $_SERVER['REQUEST_METHOD']) {
                     throw new \Exception('不存在的请求');
                 }
             }
@@ -116,6 +126,9 @@ class Route
              * 获取控制器方法
              */
             $this->method = &$this->routeData[$this->atroute][1];
+
+
+
 
         }else{
             throw new \Exception('路由不存在');
@@ -190,15 +203,17 @@ class Route
     {
         /**
          * 判断是否已经有这个对象
+         *             var_dump($this->atroute);
          */
         if(static::$object != null){
             return static::$object;
         }
-        $New = new static();
+        static::$object = new static();
+
         if($status == true){
-            return $New->begin();
+            return static::$object ->begin();
         }
-        return $New;
+
     }
 
 }

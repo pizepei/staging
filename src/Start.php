@@ -10,7 +10,9 @@ namespace pizepei\staging;
 use pizepei\staging\Route;
 use pizepei\staging\Request;
 use pizepei\config\Config;
+use pizepei\terminalInfo\ToLocation;
 use Whoops\Run;
+use pizepei\terminalInfo\TerminalInfo;
 class Start
 {
     /**
@@ -71,11 +73,16 @@ class Start
         /**
          * 请求类
          */
-        Request::init();
+        $Request = Request::init();
+        /**
+         * 全局响应配置
+         */
+        $Request->setHeader(__INIT__['header']);
         /**
          * 控制器return
          */
         $this->output(Route::init(true));
+
     }
     /**
      * 基本初始化
@@ -85,6 +92,7 @@ class Start
 
 
     }
+
 
     /**
      * 设置define
@@ -118,6 +126,14 @@ class Start
      */
     protected function output($data)
     {
+
+        $Route = Route::init();
+        /**
+         * 路由单独配置的调试4
+         * 路由权限分组 3
+         */
+        $pattern = isset($Route->routeArr[4])?$Route->routeArr[4]:false;
+
         /**
          * 判断输出类型
          */
@@ -127,13 +143,13 @@ class Start
                     /**
                      * 控制器return的是array ['code'=>001,'msg'=>'比如这样']
                      */
-                    if( __INIT__['pattern']=='exploit'){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
+                    if( __INIT__['pattern']=='exploit' && $pattern){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
                     echo json_encode($data,JSON_UNESCAPED_UNICODE );
                 }else{
                     /**
                      * 控制器returnd 的是字符串
                      */
-                    if( __INIT__['pattern']=='exploit'){
+                    if( __INIT__['pattern']=='exploit' || $pattern){
                         echo json_encode(['data'=>$data,'SYSTEMSTATUS'=>$this->getSystemStatus()],JSON_UNESCAPED_UNICODE );
                     }else{
                         echo json_encode(['data'=>$data],JSON_UNESCAPED_UNICODE );
@@ -149,7 +165,6 @@ class Start
             }
         }
     }
-
     /**
      * 获取系统状态
      */
@@ -159,6 +174,11 @@ class Start
          * 路由类
          */
         $Route = Route::init();
+        /**
+         *
+         */
+        $ToLocation = new ToLocation();
+        ['data'=>$ToLocation->getlocation('183.11.30.104')];
 
         return $data =[
             /**
@@ -179,6 +199,12 @@ class Start
              * 历史slq
              */
             'sql' =>isset($GLOBALS['DBTABASE']['sqlLog'])?$GLOBALS['DBTABASE']['sqlLog']:'',
+
+            /**
+             * ip信息
+             */
+            'clientInfo'=>terminalInfo::getArowserPro(),
+
             /**
              * 系统状态
              */
@@ -186,6 +212,7 @@ class Start
             '系统结束时的内存(KB)'=>round(memory_get_usage()/1024/1024,5),
             '系统内存峰值(KB)' =>round(memory_get_peak_usage()/1024/1024,5),
             '执行耗时(S)' =>round(microtime(true)-__INIT_MICROTIME__,4),
+
         ];
 
 
