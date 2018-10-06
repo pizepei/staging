@@ -46,7 +46,6 @@ class Start
          * 判断环境
          */
         if(PHP_VERSION <= 7){
-
             exit('PHP版本必须<=7,当前版本'.PHP_VERSION);
         }
         /**
@@ -56,7 +55,6 @@ class Start
          * 设置初始化配置
          */
         $this->setDefine();
-
         /**
          * 判断模式
          */
@@ -64,7 +62,7 @@ class Start
 
             $whoops = new Run;
             $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
-            $whoops->register();
+            //$whoops->register();
 
         }else{
             // 关闭所有PHP错误报告
@@ -105,6 +103,9 @@ class Start
         define('__INIT__',Config::UNIVERSAL['init']);//初始化配置
         define('__ROUTE__',Config::UNIVERSAL['route']);//路由配置
         define('__DS__',DIRECTORY_SEPARATOR);//路由配置
+        define('__APP__FILE__',DIRECTORY_SEPARATOR);//应用的绝对目录
+
+
         /**
          * 自定义设置配置
          */
@@ -126,14 +127,16 @@ class Start
      */
     protected function output($data)
     {
-
         $Route = Route::init();
+        /**
+         * 根据不同的路由进行不同的
+         */
+
         /**
          * 路由单独配置的调试4
          * 路由权限分组 3
          */
         $pattern = isset($Route->routeArr[4])?$Route->routeArr[4]:false;
-
         /**
          * 判断输出类型
          */
@@ -143,7 +146,7 @@ class Start
                     /**
                      * 控制器return的是array ['code'=>001,'msg'=>'比如这样']
                      */
-                    if( __INIT__['pattern']=='exploit' && $pattern){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
+                    if( __INIT__['pattern']=='exploit' ){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
                     echo json_encode($data,JSON_UNESCAPED_UNICODE );
                 }else{
                     /**
@@ -174,11 +177,8 @@ class Start
          * 路由类
          */
         $Route = Route::init();
-        /**
-         *
-         */
         $ToLocation = new ToLocation();
-        ['data'=>$ToLocation->getlocation('183.11.30.104')];
+        //['data'=>$ToLocation->getlocation('183.11.30.104')];
 
         return $data =[
             /**
@@ -194,17 +194,14 @@ class Start
              */
             'REQUEST_URI'=> $_SERVER['REQUEST_URI'],
             'route' => $Route->atroute,
-
             /**
              * 历史slq
              */
             'sql' =>isset($GLOBALS['DBTABASE']['sqlLog'])?$GLOBALS['DBTABASE']['sqlLog']:'',
-
             /**
              * ip信息
              */
             'clientInfo'=>terminalInfo::getArowserPro(),
-
             /**
              * 系统状态
              */

@@ -12,7 +12,15 @@ namespace pizepei\staging;
 
 class Request
 {
-
+    /**
+     * 数据类型转换（在获取参数是进行过滤数据类型转换）
+     *  根据路由数据
+     *      处理返回参数
+     *          区分php://input  post  get
+     *      请求来的参数
+     * 根据要求返回不同的http请求
+     * 根据要求返回不同的数据类型
+     */
 
     /**
      * 当前对象
@@ -25,9 +33,10 @@ class Request
     protected function __construct()
     {
         $this->GET = $_GET;
+        unset($this->GET['s']);
 //        $this->COOKIE = $_COOKIE;
         $this->POST = $_POST;
-
+        $this->PATH = [];
         /**
          * 释放内存
          */
@@ -41,6 +50,20 @@ class Request
             //$this->FILES = $_FILES;
         }
     }
+
+    /**
+     * 获取 PATH 变量
+     * @param $name
+     * @return mixed|null
+     */
+    public function path($name ='')
+    {
+        if($name ===''){
+            return $this->PATH;
+        }
+        return $this->PATH[$name]??null;
+    }
+
 
     /**
      * 获取数据
@@ -64,14 +87,14 @@ class Request
              */
             $type = strtoupper($name[0]);
             if(isset($name[2])){
-                settype($this->$type[$name[1]],$name[2]);
+                settype($this->$type[$name[1]]??NULL,$name[2]);
             }
             return $this->$type[$name[1]];
         }else{
             if($type != ''){
                 settype($this->GET[$name],$type);
             }
-            return  $this->GET[$name];
+            return  $this->GET[$name]??null;
 
         }
 
