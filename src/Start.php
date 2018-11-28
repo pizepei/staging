@@ -66,7 +66,7 @@ class Start
 
         }else{
             // 关闭所有PHP错误报告
-            error_reporting(0);
+            //error_reporting(0);
         }
         /**
          * 请求类
@@ -162,7 +162,7 @@ class Start
                 /**
                  * 控制器没有return;
                  */
-                if( __INIT__['pattern']=='exploit'){
+                if( __INIT__['pattern']!='exploit'){
                     echo json_encode(['SYSTEMSTATUS'=>$this->getSystemStatus()],JSON_UNESCAPED_UNICODE );
                 }
             }

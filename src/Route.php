@@ -19,10 +19,6 @@ class Route
      * 从头开始整理代码逻辑优化代码
      * 进行测试
      */
-
-
-
-
     /**
      * 当前对象
      * @var null
@@ -37,16 +33,28 @@ class Route
     /**
      * 控制器return 返回的数据类型()
      */
-    const ReturnType = ['int','string','bool','float','array','object','null'];
-
-    const ReturnFormat = ['list','objectLit'];
-
+    const ReturnType = ['int','string','bool','float','array','null'];
+    /**
+     * 返回数据类型
+     */
+    const ReturnFormat = ['list','objectList','object'];
+    /**
+     * 路由参数附加参数
+     * name 【中文说明，表达式或者正则表达式、】
+     * 表达式 empty或者函数  不能为空
+     */
+    protected $ReturnSubjoin = [
+        'required'=>['必须的','empty',''],
+        'number'=>['手机号码','/^[1][3-9][0-9]{9}$/',''],
+        'identity'=>['身份证','/^[1-9]\d{5}(18|19|2([0-9]))\d{2}(0[0-9]|10|11|12)([0-2][1-9]|30|31)\d{3}[0-9Xx]$/',''],
+        'phone'=>['电话号码','/^(0[0-9]{2,3}/-)?([2-9][0-9]{6,7})+(/-[0-9]{1,4})?$/',''],
+        'password'=>['密码格式','/^[0-9A-Za-z_\@\*\,\.]{6,23}$/'],
+    ];
     /**
      * 应用目录下所有文件路径
      * @var array
      */
     protected $filePathData = [];
-
     /**
      * 当前请求的控制器
      * @var string
@@ -67,7 +75,6 @@ class Route
      * @var string
      */
     protected $atPath = '';
-
     /**
      * 当前路由
      * @var string
@@ -124,7 +131,10 @@ class Route
      */
     protected function __construct()
     {
-
+        /**
+         * 合并ReturnSubjoin
+         */
+        $this->eturnSubjoin= array_merge($this->ReturnSubjoin,__ROUTE__['ReturnSubjoin']);
 
         $s = isset($_GET['s'])?$_GET['s']:'/'.__ROUTE__['expanded'];
         $this->atRoute = $s;
@@ -161,6 +171,7 @@ class Route
         /**
          * 判断文件类型
          */
+
         if( __ROUTE__['type']== 'note'){
             $this->annotation();
             //$this->noteRoute();
@@ -215,11 +226,13 @@ class Route
      */
     protected function noteRoute()
     {
+        
         /**
          * 获取路由信息
          */
         $Rule = &$this->noteRouter[$_SERVER['REQUEST_METHOD']]['Rule'];//常规
         $Path = &$this->noteRouter[$_SERVER['REQUEST_METHOD']]['Path'];//路径
+        //var_dump($Rule);
         /**
          * 开始使用常规路由快速匹配
          */
@@ -230,6 +243,7 @@ class Route
             //echo '在常规路由中';
             $RouteData = &$Rule[$this->atRoute];
         }else{
+            if(empty($Path)){ throw new \Exception('路由不存在'); }
             //echo '不在常规路由中';
             /**
              * 使用快捷匹配路由匹配
@@ -279,7 +293,7 @@ class Route
                 /**
                  * 严格匹配参数（如果对应的:name位置没有使用参数 或者为字符串空  认为是路由不存在 或者提示参数不存在）
                  */
-                throw new \Exception($RouteData['router'].':参数不正确');
+                throw new \Exception($RouteData['router'].':路由不存在');
             }
             /**
              * 对参数进行强制过滤（根据路由上的规则：name[int]）
@@ -303,8 +317,10 @@ class Route
         $this->controller = &$RouteData['Namespace'];
         $this->method = &$RouteData['function']['name'];
         $this->atRoute = &$RouteData['router'];
+        $this->atRouteData = $RouteData;
 
         $controller = new $RouteData['Namespace'];
+
         if(empty($RouteData['function']['Param']) && empty($RouteData['ParamObject'])){
             return $controller->$function();
         }else{
@@ -337,12 +353,10 @@ class Route
     public function annotation()
     {
         $fileData =array();
-
-
         /**
          * 判断应用模式
          */
-        if(__INIT__['pattern'] === 'exploit'){
+        if(__INIT__['pattern'] != 'exploit'){
 
             /**
              * 开发模式
@@ -376,7 +390,6 @@ class Route
                 Cache::set(['public','arr'],$this->noteRouter,0,'route');
             }
         }
-
         //var_dump($this->noteRouter);
     }
     /**
@@ -437,7 +450,21 @@ class Route
          */
         foreach ($noteBlock[1] as $k=>$v)
         {
-            unset($PathNote);
+            /**
+             * 删除上一个注解块留下来的数据
+             */
+            unset($PathNote);//简单路径路由用来快速匹配
+            unset($routerStr);//路由
+            unset($matchStr);//匹配使用的 正则表达式
+            //unset($namespace);//路由请求的控制器
+            //unset($class);//路由请求的控制器
+            unset($ParamObject);
+            unset($PathParam);//路径参数（路由参数如user/:id  id就是路由参数）
+            unset($routeParamData);//路由参数（url上的或者post等）
+            unset($routeReturnData);//返回参数
+            unset($function);//控制器方法
+
+
             preg_match('/@router(.*?)[\n\r]/s',$v,$routerData);
             preg_match('/public[\s]+function[\s]+(.*?)[\s]+$/s',$v,$functionData);
             /**
@@ -567,12 +594,22 @@ class Route
                      * 目前只支持Request对象（严格区分大小写）
                      */
                     if($routeParam != []){
+                        //var_dump($routeParam);
+
                         preg_match('/(.*?)[ ]{0,10}[\r\n]/s',$routeParam,$routeParamObject);//请求参数
                         $routeParamObject = $routeParamObject[1]??'';
                         if(empty($routeParamObject)){ throw new \Exception('设置了@param但是没有传入对象信息');}
                         /**
-                         * 判断对象
+                         * 判断对象信息
+                         * 默认常规array
+                         * $Request [xml] 使用[] 可直接定义xml或者json
                          */
+                        preg_match('/\[(.*?)]/s',$routeParamObject,$routeParamObjectType);
+                        if(isset($routeParamObjectType[1])){
+                            preg_match('/[\$A-Za-z_]+/s',$routeParamObject,$routeParamObject);
+                            $routeParamObject = $routeParamObject[0]??'';
+                        }
+
                         if($routeParamObject != '$Request'){ throw new \Exception('目前只支持Request对象（严格区分大小写）:'.$routeParamObject);}
                         /**
                          * 开始切割获取请求参数
@@ -636,7 +673,8 @@ class Route
                         'MatchStr'=>$matchStr??'',//匹配使用的 正则表达式
                         'Namespace'=>$namespace[1].'\\'.$class[1],//路由请求的控制器
                         'Router'=>$routerStr,//路由
-                        'ParamObject'=>$routeParamObject??'',
+                        'ParamObject'=>$routeParamObject??'',//请求对象
+                        'routeParamObjectType'=>$routeParamObjectType[1]??'',//请求类型json  array xml
                         'PathParam' =>$PathParam??[],//路径参数（路由参数如user/:id  id就是路由参数）
                         'Param'=>$routeParamData??'',//路由参数（url上的或者post等）
                         'Return'=>$routeReturnData??[],//返回参数
@@ -686,6 +724,9 @@ class Route
      */
     protected function setReturn($data)
     {
+        if(!isset($data[0])){
+            return null;
+        }
         /**
          * 获取第一个并且以第一个为参考
          */
