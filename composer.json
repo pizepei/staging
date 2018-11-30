@@ -17,7 +17,6 @@
         "filp/whoops": "^2.2",
         "monolog/monolog": "^1.23"
     },
-
     "autoload": {
         "psr-4": {
             "pizepei\\staging\\": "src/"
