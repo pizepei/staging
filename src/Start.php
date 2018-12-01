@@ -162,7 +162,7 @@ class Start
                 /**
                  * 控制器没有return;
                  */
-                if( __INIT__['pattern']!='exploit'){
+                if( __INIT__['pattern']=='exploit'){
                     echo json_encode(['SYSTEMSTATUS'=>$this->getSystemStatus()],JSON_UNESCAPED_UNICODE );
                 }
             }
@@ -177,8 +177,6 @@ class Start
          * 路由类
          */
         $Route = Route::init();
-        $ToLocation = new ToLocation();
-        //['data'=>$ToLocation->getlocation('183.11.30.104')];
 
         return $data =[
             /**

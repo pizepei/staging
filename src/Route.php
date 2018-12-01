@@ -357,7 +357,6 @@ class Route
          * 判断应用模式
          */
         if(__INIT__['pattern'] != 'exploit'){
-
             /**
              * 开发模式
              * 获取文件路径
