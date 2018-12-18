@@ -489,7 +489,7 @@ class Route
                 }
                 $function['name'] = $functionName[1];
                 $function['Param'] = $functionParam;
-                preg_match_all('/[^ ]{1,10}[A-Z-a-z:\/\]\[]+/s',$routerData[1],$routerData);
+                preg_match_all('/[^ ]{1,10}[A-Z-a-z.:\/\]\[]+/s',$routerData[1],$routerData);
                 //var_dump($routerData);
                 if(!isset($routerData[0][1])){continue;}//不规范的路由
                 $routerData = $routerData[0];
