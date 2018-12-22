@@ -476,9 +476,12 @@ class Request
             $para = rtrim($para, "&");
             $route = $route.'?'.$para;
         }
-        $http = $_SERVER['HTTPS'] == 'on'?'https://':'http://';
+        if(isset($_SERVER['HTTPS'])){
+            $http = $_SERVER['HTTPS'] == 'on'?'https://':'http://';
+        }else{
+            $http = 'http://';
+        }
         return $http.$_SERVER['HTTP_HOST'].$route;
-
     }
     /**
      * 自定义响应header

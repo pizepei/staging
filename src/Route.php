@@ -218,7 +218,7 @@ class Route
             $this->method = &$this->fileRouteData[$this->atRoute][1];
 
         }else{
-            throw new \Exception('路由不存在');
+            throw new \Exception('路由不存在',404);
         }
     }
 
@@ -264,7 +264,9 @@ class Route
                 }
             }
             if(!isset($PathNote)){
-                throw new \Exception('路由不存在');
+                //header("Status: 404 Not Found");
+                //header("HTTP/1.0 404 Not Found");
+                throw new \Exception('路由不存在',404);
             }
             /**
              * 判断匹配到的路由数量
