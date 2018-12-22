@@ -136,7 +136,8 @@ class Route
          */
         $this->eturnSubjoin= array_merge($this->ReturnSubjoin,__ROUTE__['ReturnSubjoin']);
 
-        $s = isset($_GET['s'])?$_GET['s']:'/'.__ROUTE__['expanded'];
+        $s = isset($_GET['s'])?$_GET['s']:'/'.__ROUTE__['index'];//默认路由
+
         $this->atRoute = $s;
         //var_dump($s);
         unset($_GET['s']);
