@@ -376,11 +376,10 @@ class Request
         /**
          * 判断是否已经有这个对象
          */
-        if(static::$object != null){
-            return static::$object;
-        }
-        static::$object =  new static();
-        return static::$object;
+        if(!self::$object) self::$object = new static();
+        
+        return self::$object;
+
     }
     /**
      * 重定向请求
