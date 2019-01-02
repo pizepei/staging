@@ -317,6 +317,7 @@ class Route
             }
         }
         $function = $RouteData['function']['name'];
+        //$this->module = $function;
         $this->controller = &$RouteData['Namespace'];
         $this->method = &$RouteData['function']['name'];
         $this->atRoute = &$RouteData['router'];
@@ -926,16 +927,16 @@ class Route
     {
         /**
          * 判断是否已经有这个对象
-         *             var_dump($this->atRoute);
+         *  var_dump($this->atRoute);
          */
-        if(static::$object != null){
-            return static::$object;
+        if(self::$object != null){
+            return self::$object;
         }else{
-            static::$object = new static();
+            self::$object = new static();
         }
         //var_dump(static::$object);
         if($status == true){
-            return static::$object ->begin();
+            return self::$object ->begin();
         }
 
     }
