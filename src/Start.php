@@ -177,7 +177,6 @@ class Start
          * 路由类
          */
         $Route = Route::init();
-
         return $data =[
             /**
              * 路由控制器
@@ -199,7 +198,7 @@ class Start
             /**
              * ip信息
              */
-            'clientInfo'=>terminalInfo::getArowserPro(),
+            'clientInfo'=>__INIT__['clientInfo']?terminalInfo::getArowserPro():terminalInfo::get_ip(),
             /**
              * 系统状态
              */
@@ -209,6 +208,7 @@ class Start
             '执行耗时(S)' =>round(microtime(true)-__INIT_MICROTIME__,4),
 
         ];
+
 
 
     }
