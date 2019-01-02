@@ -183,18 +183,20 @@ class Start
              */
             'controller' => $Route->controller,
             /**
-             * 控制器方法(请求方法 get post)
+             * 控制器方法
              */
             'function_method' => $Route->method,
             /**
-             * 控制器方法
              * 请求方法 get post
              */
             'request_method' =>$_SERVER['REQUEST_METHOD'],
             /**
-             * 完整路由
+             * 完整路由（去除域名的url地址）
              */
             'request_url'=> $_SERVER['REQUEST_URI'],
+            /**
+             * 解释路由
+             */
             'route' => $Route->atRoute,
             /**
              * 历史slq
