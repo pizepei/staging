@@ -10,6 +10,8 @@
 namespace pizepei\staging;
 
 
+use pizepei\func\Func;
+
 class Request
 {
     /**
@@ -27,6 +29,11 @@ class Request
      * @var null
      */
     private static $object = null;
+    /**
+     * 请求id  （uuid）
+     * @var null
+     */
+    protected  $RequestId = null;
 
     /**
      * 获取到所以的请求
@@ -39,6 +46,12 @@ class Request
         $this->POST = $_POST;
         $this->PATH = [];
         $this->RAW = [];
+
+        /**
+         * 生成请求id
+         */
+        $this->RequestId = Func::M('str')::getUuid(true,45,__INIT__['uuid_identifier']);
+
         /**
          * 释放内存
          */
@@ -53,6 +66,7 @@ class Request
         }
     }
 
+
     /**
      * 路由对象
      * @var null
@@ -66,6 +80,12 @@ class Request
         if($this->Route == null){
             $this->Route = Route::init();
         }
+    }
+    /**
+     * @param $vname
+     */
+    public function __get($vname){
+        return $this->$vname;
     }
     /**
      * 获取 PATH 变量

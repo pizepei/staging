@@ -136,6 +136,9 @@ class Start
          * 请求类
          */
         $Request = Request::init();
+
+        define('__REQUEST_ID__',$Request->RequestId);//初始化配置
+
         /**
          * 全局响应配置
          */
