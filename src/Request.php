@@ -86,11 +86,13 @@ class Request
         'PATH'=>false,
         'RAW'=>false,
     ];
+
     /**
      * 获取数据
      * @param string $name  ['get','key']  或者字符串key
      * @param string $type  获取的请求数据类型
      * @return bool
+     * @throws \Exception
      */
     public function input($name = '',$type='get')
     {
@@ -164,6 +166,10 @@ class Request
     protected function paramFiltration(&$data,$type)
     {
         $this->initRoute();
+        if(!isset($this->Route->atRouteData['Param'][$type])){
+            $data = null;
+            return false;
+        }
         $Param = $this->Route->atRouteData['Param'][$type];
         /**
          * 获取数据格式
@@ -487,9 +493,12 @@ class Request
      */
     public function setHeader($header)
     {
-        foreach ($header as $k=>$v){
-            header("{$k}: {$v}");
+        if(__PATTERN__ === 'WEB'){
+            foreach ($header as $k=>$v){
+                header("{$k}: {$v}");
+            }
         }
+
     }
 
 }

@@ -68,18 +68,7 @@ class Start
             // 关闭所有PHP错误报告
             //error_reporting(0);
         }
-        /**
-         * 请求类
-         */
-        $Request = Request::init();
-        /**
-         * 全局响应配置
-         */
-        $Request->setHeader(__INIT__['header']);
-        /**
-         * 控制器return
-         */
-        $this->output(Route::init(true));
+
 
     }
     /**
@@ -113,13 +102,48 @@ class Start
             require(__INIT__['define']);
         }
     }
-
+    const  GETOPT =[
+        'route:',//路由
+        'sqllog:',//是否启用dbslq日志
+        'domain:',//域名
+    ];
     /**
-     * 开始
+     * 开始web模式驱动
      */
-    public function start()
+    public function start($pattern = 'WEB')
     {
-
+        define('__PATTERN__',$pattern);
+        if(__PATTERN__ === 'CLI'){
+            $getopt = getopt('',self::GETOPT);
+            define('__CLI__SQL_LOG__',$getopt['sqllog']??'false');
+            /**
+             * 命令行模式
+             */
+            $_SERVER['HTTP_HOST']       = 'localhost';
+            $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
+            $_SERVER['REQUEST_METHOD']  = 'CLI';
+            $_SERVER['SERVER_PORT']     = '--';
+            $_SERVER['REQUEST_URI']     = $getopt['route'];
+            $_SERVER['SCRIPT_NAME']     =  $getopt['route'];
+            $_GET['s'] =  $getopt['route'];
+            $_SERVER['HTTP_COOKIE']     = '';
+            $_SERVER['QUERY_STRING']    = '';
+            $_SERVER['HTTP_USER_AGENT']    = '';
+        }else{
+            define('__CLI__SQL_LOG__','false');
+        }
+        /**
+         * 请求类
+         */
+        $Request = Request::init();
+        /**
+         * 全局响应配置
+         */
+        $Request->setHeader(__INIT__['header']);
+        /**
+         * 控制器return
+         */
+        $this->output(Route::init(true));
     }
     /**
      * 控制器输出

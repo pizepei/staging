@@ -29,7 +29,7 @@ class Route
     /**
      * 支持的请求类型
      */
-    const RequestType =['GET','POST','PUT','PATCH','DELETE','COPY','HEAD','OPTIONS','LINK','UNLINK','PURGE','LOCK','UNLOCK','PROPFIND','VIEW'];
+    const RequestType =['GET','POST','PUT','PATCH','DELETE','COPY','HEAD','OPTIONS','LINK','UNLINK','PURGE','LOCK','UNLOCK','PROPFIND','VIEW','CLI'];
     /**
      * 控制器return 返回的数据类型()
      */
@@ -135,7 +135,6 @@ class Route
          * 合并ReturnSubjoin
          */
         $this->eturnSubjoin= array_merge($this->ReturnSubjoin,__ROUTE__['ReturnSubjoin']);
-
         $s = isset($_GET['s'])?$_GET['s']:'/'.__ROUTE__['index'];//默认路由
 
         $this->atRoute = $s;
@@ -233,7 +232,6 @@ class Route
          */
         $Rule = &$this->noteRouter[$_SERVER['REQUEST_METHOD']]['Rule'];//常规
         $Path = &$this->noteRouter[$_SERVER['REQUEST_METHOD']]['Path'];//路径
-        //var_dump($Rule);
         /**
          * 开始使用常规路由快速匹配
          */
@@ -608,12 +606,22 @@ class Route
                          * $Request [xml] 使用[] 可直接定义xml或者json
                          */
                         preg_match('/\[(.*?)]/s',$routeParamObject,$routeParamObjectType);
-                        if(isset($routeParamObjectType[1])){
-                            preg_match('/[\$A-Za-z_]+/s',$routeParamObject,$routeParamObject);
+                        /**
+                         * 判断是否有命名空间
+                         */
+                        if($routeParamObject != '$Request'){
+                            /**
+                             * 有命名空间
+                             */
+                            preg_match('/(.*?)[ ]+[\$][A-Za-z]{1,30}[ ]{0,1}/s',$routeParamObject,$routeParamObjectPath);//请求对象命名空间
+                            preg_match('/[\$][A-Za-z]{1,30}/s',$routeParamObject,$routeParamObject);
+                            /**
+                             * 请求对象
+                             */
                             $routeParamObject = $routeParamObject[0]??'';
-                        }
+                            if($routeParamObject != '$Request'){ throw new \Exception('目前只支持Request对象（严格区分大小写）:'.$routeParamObject);}
 
-                        if($routeParamObject != '$Request'){ throw new \Exception('目前只支持Request对象（严格区分大小写）:'.$routeParamObject);}
+                        }
                         /**
                          * 开始切割获取请求参数
                          */
@@ -677,6 +685,7 @@ class Route
                         'Namespace'=>$namespace[1].'\\'.$class[1],//路由请求的控制器
                         'Router'=>$routerStr,//路由
                         'ParamObject'=>$routeParamObject??'',//请求对象
+                        'ParamObject'=>$routeParamObjectPath??'',//请求对象命名空间路径
                         'routeParamObjectType'=>$routeParamObjectType[1]??'',//请求类型json  array xml
                         'PathParam' =>$PathParam??[],//路径参数（路由参数如user/:id  id就是路由参数）
                         'Param'=>$routeParamData??'',//路由参数（url上的或者post等）
