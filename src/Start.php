@@ -151,13 +151,35 @@ class Start
             }
 
         }else if($pattern == 'SAAS'){
+            if(empty($path)){
+                throw new \Exception('SAAS配置路径必须',500);
+            }
             /**
-             *
-             * 通过内网加密获取（限制ip aes加密）
-             * SAAS配置在数据库中（一个统一的基础配置   和个自的配置）
-             * 合并
-             * 写入对应路径     自定义目录/项目名称/__APP__/xxxx.php
+             * 自定义路径
              */
+            $path .= DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'].DIRECTORY_SEPARATOR.__APP__.DIRECTORY_SEPARATOR;
+
+            /**
+             * 判断是否存在配置
+             */
+            if(!file_exists($path.'Config.php')){
+                /**
+                 *
+                 * 通过内网加密获取（限制ip aes加密）
+                 * SAAS配置在数据库中（一个统一的基础配置   和个自的配置）
+                 * 合并
+                 * 写入对应路径     自定义目录/项目名称/__APP__/xxxx.php
+                 */
+            }
+            if(!file_exists($path.'Dbtabase.php')){
+                /**
+                 *
+                 * 通过内网加密获取（限制ip aes加密）
+                 * SAAS配置在数据库中（一个统一的基础配置   和个自的配置）
+                 * 合并
+                 * 写入对应路径     自定义目录/项目名称/__APP__/xxxx.php
+                 */
+            }
         }
         /**
          * 包含配置
