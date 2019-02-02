@@ -184,7 +184,7 @@ class Start
         /**
          * 包含配置
          */
-        require($path.'Config.php');
+        require ($path.'Config.php');
         require($path.'Dbtabase.php');
         /**
          * 获取配置到define;
