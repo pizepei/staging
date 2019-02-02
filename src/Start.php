@@ -7,6 +7,7 @@
  * @title 脚手架启动文件
  */
 namespace pizepei\staging;
+use pizepei\config\InitializeConfig;
 use pizepei\staging\Route;
 use pizepei\staging\Request;
 use pizepei\config\Config;
@@ -39,7 +40,7 @@ class Start
     /***
      * Start constructor.
      */
-    public function __construct($environment = 'exploit')
+    public function __construct($pattern = 'ORIGINAL',$path='..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.__APP__.DIRECTORY_SEPARATOR)
     {
         /**
          * 获取配置
@@ -48,13 +49,14 @@ class Start
         if(PHP_VERSION <= 7){
             exit('PHP版本必须<=7,当前版本'.PHP_VERSION);
         }
+
         /**
          * 服务器版本php_uname('s').php_uname('r');
          */
         /**
          * 设置初始化配置
          */
-        $this->setDefine();
+        $this->setDefine($pattern,$path);
         /**
          * 判断模式
          */
@@ -83,14 +85,68 @@ class Start
 
     /**
      * 设置define
+     * @param string $pattern 默认 传统模式
+     * @param string $path  默认 ../config/__APP__/
      */
-    protected function setDefine()
+    protected function setDefine($pattern = 'ORIGINAL',$path='..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.__APP__.DIRECTORY_SEPARATOR)
     {
+        define('__RUN_PATTERN__',$pattern);//运行模式  SAAS    ORIGINAL
+        /**
+         * 传统模式
+         */
+        if($pattern == 'ORIGINAL'){
+            /**
+             * 获取配置 合并
+             */
+            if(__EXPLOIT__){
+                $InitializeConfig = new InitializeConfig();
+                $Config = $InitializeConfig->get_config_const();
+
+                $InitializeConfig = new InitializeConfig();
+                $dbtabase = $InitializeConfig->get_dbtabase_const();
+            }else{
+                /**
+                 * 判断是否存在配置
+                 */
+                if(!file_exists($path.'Config.php')){
+                    $InitializeConfig = new InitializeConfig();
+                    $Config = $InitializeConfig->get_config_const();
+                }
+                if(!file_exists($path.'Dbtabase.php')){
+                    $InitializeConfig = new InitializeConfig();
+                    $dbtabase = $InitializeConfig->get_dbtabase_const();
+                    var_dump($path);
+                    $InitializeConfig->set_config('Dbtabase',$dbtabase,$path);
+                }
+            }
+            /**
+             * 判断是否是调试开发模式
+             * 判断是否是已经有配置缓存
+             */
+            $InitializeConfig->set_config('Config',$Config,$path);
+            $InitializeConfig->set_config('Dbtabase',$dbtabase,$path);
+
+        }else if($pattern == 'SAAS'){
+            /**
+             * 数据库获取合并
+             */
+        }
+        /**
+         * 包含配置
+         */
+        require($path.'Config.php');
+        require($path.'Dbtabase.php');
+        /**
+         * 写入合并好的配置
+         */
+
+        //require('../config/Config.php');
+
         /**
          * 获取配置到define;
          */
-        define('__INIT__',Config::UNIVERSAL['init']);//初始化配置
-        define('__ROUTE__',Config::UNIVERSAL['route']);//路由配置
+        define('__INIT__',\Config::UNIVERSAL['init']);//初始化配置
+        define('__ROUTE__',\Config::UNIVERSAL['route']);//路由配置
         define('__DS__',DIRECTORY_SEPARATOR);//路由配置
         define('__APP__FILE__',DIRECTORY_SEPARATOR);//应用的绝对目录
 
@@ -102,6 +158,10 @@ class Start
             require(__INIT__['define']);
         }
     }
+
+    /**CLI 参数
+     *
+     */
     const  GETOPT =[
         'route:',//路由
         'sqllog:',//是否启用dbslq日志
@@ -112,6 +172,7 @@ class Start
      */
     public function start($pattern = 'WEB')
     {
+
         define('__PATTERN__',$pattern);
         if(__PATTERN__ === 'CLI'){
             $getopt = getopt('',self::GETOPT);
