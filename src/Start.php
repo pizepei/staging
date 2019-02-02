@@ -85,25 +85,47 @@ class Start
 
     /**
      * 设置define
-     * @param string $pattern 默认 传统模式
-     * @param string $path  默认 ../config/__APP__/
+     * @param string $pattern 默认 传统模式  namespace
+     * @param string $path  默认 ../config/__APP__/    传统模式
      */
-    protected function setDefine($pattern = 'ORIGINAL',$path='..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.__APP__.DIRECTORY_SEPARATOR)
+    protected function setDefine($pattern = 'ORIGINAL',$path='')
     {
         define('__RUN_PATTERN__',$pattern);//运行模式  SAAS    ORIGINAL
         /**
          * 传统模式
          */
         if($pattern == 'ORIGINAL'){
+            $path='..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.__APP__.DIRECTORY_SEPARATOR;
+            $namespace = 'config\\'.__APP__;
             /**
              * 获取配置 合并
              */
             if(__EXPLOIT__){
+                /**
+                 * 获取基础配置
+                 */
                 $InitializeConfig = new InitializeConfig();
-                $Config = $InitializeConfig->get_config_const();
-
-                $InitializeConfig = new InitializeConfig();
-                $dbtabase = $InitializeConfig->get_dbtabase_const();
+                $Config = $InitializeConfig->get_config_const($path);
+                $dbtabase = $InitializeConfig->get_dbtabase_const($path);
+                /**
+                 * 判断是否存在配置
+                 */
+                if(!file_exists($path.'SetConfig.php')){
+                    $InitializeConfig->set_config('SetConfig',$Config,$path,$namespace);
+                }
+                if(!file_exists($path.'SetDbtabase.php')){
+                    $InitializeConfig->set_config('SetDbtabase',$dbtabase,$path,$namespace);
+                }
+                /**
+                 * 合并
+                 */
+                $Config = array_merge($Config,$InitializeConfig->get_const($namespace.'\\SetConfig'));
+                $dbtabase = array_merge($dbtabase,$InitializeConfig->get_const($namespace.'\\SetDbtabase'));
+                /**
+                 * 写入
+                 */
+                $InitializeConfig->set_config('Config',$Config,$path);
+                $InitializeConfig->set_config('Dbtabase',$dbtabase,$path);
             }else{
                 /**
                  * 判断是否存在配置
@@ -111,24 +133,30 @@ class Start
                 if(!file_exists($path.'Config.php')){
                     $InitializeConfig = new InitializeConfig();
                     $Config = $InitializeConfig->get_config_const();
+                    $Config = array_merge($Config,$InitializeConfig->get_const($namespace.'\\SetConfig'));
+                    /**
+                     * 合并
+                     */
+                    $InitializeConfig->set_config('Config',$Config,$path);
                 }
                 if(!file_exists($path.'Dbtabase.php')){
                     $InitializeConfig = new InitializeConfig();
                     $dbtabase = $InitializeConfig->get_dbtabase_const();
-                    var_dump($path);
+                    $dbtabase = array_merge($dbtabase,$InitializeConfig->get_const($namespace.'\\SetDbtabase'));
+                    /**
+                     * 合并
+                     */
                     $InitializeConfig->set_config('Dbtabase',$dbtabase,$path);
                 }
             }
-            /**
-             * 判断是否是调试开发模式
-             * 判断是否是已经有配置缓存
-             */
-            $InitializeConfig->set_config('Config',$Config,$path);
-            $InitializeConfig->set_config('Dbtabase',$dbtabase,$path);
 
         }else if($pattern == 'SAAS'){
             /**
-             * 数据库获取合并
+             *
+             * 通过内网加密获取（限制ip aes加密）
+             * SAAS配置在数据库中（一个统一的基础配置   和个自的配置）
+             * 合并
+             * 写入对应路径     自定义目录/项目名称/__APP__/xxxx.php
              */
         }
         /**
@@ -136,12 +164,6 @@ class Start
          */
         require($path.'Config.php');
         require($path.'Dbtabase.php');
-        /**
-         * 写入合并好的配置
-         */
-
-        //require('../config/Config.php');
-
         /**
          * 获取配置到define;
          */
