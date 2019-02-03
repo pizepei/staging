@@ -34,5 +34,14 @@ class Controller
 
     }
 
+    /**
+     * 视图
+     * @param string $name
+     * @param array  $data
+     */
+    public function view($name = '',array$data = [])
+    {
 
+        require(__INIT__['index-view']);
+    }
 }

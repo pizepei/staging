@@ -34,10 +34,23 @@ class Route
      * 控制器return 返回的数据类型()
      */
     const ReturnType = ['int','string','bool','float','array','null'];
+
+    /**
+     * 控制器return 返回的数据类型()
+     */
+    const ReturnDataType = ['html','xml','json','string'];
+
     /**
      * 返回数据类型
+     * debug 调试模式    auth  权限
      */
-    const ReturnFormat = ['list','objectList','object'];
+    const ReturnFormat = ['debug','auth'];
+
+    /**
+     * 附加
+     */
+    const ReturnAddition = ['list','objectList','object','raw'];
+
     /**
      * 路由参数附加参数
      * name 【中文说明，表达式或者正则表达式、】
@@ -46,7 +59,7 @@ class Route
     protected $ReturnSubjoin = [
         'required'=>['必须的','empty',''],
         'number'=>['手机号码','/^[1][3-9][0-9]{9}$/',''],
-        'identity'=>['身份证','/^[1-9]\d{5}(18|19|2([0-9]))\d{2}(0[0-9]|10|11|12)([0-2][1-9]|30|31)\d{3}[0-9Xx]$/',''],
+        'identity'=>['身份证','/^[1-9]\d{5}(18|19|2([0-9]))\d{2}(0[0-9]|10|11|12)([0-2][1-9]|30|31)\d{3}[0-9X]$/',''],
         'phone'=>['电话号码','/^(0[0-9]{2,3}/-)?([2-9][0-9]{6,7})+(/-[0-9]{1,4})?$/',''],
         'password'=>['密码格式','/^[0-9A-Za-z_\@\*\,\.]{6,23}$/'],
     ];
@@ -96,6 +109,15 @@ class Route
      * @var array
      */
     protected $routeArr = array();
+    /**
+     * 控制器发返回类型
+     * @var null
+     */
+    protected $ReturnType = null;
+
+
+    protected $RouterAdded = [];
+
     /**
      * 以命名空间为key的控制器路由注解快
      * @var array
@@ -232,6 +254,7 @@ class Route
          */
         $Rule = &$this->noteRouter[$_SERVER['REQUEST_METHOD']]['Rule'];//常规
         $Path = &$this->noteRouter[$_SERVER['REQUEST_METHOD']]['Path'];//路径
+        //var_dump($Path);
         /**
          * 开始使用常规路由快速匹配
          */
@@ -314,13 +337,17 @@ class Route
                 $i++;
             }
         }
+        //var_dump($RouteData);
         $function = $RouteData['function']['name'];
         //$this->module = $function;
         $this->controller = &$RouteData['Namespace'];
         $this->method = &$RouteData['function']['name'];
-        $this->atRoute = &$RouteData['router'];
-        $this->atRouteData = $RouteData;
+        $this->atRoute = &$RouteData['router'];//路由
+        $this->ReturnType = &$RouteData['ReturnType'];//路由请求类型
 
+        $this->RouterAdded = &$RouteData['RouterAdded'];//附叫配置
+
+        $this->atRouteData = $RouteData;
         $controller = new $RouteData['Namespace'];
 
         if(empty($RouteData['function']['Param']) && empty($RouteData['ParamObject'])){
@@ -491,11 +518,11 @@ class Route
                 }
                 $function['name'] = $functionName[1];
                 $function['Param'] = $functionParam;
-                preg_match_all('/[^ ]{1,10}[A-Z-a-z.:\/\]\[]+/s',$routerData[1],$routerData);
-                //var_dump($routerData);
+                preg_match_all('/[^ ]{1,10}[A-Z-a-z_.:\/\]\[]+/s',$routerData[1],$routerData);
                 if(!isset($routerData[0][1])){continue;}//不规范的路由
                 $routerData = $routerData[0];
                 $routerData[0] = strtoupper($routerData[0]);
+
                 /**
                  * 判断请求类型
                  */
@@ -513,7 +540,20 @@ class Route
                     $routerStr = '/'.ltrim($basePath[1].$routerData[1],'/');
 
                 }
-
+                /**
+                 * 设置附件路由配置
+                 */
+                if(isset($routerData[2])){
+                    $routerAdded = $routerData;
+                    unset($routerAdded[0]);
+                    unset($routerAdded[1]);
+                    foreach($routerAdded as $routerAddedValue ){
+                        //var_dump(explode(':',$routerAddedValue));
+                        if(!in_array(explode(':',$routerAddedValue)[0],self::ReturnFormat)){
+                            throw new \Exception('不规范的路由附加配置'.$baseNamespace.'->'.$routerStr.'->'.$routerAddedValue);
+                        }
+                    }
+                }
                 /**
                  * 把常规路由与Restful路由分开
                  */
@@ -648,24 +688,26 @@ class Route
                          * 获取return array [object] 数据  （返回数据类型array为数组：json html：直接输出html页面）
                          */
                         preg_match('/[\s]{0,5}(.*?)[ ]{0,4}[\r\n]/s',$routeReturn[1],$routeReturnType);//获取返回参数
-
                         if(isset($routeReturnType[1])){
                             $routeReturnType = $routeReturnType[1];
-                            preg_match('/\[(.*?)\]/s',$routeReturnType,$routeReturnTypeData);//获取返回参数
-                            //var_dump($routeReturnTypeData);
+
+                            preg_match('/\[(.*?)\]/s',$routeReturnType,$routeReturnType);//获取返回参数
+                            if(!isset($routeReturnType[1]))
+                            {
+                                throw new \Exception('返回类型[必须填写]:'.$routeParamObject);
+                            }
+                            $routeReturnType = $routeReturnType[1];
                             /**
                              * 判断返回数据类型有html xml 默认json（array）
                              */
-                            if($routeReturnType == 'html'){
+                            //if($routeReturnType == 'html'){
+                            //
+                            //}else if($routeReturnType == 'xml'){
+                            //
+                            //}else{
+                            //
+                            //}
 
-                            }else if($routeReturnType == 'xml'){
-
-                            }else{
-
-                            }
-
-                        }else{
-                            $routeReturnType = [];
                         }
                         /**
                          * 以*      \r  为标准每行切割
@@ -673,6 +715,7 @@ class Route
                         preg_match_all('/\*(.*?)[\r\n]/s',$routeReturn[1],$routeReturnData);//获取返回参数
 
                         if(isset($routeReturnData[1])){ $routeReturnData = $this->setReturn($routeReturnData[1]);}else{$routeReturnData = [];}
+                        //var_dump($routeReturnData);
                     }
 
                     /**
@@ -684,12 +727,14 @@ class Route
                         'MatchStr'=>$matchStr??'',//匹配使用的 正则表达式
                         'Namespace'=>$namespace[1].'\\'.$class[1],//路由请求的控制器
                         'Router'=>$routerStr,//路由
+                        'RouterAdded'=>$routerAdded??[],//路由附加参数
                         'ParamObject'=>$routeParamObject??'',//请求对象
-                        'ParamObject'=>$routeParamObjectPath??'',//请求对象命名空间路径
+                        'routeParamObjectPath'=>$routeParamObjectPath[1]??'',//请求对象命名空间路径
                         'routeParamObjectType'=>$routeParamObjectType[1]??'',//请求类型json  array xml
                         'PathParam' =>$PathParam??[],//路径参数（路由参数如user/:id  id就是路由参数）
                         'Param'=>$routeParamData??'',//路由参数（url上的或者post等）
                         'Return'=>$routeReturnData??[],//返回参数
+                        'ReturnType' => $routeReturnType??__INIT__['return'],//返回类型
                         'function'=>$function,//控制器方法
                     ];
                     if($routerType == 'Rule'){
@@ -821,9 +866,13 @@ class Route
                  * 同一层
                  */
                 preg_match('/[ ]+(.*?)[ ]{1,5}[\[]{1}/s',$data[$x],$field);//字段
+                /**
+                 * 这里可以考虑加入敏感关键字过滤
+                 */
                 if(!isset($field[1])){throw new \Exception('@return 字段名称不正确:'.$data[$x]);}
                 $field = $field[1];
                 preg_match('/\[(.*?)\]{1}/s',$data[$x],$fieldRestrain);//约束
+                //var_dump($fieldRestrain);
                 if(!isset($fieldRestrain[1])){throw new \Exception('@return 字段约束不正确:'.$data[$x]);}
                 preg_match('/[\]][ ]+(.*?)$/s',$data[$x],$fieldExplain);//explain说明
                 $arr[$field] = [

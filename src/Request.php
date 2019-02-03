@@ -108,10 +108,10 @@ class Request
     ];
 
     /**
-     * 获取数据
+     * 获取非路径参数外的参数数据
      * @param string $name  ['get','key']  或者字符串key
      * @param string $type  获取的请求数据类型
-     * @return bool
+     * @return null
      * @throws \Exception
      */
     public function input($name = '',$type='get')
@@ -196,6 +196,7 @@ class Request
          */
         $format = $Param['fieldRestrain'][0];
         $noteData = &$Param['substratum'];
+        //var_dump($noteData);
         $this->paramFiltrationRecursive($data,$noteData);
 
     }
@@ -520,5 +521,16 @@ class Request
         }
 
     }
+
+    /**
+     * Content-Type
+     * http://tool.oschina.net/commons/
+     */
+    const Header = [
+        'txt'=>['Content-Type'=>'text/plain'],
+        'png'=>['Content-Type'=>'image/png'],
+        'html'=>['Content-Type'=>'text/html; charset=UTF-8'],
+        'json'=>['Content-Type'=>'application/json;charset=UTF-8'],
+    ];
 
 }

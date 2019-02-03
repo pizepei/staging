@@ -269,37 +269,158 @@ class Start
          * 路由权限分组 3
          */
         $pattern = isset($Route->routeArr[4])?$Route->routeArr[4]:false;
+        //http://tool.oschina.net/commons/
+        switch ($Route->ReturnType) {
+            case 'json':
+                $result = $this->returnJson($data);
+                break;
+            case 'xml':
+
+                echo "xml";
+                break;
+            case 'html':
+                $result = $this->returnHtml($data);
+                break;
+
+            default:
+                $result = $this->returnJson($data);
+        }
+
+        echo $result??'';
+
         /**
          * 判断输出类型
          */
-        if(__INIT__['return'] == 'json'){
-            if($data != null){
-                if(is_array($data)){
-                    /**
-                     * 控制器return的是array ['code'=>001,'msg'=>'比如这样']
-                     */
-                    if( __INIT__['pattern']=='exploit' ){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
-                    echo json_encode($data,JSON_UNESCAPED_UNICODE );
-                }else{
-                    /**
-                     * 控制器returnd 的是字符串
-                     */
-                    if( __INIT__['pattern']=='exploit' || $pattern){
-                        echo json_encode(['data'=>$data,'SYSTEMSTATUS'=>$this->getSystemStatus()],JSON_UNESCAPED_UNICODE );
-                    }else{
-                        echo json_encode(['data'=>$data],JSON_UNESCAPED_UNICODE );
-                    }
-                }
+        //if(__INIT__['return'] == 'json'){
+        //    if($data != null){
+        //    //    if(is_array($data)){
+        //    //        /**
+        //    //         * 控制器return的是array ['code'=>001,'msg'=>'比如这样']
+        //    //         */
+        //    //        if( __INIT__['pattern']=='exploit' ){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
+        //    //        echo json_encode($data,JSON_UNESCAPED_UNICODE );
+        //    //    }else{
+        //    //        /**
+        //    //         * 控制器returnd 的是字符串
+        //    //         */
+        //    //        if( __INIT__['pattern']=='exploit' || $pattern){
+        //    //            echo json_encode(['data'=>$data,'SYSTEMSTATUS'=>$this->getSystemStatus()],JSON_UNESCAPED_UNICODE );
+        //    //        }else{
+        //    //            echo json_encode(['data'=>$data],JSON_UNESCAPED_UNICODE );
+        //    //        }
+        //    //    }
+        //    //}else{
+        //    //    /**
+        //    //     * 控制器没有return;
+        //    //     */
+        //    //    if( __INIT__['pattern']=='exploit'){
+        //    //        echo json_encode(['SYSTEMSTATUS'=>$this->getSystemStatus()],JSON_UNESCAPED_UNICODE );
+        //    //    }
+        //    //}
+        //}
+    }
+
+    /**
+     * 返回json
+     * @param $data
+     */
+    protected function returnString($data)
+    {
+        /**
+         * 设置头部
+         */
+        $Request = Request::init();
+        $Request->setHeader($Request::Header['json']);
+
+        if($data != null){
+            if(is_array($data)){
+                /**
+                 * 判断是否是开发模式
+                 *
+                 * 不是
+                 *
+                 * 判断是否路由单独开启 调试模式
+                 */
+                if( __INIT__['pattern']=='exploit' ){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
+                return  json_encode($data,JSON_UNESCAPED_UNICODE );
             }else{
                 /**
-                 * 控制器没有return;
+                 * 控制器returnd 的是字符串
                  */
-                if( __INIT__['pattern']=='exploit'){
-                    echo json_encode(['SYSTEMSTATUS'=>$this->getSystemStatus()],JSON_UNESCAPED_UNICODE );
+                if( __INIT__['pattern']=='exploit' || $pattern){
+                    return  json_encode(['data'=>$data,'SYSTEMSTATUS'=>$this->getSystemStatus()],JSON_UNESCAPED_UNICODE );
+                }else{
+                    return  json_encode(['data'=>$data],JSON_UNESCAPED_UNICODE );
                 }
+            }
+        }else{
+            /**
+             * 控制器没有return;
+             */
+            if( __INIT__['pattern']=='exploit'){
+                return json_encode(['SYSTEMSTATUS'=>$this->getSystemStatus()],JSON_UNESCAPED_UNICODE );
             }
         }
     }
+    /**
+     * 返回json
+     * @param $data
+     */
+    protected function returnHtml($data)
+    {
+        /**
+         * 设置头部
+         */
+        $Request = Request::init();
+        $Request->setHeader($Request::Header['html']);
+        return $data;
+
+    }
+
+    /**
+     * 返回json
+     * @param $data
+     */
+    protected function returnJson($data)
+    {
+        /**
+         * 设置头部
+         */
+        $Request = Request::init();
+        $Request->setHeader(['Content-Type'=>'application/json;charset=UTF-8']);
+
+        if($data != null){
+            if(is_array($data)){
+                /**
+                 * 判断是否是开发模式
+                 *
+                 * 不是
+                 *
+                 * 判断是否路由单独开启 调试模式
+                 */
+                if( __INIT__['pattern']=='exploit' ){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
+                echo json_encode($data,JSON_UNESCAPED_UNICODE );
+            }else{
+                /**
+                 * 控制器returnd 的是字符串
+                 */
+                if( __INIT__['pattern']=='exploit' || $pattern){
+                    echo json_encode(['data'=>$data,'SYSTEMSTATUS'=>$this->getSystemStatus()],JSON_UNESCAPED_UNICODE );
+                }else{
+                    echo json_encode(['data'=>$data],JSON_UNESCAPED_UNICODE );
+                }
+            }
+        }else{
+            /**
+             * 控制器没有return;
+             */
+            if( __INIT__['pattern']=='exploit'){
+                echo json_encode(['SYSTEMSTATUS'=>$this->getSystemStatus()],JSON_UNESCAPED_UNICODE );
+            }
+        }
+    }
+
+
     /**
      * 获取系统状态
      */
