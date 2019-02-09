@@ -630,6 +630,12 @@ class Route
                     preg_match('/@return[\s]{1,4}(.*?)@/s',$v,$routeReturn);//获取返回参数
                     /*** ***********切割请求参数[url 参数  post等参数 不包括路由参数] return***************/
                     $routeParam = $routeParam[1]??[];
+
+                    if(isset($routeTitle[1])){
+                        preg_match('/(.*?)[\n\r]/s',$routeTitle[1],$routeTitle);//获取路由名称
+                    }
+
+
                     /**
                      * 获取依赖注入的 对象
                      * 目前只支持Request对象（严格区分大小写）

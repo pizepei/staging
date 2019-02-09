@@ -33,7 +33,6 @@ class Controller
          */
 
     }
-
     /**
      * 视图
      * @param string $name
@@ -41,7 +40,6 @@ class Controller
      */
     public function view($name = '',array$data = [])
     {
-
-        require(__INIT__['index-view']);
+        require(__TEMPLATE__.$name.'.html');
     }
 }

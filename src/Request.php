@@ -516,10 +516,9 @@ class Request
     {
         if(__PATTERN__ === 'WEB'){
             foreach ($header as $k=>$v){
-                header("{$k}: {$v}");
+                @header("{$k}: {$v}");
             }
         }
-
     }
 
     /**

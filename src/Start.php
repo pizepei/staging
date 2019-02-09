@@ -194,6 +194,7 @@ class Start
         define('__DS__',DIRECTORY_SEPARATOR);//路由配置
         define('__APP__FILE__',DIRECTORY_SEPARATOR);//应用的绝对目录
 
+        define('__TEMPLATE__','..'.DIRECTORY_SEPARATOR.__APP__.DIRECTORY_SEPARATOR.'template'.DIRECTORY_SEPARATOR);//模板路径
 
         /**
          * 自定义设置配置
@@ -398,7 +399,7 @@ class Start
                  *
                  * 判断是否路由单独开启 调试模式
                  */
-                if( __INIT__['pattern']=='exploit' ){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
+                if( __INIT__['pattern']!='exploit' ){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
                 echo json_encode($data,JSON_UNESCAPED_UNICODE );
             }else{
                 /**
