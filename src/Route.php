@@ -444,6 +444,13 @@ class Route
         preg_match('/@title[\s]{1,6}(.*?)[\r\n]/s',$result[1],$title);
         preg_match('/User:[\s]{1,6}(.*?)[\r\n]/s',$result[1],$User);
         preg_match('/@basePath[\s]{1,6}(.*?)[\s]{1,4}/s',$result[1],$basePath);
+        preg_match('/@authGroup[\s]{1,6}(.*?)[\r\n]/s',$result[1],$authGroup);
+        preg_match('/@baseAuth[\s]{1,6}(.*?)[\r\n]/s',$result[1],$baseAuth);
+
+
+        //var_dump($result[1]);
+        //var_dump($baseAuth);
+
         $basePath[1] = $basePath[1]??'';
         /**
          * 如果有就删除 /
@@ -624,7 +631,7 @@ class Route
                     /**
                      * 切割详细信息
                      */
-                    preg_match('/@explain[\s]{1,4}(.*?)@/s',$v,$routeExplain);//路由解释说明（备注）
+                    preg_match('/@explain[\s]{1,4}(.*?)[*][\s]{1,4}@/s',$v,$routeExplain);//路由解释说明（备注）
                     preg_match('/@title[\s]{1,4}(.*?)@/s',$v,$routeTitle);//获取路由名称
                     preg_match('/@param[\s]{1,4}(.*?)@/s',$v,$routeParam);//请求参数
                     preg_match('/@return[\s]{1,4}(.*?)@/s',$v,$routeReturn);//获取返回参数
@@ -750,18 +757,30 @@ class Route
                     }
 
 
-
-
                     /**
                      * 准备文档数据
                      * 【请求方法#路由路径】=【请求参数，请求返回数据，控制器方法】
                      */
                     $routerDocumentData[$routerData[0].'#'.$routerStr] =[
+                        'requestType'=>$routerData[0],//请求类型  get  post等等
+                        'routerType'=>$routerType,//路由类型
+                        'matchStr'=>$matchStr??'',//请求参数
+                        'routerStr'=>$routerStr,//路由
+
                         'param'=>$routeParam[1]??'',//请求参数
                         'return'=>$routeReturnData??[],//返回参数
                         'function'=>$function,//控制器方法
                         'explain'=>$routeExplain[1]??'',//路由解释说明（备注）
                         'title'=>$routeTitle[1]??'',//获取路由名称
+                        'RouterAdded'=>$routerAdded??[],//路由附加参数
+                        'ParamObject'=>$routeParamObject??'',//请求对象
+                        'routeParamObjectPath'=>$routeParamObjectPath[1]??'',//请求对象命名空间路径
+                        'routeParamObjectType'=>$routeParamObjectType[1]??'',//请求类型json  array xml
+                        'PathParam' =>$PathParam??[],//路径参数（路由参数如user/:id  id就是路由参数）
+                        'Param'=>$routeParamData??'',//路由参数（url上的或者post等）
+                        'Return'=>$routeReturnData??[],//返回参数
+                        'ReturnType' => $routeReturnType??__INIT__['return'],//返回类型
+                        'function'=>$function,//控制器方法
                     ];
                 }
             }else{
@@ -776,6 +795,9 @@ class Route
             'title'=>$title[1],
             'class'=>$class[1],
             'User'=>$User[1],
+            'basePath'=>$basePath[1]??'',
+            'authGroup'=>$authGroup[1]??[],
+            'baseAuth'=>$baseAuth[1]??[],
             'route'=>$routerDocumentData??[],
         ];
     }
