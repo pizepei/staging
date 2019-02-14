@@ -500,6 +500,13 @@ class Route
             unset($function);//控制器方法
 
 
+            unset($Author);//方法创建人
+
+            unset($Created);//方法创建时间
+            unset($routeParam);//切割请求参数
+
+
+
             preg_match('/@router(.*?)[\n\r]/s',$v,$routerData);
             preg_match('/public[\s]+function[\s]+(.*?)[\s]+$/s',$v,$functionData);
             /**
@@ -635,6 +642,13 @@ class Route
                     preg_match('/@title[\s]{1,4}(.*?)@/s',$v,$routeTitle);//获取路由名称
                     preg_match('/@param[\s]{1,4}(.*?)@/s',$v,$routeParam);//请求参数
                     preg_match('/@return[\s]{1,4}(.*?)@/s',$v,$routeReturn);//获取返回参数
+
+
+                    preg_match('/@Author[\s]{1,4}(.*?)[\s\n]{1,8}[*]{1}[\s\n]{1,8}@{0,1}/s',$v,$Author);//方法创建人
+                    preg_match('/@Created[\s]{1,4}(.*?)[\s\n]{1,8}[*]{1}[\s\n]{1,8}@{0,1}/s',$v,$Created);//方法创建时间
+
+
+
                     /*** ***********切割请求参数[url 参数  post等参数 不包括路由参数] return***************/
                     $routeParam = $routeParam[1]??[];
 
@@ -766,6 +780,9 @@ class Route
                         'routerType'=>$routerType,//路由类型
                         'matchStr'=>$matchStr??'',//请求参数
                         'routerStr'=>$routerStr,//路由
+
+                        'Author'=>$Author[1]??'',//方法创建人
+                        'Created'=>$Created[1]??'',//方法创建时间
 
                         'param'=>$routeParam[1]??'',//请求参数
                         'return'=>$routeReturnData??[],//返回参数
