@@ -45,16 +45,20 @@ class Controller
 
     /**
      * @Author pizepei
+     * @Created 2019/2/15 23:14
+     *
+     * @Author pizepei
      * @Created 2019/2/15 23:02
      *
-     * @param     $data 需要返回的数据
+     * @param     $data
      * @param     $msg 状态说明
      * @param     $code 状态码
-     * @param int $count 数据数量
+     * @param int $count sss
+     *
      * @return array
      * @title  控制器成功返回
-     *
      */
+
     public function succeed($data,$msg=__INIT__['SuccessReturnJsonMsg']['value'],$code=__INIT__['SuccessReturnsJsonCode']['value'],$count=0)
     {
         $result =  [
