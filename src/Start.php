@@ -117,10 +117,11 @@ class Start
                     $InitializeConfig->set_config('SetDbtabase',$dbtabase,$path,$namespace);
                 }
                 /**
-                 * 合并
+                 * 合并(只能合并一层)
                  */
                 $Config = array_merge($Config,$InitializeConfig->get_const($namespace.'\\SetConfig'));
                 $dbtabase = array_merge($dbtabase,$InitializeConfig->get_const($namespace.'\\SetDbtabase'));
+
                 /**
                  * 写入
                  */
