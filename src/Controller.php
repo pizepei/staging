@@ -42,4 +42,31 @@ class Controller
     {
         require(__TEMPLATE__.$name.'.html');
     }
+
+    /**
+     * 成功
+     */
+    public function succeed($data,$msg='succeed',$count=0,$code=__INIT__['SuccessReturnsJsonCode']['value'])
+    {
+        $result =  [
+            __INIT__['ReturnJsonData']=>$data,
+            __INIT__['SuccessReturnsJsonCode']['name']=>$code
+        ];
+        if($count>0){
+            $result[__INIT__['SuccessReturnsJsonCode']] = $count;
+        }
+
+        return $result;
+    }
+    /**
+     *
+     */
+    public function error()
+    {
+
+    }
+
+
+
+
 }
