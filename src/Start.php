@@ -107,6 +107,7 @@ class Start
                 $InitializeConfig = new InitializeConfig();
                 $Config = $InitializeConfig->get_config_const($path);
                 $dbtabase = $InitializeConfig->get_dbtabase_const($path);
+                $get_error_log = $InitializeConfig->get_error_log_const($path);
                 /**
                  * 判断是否存在配置
                  */
@@ -116,17 +117,23 @@ class Start
                 if(!file_exists($path.'SetDbtabase.php')){
                     $InitializeConfig->set_config('SetDbtabase',$dbtabase,$path,$namespace);
                 }
+                if(!file_exists($path.'SetErrorOrLog.php')){
+                    $InitializeConfig->set_config('SetErrorOrLog',$get_error_log,$path,$namespace);
+                }
                 /**
                  * 合并(只能合并一层)
                  */
                 $Config = array_merge($Config,$InitializeConfig->get_const($namespace.'\\SetConfig'));
                 $dbtabase = array_merge($dbtabase,$InitializeConfig->get_const($namespace.'\\SetDbtabase'));
+                $get_error_log = array_merge($get_error_log,$InitializeConfig->get_const($namespace.'\\SetErrorOrLog'));
 
                 /**
                  * 写入
                  */
                 $InitializeConfig->set_config('Config',$Config,$path);
                 $InitializeConfig->set_config('Dbtabase',$dbtabase,$path);
+                $InitializeConfig->set_config('ErrorOrLog',$get_error_log,$path);
+
             }else{
                 /**
                  * 判断是否存在配置
@@ -149,6 +156,19 @@ class Start
                      */
                     $InitializeConfig->set_config('Dbtabase',$dbtabase,$path);
                 }
+
+                if(!file_exists($path.'ErrorOrLog.php')){
+                    $InitializeConfig = new InitializeConfig();
+                    $dbtabase = $InitializeConfig->get_dbtabase_const();
+                    $dbtabase = array_merge($dbtabase,$InitializeConfig->get_const($namespace.'\\SetErrorOrLog'));
+                    /**
+                     * 合并
+                     */
+                    $InitializeConfig->set_config('ErrorOrLog',$dbtabase,$path);
+                }
+
+
+
             }
 
         }else if($pattern == 'SAAS'){
@@ -187,6 +207,8 @@ class Start
          */
         require ($path.'Config.php');
         require($path.'Dbtabase.php');
+        require($path.'ErrorOrLog.php');
+
         /**
          * 获取配置到define;
          */
@@ -290,36 +312,6 @@ class Start
 
         echo $result??'';
 
-        /**
-         * 判断输出类型
-         */
-        //if(__INIT__['return'] == 'json'){
-        //    if($data != null){
-        //    //    if(is_array($data)){
-        //    //        /**
-        //    //         * 控制器return的是array ['code'=>001,'msg'=>'比如这样']
-        //    //         */
-        //    //        if( __INIT__['pattern']=='exploit' ){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
-        //    //        echo json_encode($data,JSON_UNESCAPED_UNICODE );
-        //    //    }else{
-        //    //        /**
-        //    //         * 控制器returnd 的是字符串
-        //    //         */
-        //    //        if( __INIT__['pattern']=='exploit' || $pattern){
-        //    //            echo json_encode(['data'=>$data,'SYSTEMSTATUS'=>$this->getSystemStatus()],JSON_UNESCAPED_UNICODE );
-        //    //        }else{
-        //    //            echo json_encode(['data'=>$data],JSON_UNESCAPED_UNICODE );
-        //    //        }
-        //    //    }
-        //    //}else{
-        //    //    /**
-        //    //     * 控制器没有return;
-        //    //     */
-        //    //    if( __INIT__['pattern']=='exploit'){
-        //    //        echo json_encode(['SYSTEMSTATUS'=>$this->getSystemStatus()],JSON_UNESCAPED_UNICODE );
-        //    //    }
-        //    //}
-        //}
     }
 
     /**
