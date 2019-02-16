@@ -137,7 +137,6 @@ class Request
             if($TypeS == 'RAW'){
                 $this->getRaw();
             }
-
             $this->paramFiltration($this->$TypeS,$type);
             /**
              * 处理完成修改状态

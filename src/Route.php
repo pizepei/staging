@@ -448,9 +448,6 @@ class Route
         preg_match('/@baseAuth[\s]{1,6}(.*?)[\r\n]/s',$result[1],$baseAuth);
 
 
-        //var_dump($result[1]);
-        //var_dump($baseAuth);
-
         $basePath[1] = $basePath[1]??'';
         /**
          * 如果有就删除 /
@@ -697,7 +694,7 @@ class Route
                              * 以*            \r  为标准每行切割
                              */
                             preg_match_all('/\*(.*?)[\r\n]/s',$routeParam,$routeParamData);//获取返回参数
-                            if(isset($routeParamData[1]) || !empty($routeParamData[1])){
+                            if(isset($routeParamData[1]) && !empty($routeParamData[1]) && $routeParamData[1][0] !==''){
                                 /***
                                  * 获取详细参数
                                  */
@@ -716,9 +713,16 @@ class Route
                          */
                         preg_match('/[\s]{0,5}(.*?)[ ]{0,4}[\r\n]/s',$routeReturn[1],$routeReturnType);//获取返回参数
                         if(isset($routeReturnType[1])){
+
                             $routeReturnType = $routeReturnType[1];
+                            //var_dump($routeReturnType);
+                            $routeReturnExplain = $routeReturnType;
+                            //preg_match('/\[json\](.*?)[ ]{0,1}/s',$routeReturnType,$routeReturnExplain);//获取返回参数的主题说明备注
+                            //var_dump($routeReturnExplain);
 
                             preg_match('/\[(.*?)\]/s',$routeReturnType,$routeReturnType);//获取返回参数
+
+
                             if(!isset($routeReturnType[1]))
                             {
                                 throw new \Exception('返回类型[必须填写]:'.$routeParamObject);
@@ -741,8 +745,8 @@ class Route
                          */
                         preg_match_all('/\*(.*?)[\r\n]/s',$routeReturn[1],$routeReturnData);//获取返回参数
 
-                        if(isset($routeReturnData[1])){ $routeReturnData = $this->setReturn($routeReturnData[1]);}else{$routeReturnData = [];}
-                        //var_dump($routeReturnData);
+                        if(isset($routeReturnData[1]) && isset($routeReturnData[1][0]) && $routeReturnData[1][0] !==''){ $routeReturnData = $this->setReturn($routeReturnData[1]);}else{$routeReturnData = [];}
+
                     }
 
                     /**
@@ -780,7 +784,7 @@ class Route
                         'routerType'=>$routerType,//路由类型
                         'matchStr'=>$matchStr??'',//请求参数
                         'routerStr'=>$routerStr,//路由
-
+                        'routeReturnExplain'=>$routeReturnExplain,//返回说明
                         'Author'=>$Author[1]??'',//方法创建人
                         'Created'=>$Created[1]??'',//方法创建时间
 
