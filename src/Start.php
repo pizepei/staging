@@ -82,7 +82,82 @@ class Start
 
     }
 
+    protected function getInitDefine($path,$namespace)
+    {
+        /**
+         * 获取配置 合并
+         */
+        if(__EXPLOIT__){
+            /**
+             * 获取基础配置
+             */
+            $InitializeConfig = new InitializeConfig();
+            $Config = $InitializeConfig->get_config_const($path);
+            $dbtabase = $InitializeConfig->get_dbtabase_const($path);
+            $get_error_log = $InitializeConfig->get_error_log_const($path);
+            /**
+             * 判断是否存在配置
+             */
+            if(!file_exists($path.'SetConfig.php')){
+                $InitializeConfig->set_config('SetConfig',$Config,$path,$namespace);
+            }
+            if(!file_exists($path.'SetDbtabase.php')){
+                $InitializeConfig->set_config('SetDbtabase',$dbtabase,$path,$namespace);
+            }
+            if(!file_exists($path.'SetErrorOrLog.php')){
+                $InitializeConfig->set_config('SetErrorOrLog',$get_error_log,$path,$namespace);
+            }
+            /**
+             * 合并(只能合并一层)
+             */
+            $Config = array_merge($Config,$InitializeConfig->get_const($namespace.'\\SetConfig'));
+            $dbtabase = array_merge($dbtabase,$InitializeConfig->get_const($namespace.'\\SetDbtabase'));
+            $get_error_log = array_merge($get_error_log,$InitializeConfig->get_const($namespace.'\\SetErrorOrLog'));
 
+            /**
+             * 写入
+             */
+            $InitializeConfig->set_config('Config',$Config,$path);
+            $InitializeConfig->set_config('Dbtabase',$dbtabase,$path);
+            $InitializeConfig->set_config('ErrorOrLog',$get_error_log,$path);
+
+        }else{
+            /**
+             * 判断是否存在配置
+             */
+            if(!file_exists($path.'Config.php')){
+                $InitializeConfig = new InitializeConfig();
+                $Config = $InitializeConfig->get_config_const();
+                $Config = array_merge($Config,$InitializeConfig->get_const($namespace.'\\SetConfig'));
+                /**
+                 * 合并
+                 */
+                $InitializeConfig->set_config('Config',$Config,$path);
+            }
+            if(!file_exists($path.'Dbtabase.php')){
+                $InitializeConfig = new InitializeConfig();
+                $dbtabase = $InitializeConfig->get_dbtabase_const();
+                $dbtabase = array_merge($dbtabase,$InitializeConfig->get_const($namespace.'\\SetDbtabase'));
+                /**
+                 * 合并
+                 */
+                $InitializeConfig->set_config('Dbtabase',$dbtabase,$path);
+            }
+
+            if(!file_exists($path.'ErrorOrLog.php')){
+                $InitializeConfig = new InitializeConfig();
+                $dbtabase = $InitializeConfig->get_dbtabase_const();
+                $dbtabase = array_merge($dbtabase,$InitializeConfig->get_const($namespace.'\\SetErrorOrLog'));
+                /**
+                 * 合并
+                 */
+                $InitializeConfig->set_config('ErrorOrLog',$dbtabase,$path);
+            }
+
+
+
+        }
+    }
     /**
      * 设置define
      * @param string $pattern 默认 传统模式  namespace
@@ -97,79 +172,7 @@ class Start
         if($pattern == 'ORIGINAL'){
             $path='..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.__APP__.DIRECTORY_SEPARATOR;
             $namespace = 'config\\'.__APP__;
-            /**
-             * 获取配置 合并
-             */
-            if(__EXPLOIT__){
-                /**
-                 * 获取基础配置
-                 */
-                $InitializeConfig = new InitializeConfig();
-                $Config = $InitializeConfig->get_config_const($path);
-                $dbtabase = $InitializeConfig->get_dbtabase_const($path);
-                $get_error_log = $InitializeConfig->get_error_log_const($path);
-                /**
-                 * 判断是否存在配置
-                 */
-                if(!file_exists($path.'SetConfig.php')){
-                    $InitializeConfig->set_config('SetConfig',$Config,$path,$namespace);
-                }
-                if(!file_exists($path.'SetDbtabase.php')){
-                    $InitializeConfig->set_config('SetDbtabase',$dbtabase,$path,$namespace);
-                }
-                if(!file_exists($path.'SetErrorOrLog.php')){
-                    $InitializeConfig->set_config('SetErrorOrLog',$get_error_log,$path,$namespace);
-                }
-                /**
-                 * 合并(只能合并一层)
-                 */
-                $Config = array_merge($Config,$InitializeConfig->get_const($namespace.'\\SetConfig'));
-                $dbtabase = array_merge($dbtabase,$InitializeConfig->get_const($namespace.'\\SetDbtabase'));
-                $get_error_log = array_merge($get_error_log,$InitializeConfig->get_const($namespace.'\\SetErrorOrLog'));
-
-                /**
-                 * 写入
-                 */
-                $InitializeConfig->set_config('Config',$Config,$path);
-                $InitializeConfig->set_config('Dbtabase',$dbtabase,$path);
-                $InitializeConfig->set_config('ErrorOrLog',$get_error_log,$path);
-
-            }else{
-                /**
-                 * 判断是否存在配置
-                 */
-                if(!file_exists($path.'Config.php')){
-                    $InitializeConfig = new InitializeConfig();
-                    $Config = $InitializeConfig->get_config_const();
-                    $Config = array_merge($Config,$InitializeConfig->get_const($namespace.'\\SetConfig'));
-                    /**
-                     * 合并
-                     */
-                    $InitializeConfig->set_config('Config',$Config,$path);
-                }
-                if(!file_exists($path.'Dbtabase.php')){
-                    $InitializeConfig = new InitializeConfig();
-                    $dbtabase = $InitializeConfig->get_dbtabase_const();
-                    $dbtabase = array_merge($dbtabase,$InitializeConfig->get_const($namespace.'\\SetDbtabase'));
-                    /**
-                     * 合并
-                     */
-                    $InitializeConfig->set_config('Dbtabase',$dbtabase,$path);
-                }
-
-                if(!file_exists($path.'ErrorOrLog.php')){
-                    $InitializeConfig = new InitializeConfig();
-                    $dbtabase = $InitializeConfig->get_dbtabase_const();
-                    $dbtabase = array_merge($dbtabase,$InitializeConfig->get_const($namespace.'\\SetErrorOrLog'));
-                    /**
-                     * 合并
-                     */
-                    $InitializeConfig->set_config('ErrorOrLog',$dbtabase,$path);
-                }
-
-
-
-            }
+            $this->getInitDefine($path,$namespace);
 
         }else if($pattern == 'SAAS'){
             if(empty($path)){
@@ -179,28 +182,29 @@ class Start
              * 自定义路径
              */
             $path .= DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'].DIRECTORY_SEPARATOR.__APP__.DIRECTORY_SEPARATOR;
-
-            /**
-             * 判断是否存在配置
-             */
-            if(!file_exists($path.'Config.php')){
-                /**
-                 *
-                 * 通过内网加密获取（限制ip aes加密）
-                 * SAAS配置在数据库中（一个统一的基础配置   和个自的配置）
-                 * 合并
-                 * 写入对应路径     自定义目录/项目名称/__APP__/xxxx.php
-                 */
-            }
-            if(!file_exists($path.'Dbtabase.php')){
-                /**
-                 *
-                 * 通过内网加密获取（限制ip aes加密）
-                 * SAAS配置在数据库中（一个统一的基础配置   和个自的配置）
-                 * 合并
-                 * 写入对应路径     自定义目录/项目名称/__APP__/xxxx.php
-                 */
-            }
+            $namespace = 'config\\'.__APP__;
+            $this->getInitDefine($path,$namespace);
+            ///**
+            // * 判断是否存在配置
+            // */
+            //if(!file_exists($path.'Config.php')){
+            //    /**
+            //     *
+            //     * 通过内网加密获取（限制ip aes加密）
+            //     * SAAS配置在数据库中（一个统一的基础配置   和个自的配置）
+            //     * 合并
+            //     * 写入对应路径     自定义目录/项目名称/__APP__/xxxx.php
+            //     */
+            //}
+            //if(!file_exists($path.'Dbtabase.php')){
+            //    /**
+            //     *
+            //     * 通过内网加密获取（限制ip aes加密）
+            //     * SAAS配置在数据库中（一个统一的基础配置   和个自的配置）
+            //     * 合并
+            //     * 写入对应路径     自定义目录/项目名称/__APP__/xxxx.php
+            //     */
+            //}
         }
         /**
          * 包含配置
