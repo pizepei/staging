@@ -116,6 +116,7 @@ class Request
      */
     public function input($name = '',$type='get')
     {
+
         /**
          * 判断参数
          */
