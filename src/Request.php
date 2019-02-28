@@ -116,7 +116,7 @@ class Request
      */
     public function input($name = '',$type='get')
     {
-
+        $this->initRoute();
         /**
          * 判断参数
          */
@@ -138,7 +138,18 @@ class Request
             if($TypeS == 'RAW'){
                 $this->getRaw();
             }
-            $this->paramFiltration($this->$TypeS,$type);
+
+            if(isset($this->Route->atRouteData['Param']['raw']['fieldRestrain'][1])){
+                if(isset($this->Route->atRouteData['Param']['raw']['fieldRestrain'][1]) == 'raw'){
+                    /**
+                     * 对数据不做处理
+                     */
+                }
+            }else{
+                $this->paramFiltration($this->$TypeS,$type);
+            }
+
+
             /**
              * 处理完成修改状态
              */
@@ -157,28 +168,52 @@ class Request
      */
     protected function getRaw()
     {
-        if(file_get_contents("php://input") == ''){
-            $this->RAW = null;
-        }
-        if($_SERVER['HTTP_CONTENT_TYPE'] == 'application/json'){
-            $this->RAW = json_decode(file_get_contents("php://input",'r'),true);
-        }
         /**
-         * xml
+         * 判断是否定义数据类型
          */
-        if($_SERVER['HTTP_CONTENT_TYPE'] == 'application/xml'){
-            $this->RAW = $this->xmlToArray(file_get_contents("php://input",'r'));
-        }
-        /**
-         * application/x-www-form-urlencoded方式是Jquery的Ajax请求默认方式
-         * 在请求发送过程中会对数据进行序列化处理，以键值对形式？key1=value1&key2=value2的方式发送到服务器
-         */
-        if($_SERVER['HTTP_CONTENT_TYPE'] == 'text/plain'|| !isset($_SERVER['HTTP_CONTENT_TYPE']) || $_SERVER['HTTP_CONTENT_TYPE'] == 'application/x-www-form-urlencoded'){
-            $this->RAW = json_decode(file_get_contents("php://input",'r'),true);
-            if(!$this->RAW){
+        if(isset($this->Route->atRouteData['Param']['raw']['fieldRestrain'][0])){
+
+            if($this->Route->atRouteData['Param']['raw']['fieldRestrain'][0] == 'xml'){
+                $this->RAW = $this->xmlToArray(file_get_contents("php://input",'r'));
+
+            }else if($this->Route->atRouteData['Param']['raw']['fieldRestrain'][0] == 'json'){
+                $this->RAW = json_decode(file_get_contents("php://input",'r'),true);
+            }else if($this->Route->atRouteData['Param']['raw']['fieldRestrain'][0] == 'url'){
+                /**
+                 * application/x-www-form-urlencoded方式是Jquery的Ajax请求默认方式
+                 * 在请求发送过程中会对数据进行序列化处理，以键值对形式？key1=value1&key2=value2的方式发送到服务器
+                 */
                 parse_str(file_get_contents("php://input"),$this->RAW);
             }
+
+        }else{
+            /**
+             * 没有定义
+             */
+            if(file_get_contents("php://input") == ''){
+                $this->RAW = null;
+            }
+            if($_SERVER['HTTP_CONTENT_TYPE'] == 'application/json'){
+                $this->RAW = json_decode(file_get_contents("php://input",'r'),true);
+            }
+            /**
+             * xml
+             */
+            if($_SERVER['HTTP_CONTENT_TYPE'] == 'application/xml'){
+                $this->RAW = $this->xmlToArray(file_get_contents("php://input",'r'));
+            }
+            /**
+             * application/x-www-form-urlencoded方式是Jquery的Ajax请求默认方式
+             * 在请求发送过程中会对数据进行序列化处理，以键值对形式？key1=value1&key2=value2的方式发送到服务器
+             */
+            if($_SERVER['HTTP_CONTENT_TYPE'] == 'text/plain'|| !isset($_SERVER['HTTP_CONTENT_TYPE']) || $_SERVER['HTTP_CONTENT_TYPE'] == 'application/x-www-form-urlencoded'){
+                $this->RAW = json_decode(file_get_contents("php://input",'r'),true);
+                if(!$this->RAW){
+                    parse_str(file_get_contents("php://input"),$this->RAW);
+                }
+            }
         }
+
     }
     /**
      * 请求参数过滤
@@ -186,7 +221,11 @@ class Request
     protected function paramFiltration(&$data,$type)
     {
         $this->initRoute();
-        if(!isset($this->Route->atRouteData['Param'][$type])){
+
+
+        //var_dump($this->Route->atRouteData['Param'][$type]);
+
+        if(!isset($this->Route->atRouteData['Param'])){
             $data = null;
             return false;
         }
@@ -217,19 +256,35 @@ class Request
         /**
          * 对请求参数进行过滤（删除不在注解中的参数key）
          */
+        //var_dump($noteData);
         if(__INIT__['requestParam']){$this->unsetParam($data,$noteData,$type);}
         foreach($noteData as $k=>$v){
+            //var_dump($k);
+            //var_dump($v['fieldRestrain']);
+            //var_dump($data);
             /**
              * 判断类型
              */
             if(in_array($v['fieldRestrain'][0],$this->Route::ReturnType)  ){
+                /**
+                 * 参数过滤（约束）
+                 */
                 $this->eturnSubjoin($data,$k,$v,$type);
             }else if((in_array($v['fieldRestrain'][0],$this->Route::ReturnFormat) && $type =='objectList') ){
                 if($v['fieldRestrain'][0] == 'object'){
+                    /**
+                     * 参数过滤（约束）
+                     */
                     $this->eturnSubjoin($data,$k,$v,'object');
-                }else{
-
+                }else if($v['fieldRestrain'][0] == 'objectList'){
+                    /**
+                     * 参数过滤（约束）
+                     */
                     $this->eturnSubjoin($data,$k,$v,'objectList');
+                }else if($v['fieldRestrain'][0] == 'raw'){
+                    /**
+                     * 没有限制
+                     */
                 }
 
             }else if(in_array($v['fieldRestrain'][0],$this->Route::ReturnFormat)){
@@ -376,19 +431,26 @@ class Request
         if(isset($data) && is_array($data)){
             foreach($data as $pk=>&$pv){
                 if($type == 'object'){
+
+                    if($noteData[$pk]['fieldRestrain'][0] != 'raw'){
                         if(!array_key_exists($pk,$noteData)){ unset($data[$pk]);}
+                    }
+
                 }else if($type == 'objectList'){
 
-                    if(!is_array($pv)){throw new \Exception('非法的数据结构');}
+                    if(!is_array($pv)){
+                        throw new \Exception('非法的数据结构:'.$pk.'上级应该是['.$type.']');
+                    }
                     foreach($pv as $kk =>&$vv){
                         if(is_array($vv)){
                             $type = 'objectList';
                             if($noteData[$kk]['fieldRestrain'][0] == 'object'){
                                 $type = 'object';
+                            }else if($noteData[$kk]['fieldRestrain'][0] != 'raw'){
+                                $this->unsetParam($vv,$noteData[$kk]['substratum'],$type);
                             }
-                            $this->unsetParam($vv,$noteData[$kk]['substratum'],$type);
                         }else{
-                            if(!array_key_exists($kk,$noteData)){ unset($data[$pk][$kk]);var_dump($kk);}
+                            if(!array_key_exists($kk,$noteData)){ unset($data[$pk][$kk]);}
                         }
                     }
                 }

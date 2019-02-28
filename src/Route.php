@@ -42,14 +42,13 @@ class Route
 
     /**
      * 返回数据类型
-     * debug 调试模式    auth  权限
      */
-    const ReturnFormat = ['debug','auth'];
-
+    const ReturnFormat = ['list','objectList','object','raw'];
     /**
      * 附加
+     * debug 调试模式    auth  权限
      */
-    const ReturnAddition = ['list','objectList','object','raw'];
+    const ReturnAddition =  ['debug','auth'];
 
     /**
      * 路由参数附加参数
@@ -254,7 +253,7 @@ class Route
          */
         $Rule = &$this->noteRouter[$_SERVER['REQUEST_METHOD']]['Rule'];//常规
         $Path = &$this->noteRouter[$_SERVER['REQUEST_METHOD']]['Path'];//路径
-        //var_dump($Path);
+        //var_dump($Rule);
         /**
          * 开始使用常规路由快速匹配
          */
@@ -529,7 +528,8 @@ class Route
                 }
                 $function['name'] = $functionName[1];
                 $function['Param'] = $functionParam;
-                preg_match_all('/[^ ]{1,10}[A-Z-a-z_.:\/\]\[]+/s',$routerData[1],$routerData);
+                preg_match_all('/[^ ]+[A-Z-a-z_.:\/\]\[]+/s',$routerData[1],$routerData);
+
                 if(!isset($routerData[0][1])){continue;}//不规范的路由
                 $routerData = $routerData[0];
                 $routerData[0] = strtoupper($routerData[0]);
@@ -551,6 +551,7 @@ class Route
                     $routerStr = '/'.ltrim($basePath[1].$routerData[1],'/');
 
                 }
+
                 /**
                  * 设置附件路由配置
                  */
@@ -560,7 +561,7 @@ class Route
                     unset($routerAdded[1]);
                     foreach($routerAdded as $routerAddedValue ){
                         //var_dump(explode(':',$routerAddedValue));
-                        if(!in_array(explode(':',$routerAddedValue)[0],self::ReturnFormat)){
+                        if(!in_array(explode(':',$routerAddedValue)[0],self::ReturnAddition)){
                             throw new \Exception('不规范的路由附加配置'.$baseNamespace.'->'.$routerStr.'->'.$routerAddedValue);
                         }
                     }
