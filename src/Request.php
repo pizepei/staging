@@ -431,24 +431,29 @@ class Request
         if(isset($data) && is_array($data)){
             foreach($data as $pk=>&$pv){
                 if($type == 'object'){
-
-                    if($noteData[$pk]['fieldRestrain'][0] != 'raw'){
+                    //if(!isset($noteData[$pk])){
+                    //    if(!array_key_exists($pk,$noteData)){ unset($data[$pk]);}
+                    //}
+                    //if($noteData[$pk]['fieldRestrain'][0] != 'raw'){
                         if(!array_key_exists($pk,$noteData)){ unset($data[$pk]);}
-                    }
+                    //}
 
                 }else if($type == 'objectList'){
 
                     if(!is_array($pv)){
                         throw new \Exception('非法的数据结构:'.$pk.'上级应该是['.$type.']');
                     }
+                    var_dump($pv);
                     foreach($pv as $kk =>&$vv){
                         if(is_array($vv)){
                             $type = 'objectList';
                             if($noteData[$kk]['fieldRestrain'][0] == 'object'){
                                 $type = 'object';
+                                $this->unsetParam($vv,$noteData[$kk]['substratum'],$type);
                             }else if($noteData[$kk]['fieldRestrain'][0] != 'raw'){
                                 $this->unsetParam($vv,$noteData[$kk]['substratum'],$type);
                             }
+
                         }else{
                             if(!array_key_exists($kk,$noteData)){ unset($data[$pk][$kk]);}
                         }

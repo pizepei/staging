@@ -61,6 +61,7 @@ class Route
         'identity'=>['身份证','/^[1-9]\d{5}(18|19|2([0-9]))\d{2}(0[0-9]|10|11|12)([0-2][1-9]|30|31)\d{3}[0-9X]$/',''],
         'phone'=>['电话号码','/^(0[0-9]{2,3}/-)?([2-9][0-9]{6,7})+(/-[0-9]{1,4})?$/',''],
         'password'=>['密码格式','/^[0-9A-Za-z_\@\*\,\.]{6,23}$/'],
+        'uuid'=>['uuid','/^[0-9A-Za-z]{8}[-][0-9A-Za-z]{4}[-][0-9A-Za-z]{4}[-][0-9A-Za-z]{4}[-][0-9A-Za-z]{12}$/'],//0152C794-4674-3E16-9A3E-62005CACC127
     ];
     /**
      * 应用目录下所有文件路径
@@ -155,7 +156,7 @@ class Route
         /**
          * 合并ReturnSubjoin
          */
-        $this->eturnSubjoin= array_merge($this->ReturnSubjoin,__ROUTE__['ReturnSubjoin']);
+        $this->ReturnSubjoin= array_merge($this->ReturnSubjoin,__ROUTE__['ReturnSubjoin']);
         $s = isset($_GET['s'])?$_GET['s']:'/'.__ROUTE__['index'];//默认路由
 
         $this->atRoute = $s;
@@ -329,9 +330,20 @@ class Route
                 if(empty($PathData[$i])){
                     throw new \Exception($k.'缺少参数');
                 }
-                if(!settype($PathData[$i],$v)){
-                    throw new \Exception($k.'参数约束失败:'.$v);
+
+                if(array_key_exists($v,$this->ReturnSubjoin)){
+                    preg_match($this->ReturnSubjoin[$v][1],$PathData[$i],$result);
+                    if(!isset($result[0]) && empty($result[0])){
+                        throw new \Exception($k.'非法的:'.$this->ReturnSubjoin[$v][0]);
+                    }
+                }else if(in_array($v,self::ReturnType)){
+                    if(!settype($PathData[$i],$v)){
+                        throw new \Exception($k.'参数约束失败:'.$v);
+                    }
+                }else{
+                    throw new \Exception($k.'非法的参数约束:'.$v);
                 }
+
                 $PathArray[$k] = $PathData[$i];
                 $i++;
             }
