@@ -434,16 +434,15 @@ class Request
                     //if(!isset($noteData[$pk])){
                     //    if(!array_key_exists($pk,$noteData)){ unset($data[$pk]);}
                     //}
-                    //if($noteData[$pk]['fieldRestrain'][0] != 'raw'){
+                    if($noteData[$pk]['fieldRestrain'][0] != 'raw'){
                         if(!array_key_exists($pk,$noteData)){ unset($data[$pk]);}
-                    //}
+                    }
 
                 }else if($type == 'objectList'){
 
                     if(!is_array($pv)){
                         throw new \Exception('非法的数据结构:'.$pk.'上级应该是['.$type.']');
                     }
-                    var_dump($pv);
                     foreach($pv as $kk =>&$vv){
                         if(is_array($vv)){
                             $type = 'objectList';
