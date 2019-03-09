@@ -173,7 +173,6 @@ class Start
             $path='..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.__APP__.DIRECTORY_SEPARATOR;
             $namespace = 'config\\'.__APP__;
             $this->getInitDefine($path,$namespace);
-
         }else if($pattern == 'SAAS'){
             if(empty($path)){
                 throw new \Exception('SAAS配置路径必须',500);
@@ -296,22 +295,27 @@ class Start
          * 路由单独配置的调试4
          * 路由权限分组 3
          */
+        //var_dump($Route->atRouteData);
+
+
+        $debug = $Route->atRouteData['RouterAdded']['debug']??false;
+
         $pattern = isset($Route->routeArr[4])?$Route->routeArr[4]:false;
         //http://tool.oschina.net/commons/
         switch ($Route->ReturnType) {
             case 'json':
-                $result = $this->returnJson($data);
+                $result = $this->returnJson($data,$debug);
                 break;
             case 'xml':
 
                 echo "xml";
                 break;
             case 'html':
-                $result = $this->returnHtml($data);
+                $result = $this->returnHtml($data,$debug);
                 break;
 
             default:
-                $result = $this->returnJson($data);
+                $result = $this->returnJson($data,$debug);
         }
 
         echo $result??'';
@@ -319,7 +323,7 @@ class Start
     }
 
     /**
-     * 返回json
+     * 返回字符串
      * @param $data
      */
     protected function returnString($data)
@@ -328,40 +332,11 @@ class Start
          * 设置头部
          */
         $Request = Request::init();
-        $Request->setHeader($Request::Header['json']);
-
-        if($data != null){
-            if(is_array($data)){
-                /**
-                 * 判断是否是开发模式
-                 *
-                 * 不是
-                 *
-                 * 判断是否路由单独开启 调试模式
-                 */
-                if( __INIT__['pattern']=='exploit' ){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
-                return  json_encode($data,JSON_UNESCAPED_UNICODE );
-            }else{
-                /**
-                 * 控制器returnd 的是字符串
-                 */
-                if( __INIT__['pattern']=='exploit' || $pattern){
-                    return  json_encode(['data'=>$data,'SYSTEMSTATUS'=>$this->getSystemStatus()],JSON_UNESCAPED_UNICODE );
-                }else{
-                    return  json_encode(['data'=>$data],JSON_UNESCAPED_UNICODE );
-                }
-            }
-        }else{
-            /**
-             * 控制器没有return;
-             */
-            if( __INIT__['pattern']=='exploit'){
-                return json_encode(['SYSTEMSTATUS'=>$this->getSystemStatus()],JSON_UNESCAPED_UNICODE );
-            }
-        }
+        $Request->setHeader($Request::Header['html']);
+        return $data;
     }
     /**
-     * 返回json
+     * 返回html
      * @param $data
      */
     protected function returnHtml($data)
@@ -379,13 +354,13 @@ class Start
      * 返回json
      * @param $data
      */
-    protected function returnJson($data)
+    protected function returnJson($data,$debug)
     {
         /**
          * 设置头部
          */
         $Request = Request::init();
-        $Request->setHeader(['Content-Type'=>'application/json;charset=UTF-8']);
+        $Request->setHeader($Request::Header['json']);
 
         if($data != null){
             if(is_array($data)){
@@ -396,13 +371,13 @@ class Start
                  *
                  * 判断是否路由单独开启 调试模式
                  */
-                if( __INIT__['pattern']!='exploit' ){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
+                if( __INIT__['pattern']!='exploit' || $debug==='true' ){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
                 echo json_encode($data,JSON_UNESCAPED_UNICODE );
             }else{
                 /**
                  * 控制器returnd 的是字符串
                  */
-                if( __INIT__['pattern']=='exploit' || $pattern){
+                if( __INIT__['pattern']=='exploit' || $debug==='true'){
                     echo json_encode(['data'=>$data,'SYSTEMSTATUS'=>$this->getSystemStatus()],JSON_UNESCAPED_UNICODE );
                 }else{
                     echo json_encode(['data'=>$data],JSON_UNESCAPED_UNICODE );
@@ -412,7 +387,7 @@ class Start
             /**
              * 控制器没有return;
              */
-            if( __INIT__['pattern']=='exploit'){
+            if( __INIT__['pattern']=='exploit' || $debug==='true'){
                 echo json_encode(['SYSTEMSTATUS'=>$this->getSystemStatus()],JSON_UNESCAPED_UNICODE );
             }
         }
@@ -429,6 +404,7 @@ class Start
          */
         $Route = Route::init();
         return $data =[
+            'requestId'=>__REQUEST_ID__,
             /**
              * 路由控制器
              */

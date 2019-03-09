@@ -357,8 +357,8 @@ class Route
         $this->ReturnType = &$RouteData['ReturnType'];//路由请求类型
 
         $this->RouterAdded = &$RouteData['RouterAdded'];//附叫配置
+        $this->atRouteData = &$RouteData;//路由
 
-        $this->atRouteData = $RouteData;
         $controller = new $RouteData['Namespace'];
 
         if(empty($RouteData['function']['Param']) && empty($RouteData['ParamObject'])){
@@ -412,6 +412,7 @@ class Route
              * 路由缓存
              */
             $CacheData = Cache::get(['public','arr'],'route');
+
             if($CacheData){
                 $this->noteRouter = $CacheData;
             }else{
@@ -572,11 +573,15 @@ class Route
                     unset($routerAdded[0]);
                     unset($routerAdded[1]);
                     foreach($routerAdded as $routerAddedValue ){
-                        //var_dump(explode(':',$routerAddedValue));
-                        if(!in_array(explode(':',$routerAddedValue)[0],self::ReturnAddition)){
+
+                        $routerAddedExp = explode(':',$routerAddedValue);
+
+                        if(!in_array($routerAddedExp[0],self::ReturnAddition)){
                             throw new \Exception('不规范的路由附加配置'.$baseNamespace.'->'.$routerStr.'->'.$routerAddedValue);
                         }
+                        $routerAddedExplode[$routerAddedExp[0]] = $routerAddedExp[1];
                     }
+                    $routerAdded = $routerAddedExplode;
                 }
                 /**
                  * 把常规路由与Restful路由分开
