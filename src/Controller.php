@@ -69,7 +69,7 @@ class Controller
         if($count>0){
             $result[__INIT__['ReturnJsonCount']] = $count;
         }else{
-            $result[__INIT__['ReturnJsonCount']] = count($data);
+            $result[__INIT__['ReturnJsonCount']] = is_array($data)?count($data):0;
         }
         return $result;
     }
