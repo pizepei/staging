@@ -434,9 +434,12 @@ class Request
                     //if(!isset($noteData[$pk])){
                     //    if(!array_key_exists($pk,$noteData)){ unset($data[$pk]);}
                     //}
-                    if($noteData[$pk]['fieldRestrain'][0] != 'raw'){
-                        if(!array_key_exists($pk,$noteData)){ unset($data[$pk]);}
+                    if(isset($noteData[$pk])){
+                        if($noteData[$pk]['fieldRestrain'][0] != 'raw'){
+                            if(!array_key_exists($pk,$noteData)){ unset($data[$pk]);}
+                        }
                     }
+
 
                 }else if($type == 'objectList'){
 
