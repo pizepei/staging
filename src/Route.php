@@ -62,6 +62,7 @@ class Route
         'phone'=>['电话号码','/^(0[0-9]{2,3}/-)?([2-9][0-9]{6,7})+(/-[0-9]{1,4})?$/',''],
         'password'=>['密码格式','/^[0-9A-Za-z_\@\*\,\.]{6,23}$/'],
         'uuid'=>['uuid','/^[0-9A-Za-z]{8}[-][0-9A-Za-z]{4}[-][0-9A-Za-z]{4}[-][0-9A-Za-z]{4}[-][0-9A-Za-z]{12}$/'],//0152C794-4674-3E16-9A3E-62005CACC127
+        'email'=>['email','/^[A-Za-z\d]+([-_.][A-Za-z\d]+)*@([A-Za-z\d]+[-.])+[A-Za-z\d]{2,4}$/','']
     ];
     /**
      * 应用目录下所有文件路径
@@ -348,9 +349,11 @@ class Route
                 $i++;
             }
         }
-        //var_dump($RouteData);
+        /**
+         * 判断是否有对应参数（确定是先检查参数准确性、还是在控制器中获取参数时检查（可能出现参数不正确但是不提示错误））
+         */
+
         $function = $RouteData['function']['name'];
-        //$this->module = $function;
         $this->controller = &$RouteData['Namespace'];
         $this->method = &$RouteData['function']['name'];
         $this->atRoute = &$RouteData['router'];//路由
