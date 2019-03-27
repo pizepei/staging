@@ -84,7 +84,7 @@ class Controller
      * @return array
      * @title  控制器错误返回
      */
-    public function error($data,$msg=__INIT__['ErrorReturnJsonMsg']['value'],$code=__INIT__['ErrorReturnsJsonCode']['value'])
+    public function error($data,$msg=__INIT__['ErrorReturnJsonMsg']['value'],$code=__INIT__['ErrorReturnJsonCode']['value'])
     {
         $result =  [
             __INIT__['SuccessReturnJsonMsg']['name']=>$msg,
