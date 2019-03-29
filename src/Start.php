@@ -154,8 +154,6 @@ class Start
                 $InitializeConfig->set_config('ErrorOrLog',$dbtabase,$path);
             }
 
-
-
         }
     }
     /**

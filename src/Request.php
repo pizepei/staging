@@ -108,6 +108,16 @@ class Request
     ];
 
     /**
+     * 获取post
+     * @param string $name
+     * @return null
+     * @throws \Exception
+     */
+    public function post($name='')
+    {
+        return $this->input($name,'post');
+    }
+    /**
      * 获取非路径参数外的参数数据
      * @param string $name  ['get','key']  或者字符串key
      * @param string $type  获取的请求数据类型
@@ -228,6 +238,9 @@ class Request
         if(!isset($this->Route->atRouteData['Param'])){
             $data = null;
             return false;
+        }
+        if(!isset($this->Route->atRouteData['Param'][$type])){
+            return null;
         }
         $Param = $this->Route->atRouteData['Param'][$type];
         /**
