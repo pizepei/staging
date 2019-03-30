@@ -112,6 +112,7 @@ class Start
              */
             $Config = array_merge($Config,$InitializeConfig->get_const($namespace.'\\SetConfig'));
             $dbtabase = array_merge($dbtabase,$InitializeConfig->get_const($namespace.'\\SetDbtabase'));
+
             $get_error_log = array_merge($get_error_log,$InitializeConfig->get_const($namespace.'\\SetErrorOrLog'));
 
             /**

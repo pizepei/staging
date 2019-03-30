@@ -59,11 +59,11 @@ class Controller
      * @title  控制器成功返回
      */
 
-    public function succeed($data,$msg=__INIT__['SuccessReturnJsonMsg']['value'],$code=__INIT__['SuccessReturnsJsonCode']['value'],$count=0)
+    public function succeed($data,$msg=__INIT__['SuccessReturnJsonMsg']['value'],$code=__INIT__['SuccessReturnJsonCode']['value'],$count=0)
     {
         $result =  [
             __INIT__['SuccessReturnJsonMsg']['name']=>$msg,
-            __INIT__['SuccessReturnsJsonCode']['name']=>$code,
+            __INIT__['SuccessReturnJsonCode']['name']=>$code,
             __INIT__['ReturnJsonData']=>$data,
         ];
         if($count>0){
@@ -87,10 +87,12 @@ class Controller
     public function error($data,$msg=__INIT__['ErrorReturnJsonMsg']['value'],$code=__INIT__['ErrorReturnJsonCode']['value'])
     {
         $result =  [
-            __INIT__['SuccessReturnJsonMsg']['name']=>$msg,
-            __INIT__['SuccessReturnsJsonCode']['name']=>$code,
+            __INIT__['ErrorReturnJsonMsg']['name']=>$msg,
+            __INIT__['ErrorReturnJsonCode']['name']=>$code,
             __INIT__['ReturnJsonData']=>$data,
         ];
+        var_dump($result);
+
         return $result;
     }
 
