@@ -91,8 +91,6 @@ class Controller
             __INIT__['ErrorReturnJsonCode']['name']=>$code,
             __INIT__['ReturnJsonData']=>$data,
         ];
-        var_dump($result);
-
         return $result;
     }
 
