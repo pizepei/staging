@@ -197,6 +197,13 @@ class Request
             }
 
         }else{
+
+            if(!isset($_SERVER['HTTP_CONTENT_TYPE'])){
+                $this->RAW = json_decode(file_get_contents("php://input",'r'),true);
+                if(!$this->RAW){
+                    parse_str(file_get_contents("php://input"),$this->RAW);
+                }
+            }
             /**
              * 没有定义
              */
