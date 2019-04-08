@@ -458,8 +458,12 @@ class Request
                         if($noteData[$pk]['fieldRestrain'][0] != 'raw'){
                             if(!array_key_exists($pk,$noteData)){ unset($data[$pk]);}
                         }
+                    }else{
+                        /**
+                         * 删除不在注解中的参数key
+                         */
+                        unset($data[$pk]);
                     }
-
 
                 }else if($type == 'objectList'){
 
