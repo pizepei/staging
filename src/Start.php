@@ -14,6 +14,10 @@ use pizepei\config\Config;
 use pizepei\terminalInfo\ToLocation;
 use Whoops\Run;
 use pizepei\terminalInfo\TerminalInfo;
+use pizepei\staging\MyException;
+
+
+
 class Start
 {
     /**
@@ -60,15 +64,24 @@ class Start
         /**
          * 判断模式
          */
+        //array("App","customError")
+        //MyException::class
         if(__INIT__['pattern'] == 'exploit'){
+            new MyException();
+            //set_exception_handler(array('pizepei\staging\MyException','exploit($errno, $errstr, $errfile, $errline)'));
 
-            $whoops = new Run;
-            $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
+            //set_exception_handler(function($exception){
+            //        echo "<b>Exception:</b> ".__REQUEST_ID__ , $exception->getMessage();
+            //});
+            //$whoops = new Run;
+            //$whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
             //$whoops->register();
 
         }else{
             // 关闭所有PHP错误报告
             //error_reporting(0);
+            set_exception_handler(['MyException','production']);
+
         }
 
 
