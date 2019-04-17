@@ -123,4 +123,13 @@ class MyException
 
     }
 
+    /**
+     * 创建错误代码
+     * 用以生产
+     */
+    protected function setCodeCipher()
+    {
+
+    }
+
 }
