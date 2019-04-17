@@ -10,6 +10,8 @@
 namespace pizepei\staging;
 
 
+use pizepei\func\Func;
+
 class MyException
 {
     public function __construct() {
@@ -54,11 +56,13 @@ class MyException
      */
     private $exception = null;
     public function exception_handler($exception) {
+        header("Content-Type:application/json;charset=UTF-8");
+
         $this->exception = $exception;
         /**
          * 判断是否是开发模式
          */
-        if(__EXPLOIT__){
+        if(!__EXPLOIT__){
             /**
              * 开发模式
              */
@@ -72,12 +76,10 @@ class MyException
     }
     private function production($exception)
     {
-        echo 'ssss';
+        echo json_encode($this->setCodeCipher(),JSON_UNESCAPED_UNICODE);
     }
     private function exploit($exception)
     {
-        //var_dump($exception);
-        header("Content-Type:application/json;charset=UTF-8");
         echo json_encode($this->resultData($this->exception->getMessage(),$this->exception->getCode(),$this->exploitData()),JSON_UNESCAPED_UNICODE);
     }
 
@@ -98,9 +100,18 @@ class MyException
     }
     private function exploitData()
     {
+        $Route = Route::init();
         return [
+            'route'=>[
+                'controller'=>$Route->controller.'->'.$Route->method,
+                //'d'=>$Route->atRouteData,
+                'router'=>$Route->atRoute,
+            ],
             'File'=>$this->exception->getFile().'['.$this->exception->getLine().']',
             'Trace'=>$this->getTrace(),
+            'ErrorOrLog'=>\ErrorOrLog::CODE_SECTION,
+            'setCodeCipher'=>$this->setCodeCipher(),
+
         ];
     }
     /**
@@ -111,16 +122,18 @@ class MyException
      * @title  获取痕迹方法 默认6级
      * @explain
      */
-    private function getTrace(int$tier=6)
+    private function getTrace(int$tier=3)
     {
         $array =[];
         foreach($this->exception->getTrace() as $key=>$value)
         {
+            if($key>($tier-1)){
+                break;
+            }
             unset($value['args']);
             $array[] = $value;
         }
         return $array;
-
     }
 
     /**
@@ -129,6 +142,58 @@ class MyException
      */
     protected function setCodeCipher()
     {
+        //确定错误代码
+        /**
+         *  0  默认
+         */
+        if($this->exception->getCode() === 0)
+        {
+
+        }
+        /**
+         * 判断区间
+         */
+        foreach(\ErrorOrLog::CODE_SECTION as $key=>$value)
+        {
+            /**
+             * 判断范围
+             */
+
+            if($value[0] < $this->exception->getCode() &&  $this->exception->getCode()<$value[1])
+            {
+                if($key === 'SYSTEM_CODE')
+                {
+                    if(isset(\ErrorOrLog::SYSTEM_CODE[$this->exception->getCode()]))
+                    {
+                        $str_rand = Func::M('str')::str_rand(10);
+                        $result =  [
+                            __INIT__['ErrorReturnJsonMsg']['name']=>
+                                is_int(\ErrorOrLog::SYSTEM_CODE[$this->exception->getCode()][0])?
+                                    \ErrorOrLog::HINT_MSG[\ErrorOrLog::SYSTEM_CODE[$this->exception->getCode()][0]]:
+                                    \ErrorOrLog::SYSTEM_CODE[$this->exception->getCode()][0].'['.$str_rand.']',
+                            __INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
+                            'error'=>$str_rand,
+                        ];
+                    }
+
+                }else if($key === 'USE_CODE')
+                {
+                    if(isset(\ErrorOrLog::USE_CODE[$this->exception->getCode()]))
+                    {
+                        $str_rand = Func::M('str')::str_rand(15);
+                        $result =  [
+                            __INIT__['ErrorReturnJsonMsg']['name']=>
+                                is_int(\ErrorOrLog::USE_CODE[$this->exception->getCode()][0])?
+                                    \ErrorOrLog::HINT_MSG[\ErrorOrLog::USE_CODE[$this->exception->getCode()][0]].'['.$str_rand.']':
+                                    \ErrorOrLog::USE_CODE[$this->exception->getCode()][0].'['.$str_rand.']',
+                            __INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
+                            'error'=>$str_rand,
+                        ];
+                    }
+                }
+            }
+        }
+        return $result;
 
     }
 
