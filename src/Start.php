@@ -60,14 +60,14 @@ class Start
         /**
          * 设置初始化配置
          */
-        $this->setDefine($pattern,$path);
+        $path = $this->setDefine($pattern,$path);
         /**
          * 判断模式
          */
         //array("App","customError")
         //MyException::class
         if(__INIT__['pattern'] == 'exploit'){
-            new MyException();
+            new MyException($path);
             //set_exception_handler(array('pizepei\staging\MyException','exploit($errno, $errstr, $errfile, $errline)'));
 
             //set_exception_handler(function($exception){
@@ -233,13 +233,13 @@ class Start
         define('__APP__FILE__',DIRECTORY_SEPARATOR);//应用的绝对目录
 
         define('__TEMPLATE__','..'.DIRECTORY_SEPARATOR.__APP__.DIRECTORY_SEPARATOR.'template'.DIRECTORY_SEPARATOR);//模板路径
-
-        /**
-         * 自定义设置配置
-         */
-        if(__INIT__['define'] != ''){
-            require(__INIT__['define']);
-        }
+        return $path;
+        ///**
+        // * 自定义设置配置
+        // */
+        //if(__INIT__['define'] != ''){
+        //    require(__INIT__['define']);
+        //}
     }
 
     /**CLI 参数

@@ -11,10 +11,20 @@ namespace pizepei\staging;
 
 
 use pizepei\func\Func;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
 
 class MyException
 {
-    public function __construct() {
+    /**
+     * MyException constructor.
+     *
+     * @param string $path
+     * @param array  $info
+     */
+    public function __construct(string $path,array$info=[]) {
+        $this->path = $path;
+        $this->info = $info;
         @set_exception_handler(array($this, 'exception_handler'));
         //throw new Exception('DOH!!');
     }
@@ -83,6 +93,12 @@ class MyException
         echo json_encode($this->resultData($this->exception->getMessage(),$this->exception->getCode(),$this->exploitData()),JSON_UNESCAPED_UNICODE);
     }
 
+    /**
+     * @param       $msg
+     * @param       $code
+     * @param array $data
+     * @return array
+     */
     private  function resultData($msg,$code,$data=[])
     {
         $result =  [
@@ -93,25 +109,21 @@ class MyException
         return $result;
     }
 
-    private function getErrorCode(){
-        /**
-         * 构造错误代码和提示（生产时使用）
-         */
-    }
+
+    /**
+     * 开发时的异常处理（data）
+     * @return array
+     */
     private function exploitData()
     {
         $Route = Route::init();
         return [
             'route'=>[
                 'controller'=>$Route->controller.'->'.$Route->method,
-                //'d'=>$Route->atRouteData,
                 'router'=>$Route->atRoute,
             ],
             'File'=>$this->exception->getFile().'['.$this->exception->getLine().']',
             'Trace'=>$this->getTrace(),
-            'ErrorOrLog'=>\ErrorOrLog::CODE_SECTION,
-            'setCodeCipher'=>$this->setCodeCipher(),
-
         ];
     }
     /**
@@ -142,30 +154,32 @@ class MyException
      */
     protected function setCodeCipher()
     {
+        $str_rand = Func::M('str')::str_rand(15);
+
         //确定错误代码
         /**
          *  0  默认
          */
-        if($this->exception->getCode() === 0)
+        if($this->exception->getCode() !== 0)
         {
 
         }
+
         /**
          * 判断区间
          */
         foreach(\ErrorOrLog::CODE_SECTION as $key=>$value)
         {
+
             /**
              * 判断范围
              */
-
             if($value[0] < $this->exception->getCode() &&  $this->exception->getCode()<$value[1])
             {
                 if($key === 'SYSTEM_CODE')
                 {
                     if(isset(\ErrorOrLog::SYSTEM_CODE[$this->exception->getCode()]))
                     {
-                        $str_rand = Func::M('str')::str_rand(10);
                         $result =  [
                             __INIT__['ErrorReturnJsonMsg']['name']=>
                                 is_int(\ErrorOrLog::SYSTEM_CODE[$this->exception->getCode()][0])?
@@ -180,7 +194,6 @@ class MyException
                 {
                     if(isset(\ErrorOrLog::USE_CODE[$this->exception->getCode()]))
                     {
-                        $str_rand = Func::M('str')::str_rand(15);
                         $result =  [
                             __INIT__['ErrorReturnJsonMsg']['name']=>
                                 is_int(\ErrorOrLog::USE_CODE[$this->exception->getCode()][0])?
@@ -193,7 +206,21 @@ class MyException
                 }
             }
         }
+        $this->createLog($result);
         return $result;
+    }
+
+    /**
+     * 创建日志
+     */
+    private function createLog($result)
+    {
+        // 创建日志频道
+        $log = new Logger('name');
+        $log->pushHandler(new StreamHandler($this->path.'/your.log', Logger::WARNING));
+        // 添加日志记录
+        $log->addWarning('Foo',$this->exploitData());
+        $log->addError('Bar',$result);
 
     }
 
