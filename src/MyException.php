@@ -72,7 +72,7 @@ class MyException
         /**
          * 判断是否是开发模式
          */
-        if(!__EXPLOIT__){
+        if(__EXPLOIT__){
             /**
              * 开发模式
              */
