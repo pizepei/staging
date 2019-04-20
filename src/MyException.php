@@ -17,57 +17,83 @@ use Monolog\Handler\StreamHandler;
 class MyException
 {
     /**
+     * 异常对象
+     * @var null
+     */
+    //private $exception = null;
+    /**
      * MyException constructor.
-     *
      * @param string $path
+     * @param string $exception
      * @param array  $info
      */
-    public function __construct(string $path,array$info=[]) {
+    public function __construct(string $path,$exception=null,array$info=[]) {
         $this->path = $path;
         $this->info = $info;
+
+        $this->exception = $exception;
+        if($exception){
+            $this->PDO_exception_handler($exception);
+        }
         @set_exception_handler(array($this, 'exception_handler'));
+        @set_error_handler(array($this, 'error_handler'));
         //throw new Exception('DOH!!');
     }
 
-    //protected string $message ;        //异常消息内容
-    //
-    //protected int $code ;            //异常代码
-    //
-    //protected string $file ;        //抛出异常的文件名
-    //
-    //protected int $line ;            //抛出异常在该文件中的行号
-    //
-    //    /* 方法 */
-    //
-    //public construct ([ string $message = "" [, int $code = 0 [, Exception $previous = NULL ]]] )    //异常
-    //
-    //构造函数
-    //
-    //final public string getMessage ( void )            //获取异常消息内容
-    //
-    //final public Exception getPrevious ( void )        //返回异常链中的前一个异常
-    //
-    //final public int getCode ( void )                //获取异常代码
-    //
-    //final public string getFile ( void )            //获取发生异常的程序文件名称
-    //
-    //final public int getLine ( void )                //获取发生异常的代码在文件中的行号
-    //
-    //final public array getTrace ( void )            //获取异常追踪信息
-    //
-    //final public string getTraceAsString ( void )    //获取字符串类型的异常追踪信息
-    //
-    //public string toString ( void )                //将异常对象转换为字符串
-    //
-    //final private void clone ( void )                //异常克隆
+    /**
+     * 错误处理
+     * @param $errno 错误编号
+     * @param $errstr 错误消息
+     * @param $errfile 错误所在的文件
+     * @param $errline 错误所在的行
+     */
+    public function error_handler($errno, $errstr, $errfile, $errline)
+    {
+        header("Content-Type:application/json;charset=UTF-8");
+        $str_rand = Func::M('str')::str_rand(20);
+        /**
+         * 判断是否是开发模式
+         */
+        $result = [
+            __INIT__['ErrorReturnJsonCode']['name']=>50000,
+        ];
+        if(__EXPLOIT__){
+            $Route = Route::init();
+            /**
+             * 开发模式
+             */
+            $result[__INIT__['ErrorReturnJsonMsg']['name']] = $errstr.'['.$errno.']';
+            $result[__INIT__['ReturnJsonData']] = [
+                'route'=>[
+                    'controller'=>$Route->controller.'->'.$Route->method,
+                    'router'=>$Route->atRoute,
+                ],
+                'File'=>str_replace(getcwd(), "", $errfile).'['.$errline.']',
+            ];
+
+        }else{
+            /**
+             * 生产模式
+             */
+            $result[ __INIT__['ErrorReturnJsonMsg']['name']] = '系统繁忙['.$str_rand.']';
+        }
+        $result['error'] = $str_rand;
+        $this->createLog($result);
+        exit(json_encode($result,JSON_UNESCAPED_UNICODE));
+    }
+
     /**
      * 异常类
      * @var null
      */
     private $exception = null;
+
+    /**
+     * 常规
+     * @param $exception
+     */
     public function exception_handler($exception) {
         header("Content-Type:application/json;charset=UTF-8");
-
         $this->exception = $exception;
         /**
          * 判断是否是开发模式
@@ -84,13 +110,40 @@ class MyException
             $this->production($exception);
         }
     }
+    /**
+     * PDO
+     * @param $exception
+     */
+    public function PDO_exception_handler($exception) {
+
+        header("Content-Type:application/json;charset=UTF-8");
+        $this->exception = $exception;
+        //var_dump($exception);
+        /**
+         * 判断是否是开发模式
+         */
+        if(__EXPLOIT__){
+            /**
+             * 开发模式
+             */
+            $this->exploit($exception);
+        }else{
+            /**
+             * 生产模式
+             */
+            $this->production($exception);
+        }
+    }
+
     private function production($exception)
     {
         echo json_encode($this->setCodeCipher(),JSON_UNESCAPED_UNICODE);
+
+        //exit(json_encode($this->setCodeCipher(),JSON_UNESCAPED_UNICODE));
     }
     private function exploit($exception)
     {
-        echo json_encode($this->resultData($this->exception->getMessage(),$this->exception->getCode(),$this->exploitData()),JSON_UNESCAPED_UNICODE);
+        exit(json_encode($this->resultData($this->exception->getMessage(),$this->exception->getCode(),$this->exploitData()),JSON_UNESCAPED_UNICODE));
     }
 
     /**
@@ -116,14 +169,15 @@ class MyException
      */
     private function exploitData()
     {
+
         $Route = Route::init();
         return [
             'route'=>[
                 'controller'=>$Route->controller.'->'.$Route->method,
                 'router'=>$Route->atRoute,
             ],
-            'File'=>$this->exception->getFile().'['.$this->exception->getLine().']',
-            'Trace'=>$this->getTrace(),
+            'File'=>str_replace(getcwd(), "", $this->exception->getFile()).'['.$this->exception->getLine().']',
+            'Trace'=>$this->getTrace(30),
         ];
     }
     /**
@@ -142,29 +196,50 @@ class MyException
             if($key>($tier-1)){
                 break;
             }
-            unset($value['args']);
+            if($key != 0){
+                unset($value['args']);
+            }
             $array[] = $value;
         }
         return $array;
     }
-
     /**
      * 创建错误代码
      * 用以生产
+     * @param array $error_code
+     * @return array
      */
     protected function setCodeCipher()
     {
-        $str_rand = Func::M('str')::str_rand(15);
-
+        $str_rand = Func::M('str')::str_rand(20);
+        if($this->info){
+            if(isset($this->info[$this->exception->getCode()])){
+                $result =  [
+                    __INIT__['ErrorReturnJsonMsg']['name']=>$this->info[$this->exception->getCode()][0].'['.$str_rand.']',
+                    __INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
+                    'error'=>$str_rand,
+                ];
+            }else{
+                $result =  [
+                    __INIT__['ErrorReturnJsonMsg']['name']=>'系统繁忙['.$str_rand.']',
+                    __INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
+                ];
+            }
+            $result['error'] = $str_rand;
+            return $result;
+        }
         //确定错误代码
         /**
          *  0  默认
          */
-        if($this->exception->getCode() !== 0)
+        if($this->exception->getCode() === 0)
         {
-
+            $result =  [
+                __INIT__['ErrorReturnJsonMsg']['name']=>'系统繁忙['.$str_rand.']',
+                __INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
+                'error'=>$str_rand,
+            ];
         }
-
         /**
          * 判断区间
          */
@@ -212,15 +287,18 @@ class MyException
 
     /**
      * 创建日志
+     * @param        $result
+     * @param string $Logger
+     * @throws \Exception
      */
-    private function createLog($result)
+    private function createLog($result,string $Logger='')
     {
         // 创建日志频道
         $log = new Logger('name');
         $log->pushHandler(new StreamHandler($this->path.'/your.log', Logger::WARNING));
         // 添加日志记录
-        $log->addWarning('Foo',$this->exploitData());
-        $log->addError('Bar',$result);
+        //$log->addWarning('Foo',$this->exploitData());
+        //$log->addError('Bar',$result);
 
     }
 

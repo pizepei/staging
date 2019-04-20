@@ -68,6 +68,7 @@ class Start
         //MyException::class
         if(__INIT__['pattern'] == 'exploit'){
             new MyException($path);
+            //set_error_handler
             //set_exception_handler(array('pizepei\staging\MyException','exploit($errno, $errstr, $errfile, $errline)'));
 
             //set_exception_handler(function($exception){
@@ -80,7 +81,7 @@ class Start
         }else{
             // 关闭所有PHP错误报告
             //error_reporting(0);
-            set_exception_handler(['MyException','production']);
+            //set_exception_handler(['MyException','production']);
 
         }
 
