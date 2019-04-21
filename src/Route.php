@@ -7,6 +7,7 @@
  * @title 路由
  */
 namespace pizepei\staging;
+use authority\Resource;
 use pizepei\config\Config;
 use pizepei\model\cache\Cache;
 
@@ -255,7 +256,6 @@ class Route
          */
         $Rule = &$this->noteRouter[$_SERVER['REQUEST_METHOD']]['Rule'];//常规
         $Path = &$this->noteRouter[$_SERVER['REQUEST_METHOD']]['Path'];//路径
-        //var_dump($Rule);
         /**
          * 开始使用常规路由快速匹配
          */
@@ -361,6 +361,7 @@ class Route
 
         $this->RouterAdded = &$RouteData['RouterAdded'];//附叫配置
         $this->atRouteData = &$RouteData;//路由
+        //var_dump($RouteData);
 
         $controller = new $RouteData['Namespace'];
 
@@ -461,9 +462,17 @@ class Route
         preg_match('/@basePath[\s]{1,6}(.*?)[\s]{1,4}/s',$result[1],$basePath);
         preg_match('/@authGroup[\s]{1,6}(.*?)[\r\n]/s',$result[1],$authGroup);
         preg_match('/@baseAuth[\s]{1,6}(.*?)[\r\n]/s',$result[1],$baseAuth);
-
-
+        /**
+         * 处理权限
+         */
+        if(isset($baseAuth[1]))
+        {
+            $baseAuth = explode(':',$baseAuth[1]);
+        }else{
+            $baseAuth = [];
+        }
         $basePath[1] = $basePath[1]??'';
+
         /**
          * 如果有就删除 /
          */
@@ -510,8 +519,6 @@ class Route
             unset($routeParamData);//路由参数（url上的或者post等）
             unset($routeReturnData);//返回参数
             unset($function);//控制器方法
-
-
             unset($Author);//方法创建人
 
             unset($Created);//方法创建时间
@@ -665,6 +672,22 @@ class Route
                     preg_match('/@Author[\s]{1,4}(.*?)[\s\n]{1,8}[*]{1}[\s\n]{1,8}@{0,1}/s',$v,$Author);//方法创建人
                     preg_match('/@Created[\s]{1,4}(.*?)[\s\n]{1,8}[*]{1}[\s\n]{1,8}@{0,1}/s',$v,$Created);//方法创建时间
 
+                    preg_match('/@authGroup[\s]{1,4}(.*?)[\r\n]/s',$v,$routeAuthGroup);//路由的权限分组
+                    preg_match('/@authExtend[\s]{1,4}(.*?)[\r\n]/s',$v,$routeAuthExtend);//权限扩展信息
+                    /**
+                     * 切割处理
+                     */
+                    $this->authDispose($routeAuthGroup,$routeAuthExtend);
+                    /**
+                     * 分组判断
+                     */
+                    $detectionAuthGroup = $this->detectionAuthGroup($routeAuthGroup);
+                    if(!$detectionAuthGroup[0]){
+                        throw new \Exception($detectionAuthGroup[1].' '.$detectionAuthGroup[2].'  ['.$baseErrorNamespace.']');
+                    }
+                    if(!$this->detectionAuthExtend($routeAuthExtend)){
+                        throw new \Exception('AuthExtend illegality  ['.$baseErrorNamespace.']');
+                    }
 
 
                     /*** ***********切割请求参数[url 参数  post等参数 不包括路由参数] return***************/
@@ -788,6 +811,12 @@ class Route
                         'Return'=>$routeReturnData??[],//返回参数
                         'ReturnType' => $routeReturnType??__INIT__['return'],//返回类型
                         'function'=>$function,//控制器方法
+                        'baseAuth'=>$baseAuth,//权限控制器
+                        'routeAuthGroup'=>$routeAuthGroup,//路由的权限分组
+                        'routeAuthExtend'=>$routeAuthExtend,//权限扩展信息
+
+                        //* @authGroup [admin.del:user.del]删除账号操作
+                        //* @authExtend UserExtend:list 删除账号操作
                     ];
                     if($routerType == 'Rule'){
                         $this->noteRouter[$routerData[0]][$routerType][$routerStr] = $noteRouter;
@@ -839,13 +868,111 @@ class Route
             'User'=>$User[1],
             'basePath'=>$basePath[1]??'',
             'authGroup'=>$authGroup[1]??[],
-            'baseAuth'=>$baseAuth[1]??[],
+            'baseAuth'=>($baseAuth[0]??'').':'.($baseAuth[1]??''),
             'route'=>$routerDocumentData??[],
         ];
     }
 
+    /**
+     * @Author pizepei
+     * @Created 2019/4/21 16:09
+     *
+     * @title  权限相关处理
+     * @explain 一般是方法功能说明、逻辑说明、注意事项等。
+     */
+    protected function authDispose(&$routeAuthGroup,&$routeAuthExtend)
+    {
+        //* @authGroup [admin.del:user.del]删除账号操作
+        //* @authExtend UserExtend:list 删除账号操作
+        /**
+         * 切割权限
+         */
+        if(isset($routeAuthGroup[1])){
+            $routeAuthGroup = $routeAuthGroup[1];
+            $this->processingBatch($routeAuthGroup,'.',':');
+            /**
+             * 检测权限分组规范
+             */
+            //authority
+        }
+        if(isset($routeAuthExtend[1])){
+            $routeAuthExtend= $routeAuthExtend[1];
+            $this->processingBatch($routeAuthExtend,'.',':');
+        }
+    }
+
+    /**
+     * @Author pizepei
+     * @Created 2019/4/21 17:19
+     * @param $routeAuthGroup
+     * @return array
+     * @title  检测权限分组
+     */
+    protected function detectionAuthGroup($routeAuthGroup)
+    {
+        if(empty($routeAuthGroup)){return [true];}
+        foreach($routeAuthGroup as $value)
+        {
+            if(!isset(Resource::mainResource[$value[0]])){
+                return [false,'main illegality',$value[0]];
+            }
+            if(!isset($value[1][0])){
+                return [false,'lesser inexistence',$value[1][0]];
+            }
+            if(isset(Resource::$value[1][0])){
+                return [false,'lesser illegality',$value[1][0]];
+            }
+            return [true];
+        }
+
+    }
+
+    /**
+     * @Author pizepei
+     * @Created 2019/4/21 17:19
+     * @param $routeAuthExtend
+     * @title  权限格式判断
+     * @return array
+     */
+    protected function detectionAuthExtend($routeAuthExtend)
+    {
+        if(empty($routeAuthExtend)){
+            return true;
+        }
+        foreach($routeAuthExtend as $value)
+        {
+            if(count($value) !=2){
+                return false;
+            }
+            if(count($value[1]) !=2){
+                return false;
+            }
+            return [true];
+        }
+    }
 
 
+    /**
+     * @Author pizepei
+     * @Created 2019/4/21 16:12
+     *
+     * @param $data
+     * @param $main
+     * @param $lesser
+     * @title  批处理固定格式数据
+     * @explain 一般是方法功能说明、逻辑说明、注意事项等。
+     *
+     */
+    public function processingBatch( &$data, $main, $lesser)
+    {
+        $data = explode(',',$data);
+        foreach($data as &$value){
+            $value = explode($main,$value);
+            foreach($value as &$valueLesser){
+                $valueLesser = (count(explode($lesser,$valueLesser)) == 1)?$valueLesser:explode($lesser,$valueLesser);
+            }
+        }
+    }
     /**
      * 切割组织返回参数
      */
