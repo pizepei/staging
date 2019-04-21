@@ -362,7 +362,7 @@ class Route
         $this->RouterAdded = &$RouteData['RouterAdded'];//附叫配置
         $this->atRouteData = &$RouteData;//路由
         //var_dump($RouteData);
-
+        //var_dump($this->Permissions);
         $controller = new $RouteData['Namespace'];
 
         if(empty($RouteData['function']['Param']) && empty($RouteData['ParamObject'])){
@@ -674,10 +674,11 @@ class Route
 
                     preg_match('/@authGroup[\s]{1,4}(.*?)[\r\n]/s',$v,$routeAuthGroup);//路由的权限分组
                     preg_match('/@authExtend[\s]{1,4}(.*?)[\r\n]/s',$v,$routeAuthExtend);//权限扩展信息
+                    $tag = md5($namespace[1].'\\'.$class[1].$function['name'].$routerStr);//路由标识（控制器方法级别）
                     /**
                      * 切割处理
                      */
-                    $this->authDispose($routeAuthGroup,$routeAuthExtend);
+                    $this->authDispose($routeAuthGroup,$routeAuthExtend,$tag);
                     /**
                      * 分组判断
                      */
@@ -798,6 +799,7 @@ class Route
                      */
                     $noteRouter = [
                         'router'=>$routerStr,//路由
+                        'tag'=>$tag,//tag路由标识
                         'PathNote'=>$PathNote??'',//简单路径路由用来快速匹配
                         'MatchStr'=>$matchStr??'',//匹配使用的 正则表达式
                         'Namespace'=>$namespace[1].'\\'.$class[1],//路由请求的控制器
@@ -880,7 +882,7 @@ class Route
      * @title  权限相关处理
      * @explain 一般是方法功能说明、逻辑说明、注意事项等。
      */
-    protected function authDispose(&$routeAuthGroup,&$routeAuthExtend)
+    protected function authDispose(&$routeAuthGroup,&$routeAuthExtend,$tag)
     {
         //* @authGroup [admin.del:user.del]删除账号操作
         //* @authExtend UserExtend:list 删除账号操作
@@ -899,8 +901,29 @@ class Route
             $routeAuthExtend= $routeAuthExtend[1];
             $this->processingBatch($routeAuthExtend,'.',':');
         }
+        /**
+         * 合并
+         *      [模块资源]=>[del=>[路由=>''，唯一路由标识md5（命名空间+类名称+方法名称）]]
+         *
+         * @authGroup admin.del:删除账号操作,user.del:删除账号操作,user.add:添加账号操作
+         * @authExtend UserExtend.list:删除账号操作
+         */
+        foreach($routeAuthGroup as $value)
+        {
+                                //模块资源  del  $tag
+            $this->Permissions[$value[0]][$value[1][0]][] = [
+                'tag'=>$tag,
+                'explain'=>$value[1][1],
+                'extend'=>$routeAuthExtend
+            ];
+        }
     }
 
+    /**
+     * 权限模型数据
+     * @var array
+     */
+    protected $Permissions  = [];
     /**
      * @Author pizepei
      * @Created 2019/4/21 17:19
