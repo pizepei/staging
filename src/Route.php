@@ -362,7 +362,7 @@ class Route
         $this->RouterAdded = &$RouteData['RouterAdded'];//附叫配置
         $this->atRouteData = &$RouteData;//路由
         //var_dump($RouteData);
-        //var_dump($this->Permissions);
+        var_dump($this->Permissions);
         $controller = new $RouteData['Namespace'];
 
         if(empty($RouteData['function']['Param']) && empty($RouteData['ParamObject'])){
@@ -415,9 +415,11 @@ class Route
             /**
              * 路由缓存
              */
-            $CacheData = Cache::get(['public','arr'],'route');
+            $CacheData = Cache::get(['public','route'],'route');
+            $Permissions = Cache::get(['public','Permissions'],'Permissions');
 
-            if($CacheData){
+
+            if($CacheData && $Permissions){
                 $this->noteRouter = $CacheData;
             }else{
                 /**
@@ -431,7 +433,9 @@ class Route
                  * 分离获取所有注解块
                  */
                 $this->noteBlock();
-                Cache::set(['public','arr'],$this->noteRouter,0,'route');
+                Cache::set(['public','route'],$this->noteRouter,0,'route');
+
+                Cache::set(['public','Permissions'],$this->Permissions,0,'Permissions');
             }
         }
         //var_dump($this->noteRouter);
