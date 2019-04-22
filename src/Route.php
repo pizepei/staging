@@ -116,8 +116,14 @@ class Route
      * @var null
      */
     protected $ReturnType = null;
-
-
+    /**
+     * 当前路由的权限控制器
+     * @var array
+     */
+    protected $baseAuth = [];
+    /**
+     * @var array
+     */
     protected $RouterAdded = [];
 
     /**
@@ -361,8 +367,14 @@ class Route
 
         $this->RouterAdded = &$RouteData['RouterAdded'];//附叫配置
         $this->atRouteData = &$RouteData;//路由
+        $this->baseAuth = &$RouteData['baseAuth']??[];//权限控制器
+
+        if(!empty($RouteData['routeBaseAuth'])){
+            $this->baseAuth = &$RouteData['routeBaseAuth']??[];//权限控制器
+        }
+
         //var_dump($RouteData);
-        var_dump($this->Permissions);
+        //var_dump($this->Permissions);
         $controller = new $RouteData['Namespace'];
 
         if(empty($RouteData['function']['Param']) && empty($RouteData['ParamObject'])){
@@ -421,6 +433,8 @@ class Route
 
             if($CacheData && $Permissions){
                 $this->noteRouter = $CacheData;
+                $this->Permissions = $CacheData;
+
             }else{
                 /**
                  * 没有缓存
@@ -678,6 +692,9 @@ class Route
 
                     preg_match('/@authGroup[\s]{1,4}(.*?)[\r\n]/s',$v,$routeAuthGroup);//路由的权限分组
                     preg_match('/@authExtend[\s]{1,4}(.*?)[\r\n]/s',$v,$routeAuthExtend);//权限扩展信息
+                    preg_match('/@baseAuth[\s]{1,6}(.*?)[\r\n]/s',$v,$routeBaseAuth);//路由上定义的权限控制器
+
+
                     $tag = md5($namespace[1].'\\'.$class[1].$function['name'].$routerStr);//路由标识（控制器方法级别）
                     /**
                      * 切割处理
@@ -693,6 +710,23 @@ class Route
                     if(!$this->detectionAuthExtend($routeAuthExtend)){
                         throw new \Exception('AuthExtend illegality  ['.$baseErrorNamespace.']');
                     }
+
+
+
+
+                    /**
+                     * 处理权限
+                     */
+                    if(isset($routeBaseAuth[1]))
+                    {
+                        $routeBaseAuth = explode(':',$routeBaseAuth[1]);
+                    }else{
+                        $routeBaseAuth = [];
+                    }
+                    $routeBaseAuth[1] = $routeBaseAuth[1]??'';
+
+
+
 
 
                     /*** ***********切割请求参数[url 参数  post等参数 不包括路由参数] return***************/
@@ -802,6 +836,7 @@ class Route
                      * 准备路由数据
                      */
                     $noteRouter = [
+
                         'router'=>$routerStr,//路由
                         'tag'=>$tag,//tag路由标识
                         'PathNote'=>$PathNote??'',//简单路径路由用来快速匹配
@@ -817,12 +852,11 @@ class Route
                         'Return'=>$routeReturnData??[],//返回参数
                         'ReturnType' => $routeReturnType??__INIT__['return'],//返回类型
                         'function'=>$function,//控制器方法
-                        'baseAuth'=>$baseAuth,//权限控制器
                         'routeAuthGroup'=>$routeAuthGroup,//路由的权限分组
                         'routeAuthExtend'=>$routeAuthExtend,//权限扩展信息
+                        'baseAuth'=>$baseAuth,//权限控制器
+                        'routeBaseAuth'=>$routeBaseAuth,//路由上定义的权限控制器
 
-                        //* @authGroup [admin.del:user.del]删除账号操作
-                        //* @authExtend UserExtend:list 删除账号操作
                     ];
                     if($routerType == 'Rule'){
                         $this->noteRouter[$routerData[0]][$routerType][$routerStr] = $noteRouter;

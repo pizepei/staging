@@ -22,7 +22,18 @@ class Controller
         /**
          * 权限类
          */
-
+        //路由
+        $Route = Route::init();
+        /**
+         * 判断是否有设置权限控制器
+         */
+        if(isset($Route->baseAuth[0]))
+        {
+            $className = 'authority\controller\\'.$Route->baseAuth[0];
+            $functionName = $Route->baseAuth[1];
+            $class = new $className($Route->baseAuth[1],'common');
+            $class->init();
+        }
         /**
          * 路由
          */
