@@ -373,10 +373,12 @@ class Route
         $this->atRouteData = &$RouteData;//路由
         $this->baseAuth = &$RouteData['baseAuth']??[];//权限控制器
         $this->authTag = &$RouteData['tag']??'';//路由标识
-        if(!empty($RouteData['routeBaseAuth'])){
+
+        $this->baseAuth = &$RouteData['baseAuth']??[];//权限控制器
+
+        if(!empty($RouteData['routeBaseAuth'][0])){
             $this->baseAuth = &$RouteData['routeBaseAuth']??[];//权限控制器
         }
-
         //var_dump($RouteData);
         //var_dump($this->Permissions);
         $controller = new $RouteData['Namespace'];
@@ -859,8 +861,8 @@ class Route
                         'function'=>$function,//控制器方法
                         'routeAuthGroup'=>$routeAuthGroup,//路由的权限分组
                         'routeAuthExtend'=>$routeAuthExtend,//权限扩展信息
-                        'baseAuth'=>$baseAuth,//权限控制器
-                        'routeBaseAuth'=>$routeBaseAuth,//路由上定义的权限控制器
+                        'baseAuth'=>$baseAuth??[],//权限控制器
+                        'routeBaseAuth'=>$routeBaseAuth??[],//路由上定义的权限控制器
 
                     ];
                     if($routerType == 'Rule'){

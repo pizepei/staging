@@ -23,7 +23,7 @@ class Controller
         /**
          * 判断是否有设置权限控制器
          */
-        if(isset($Route->baseAuth[0]))
+        if(isset($Route->baseAuth[0]) && $Route->baseAuth[1] !='public')
         {
             $className = 'authority\controller\\'.$Route->baseAuth[0];
             $functionName = $Route->baseAuth[1];
@@ -31,6 +31,7 @@ class Controller
             $authResult = $class->init($Route->baseAuth[1]);
             $this->authExtend = $class->authExtend;
             $this->Payload = $class->Payload;
+            var_dump($this->Payload);
         }
         /**
          * 路由
