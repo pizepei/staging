@@ -105,9 +105,11 @@ class Start
             /**
              * 获取基础配置
              */
+
             $InitializeConfig = new InitializeConfig();
             $Config = $InitializeConfig->get_config_const($path);
             $dbtabase = $InitializeConfig->get_dbtabase_const($path);
+
             $get_error_log = $InitializeConfig->get_error_log_const($path);
             /**
              * 判断是否存在配置
@@ -119,6 +121,7 @@ class Start
                 $InitializeConfig->set_config('SetDbtabase',$dbtabase,$path,$namespace);
             }
             if(!file_exists($path.'SetErrorOrLog.php')){
+
                 $InitializeConfig->set_config('SetErrorOrLog',$get_error_log,$path,$namespace);
             }
             /**
@@ -158,10 +161,11 @@ class Start
                  */
                 $InitializeConfig->set_config('Dbtabase',$dbtabase,$path);
             }
-
             if(!file_exists($path.'ErrorOrLog.php')){
+
                 $InitializeConfig = new InitializeConfig();
                 $dbtabase = $InitializeConfig->get_dbtabase_const();
+
                 $dbtabase = array_merge($dbtabase,$InitializeConfig->get_const($namespace.'\\SetErrorOrLog'));
                 /**
                  * 合并

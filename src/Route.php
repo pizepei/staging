@@ -131,7 +131,11 @@ class Route
      * @var array
      */
     protected $noteBlock = array();
-
+    /**
+     * 当前路由的tag
+     * @var string
+     */
+    protected $authTag = '';
     /**
      * 匹配路由（都是从请求方法先过滤的）
      *      生成路由表时
@@ -368,7 +372,7 @@ class Route
         $this->RouterAdded = &$RouteData['RouterAdded'];//附叫配置
         $this->atRouteData = &$RouteData;//路由
         $this->baseAuth = &$RouteData['baseAuth']??[];//权限控制器
-
+        $this->authTag = &$RouteData['tag']??'';//路由标识
         if(!empty($RouteData['routeBaseAuth'])){
             $this->baseAuth = &$RouteData['routeBaseAuth']??[];//权限控制器
         }
@@ -694,8 +698,9 @@ class Route
                     preg_match('/@authExtend[\s]{1,4}(.*?)[\r\n]/s',$v,$routeAuthExtend);//权限扩展信息
                     preg_match('/@baseAuth[\s]{1,6}(.*?)[\r\n]/s',$v,$routeBaseAuth);//路由上定义的权限控制器
 
+                    $tag = md5($namespace[1].'\\'.$class[1].$function['name']);//路由标识（控制器方法级别）
 
-                    $tag = md5($namespace[1].'\\'.$class[1].$function['name'].$routerStr);//路由标识（控制器方法级别）
+                    //$tag = md5($namespace[1].'\\'.$class[1].$function['name'].$routerStr.$matchStr);//路由标识（路由级别）
                     /**
                      * 切割处理
                      */

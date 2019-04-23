@@ -13,10 +13,6 @@ class Controller
     /**
      * 初始化
      */
-    /**
-     * 权限控制
-     */
-
     public function __construct()
     {
         /**
@@ -31,8 +27,10 @@ class Controller
         {
             $className = 'authority\controller\\'.$Route->baseAuth[0];
             $functionName = $Route->baseAuth[1];
-            $class = new $className($Route->baseAuth[1],'common');
-            $class->init();
+            $class = new $className('common');
+            $authResult = $class->init($Route->baseAuth[1]);
+            $this->authExtend = $class->authExtend;
+            $this->Payload = $class->Payload;
         }
         /**
          * 路由
@@ -44,6 +42,17 @@ class Controller
          */
 
     }
+
+    /**
+     * 获取Extend
+     * @param string $key
+     * @return mixed
+     */
+    public function getAuthExtend($key ='')
+    {
+        return $this->jurisdictionExtend[$key]??null;
+    }
+
     /**
      * 视图
      * @param string $name

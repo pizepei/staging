@@ -212,6 +212,17 @@ class MyException
     protected function setCodeCipher()
     {
         $str_rand = Func::M('str')::str_rand(20);
+        /**
+         * 判断是否是权限和登录
+         */
+        if(\ErrorOrLog::NOT_LOGGOD_IN_CODE == $this->exception->getCode()   || \ErrorOrLog::JURISDICTION_CODE == $this->exception->getCode() ){
+            $result =  [
+                __INIT__['ErrorReturnJsonMsg']['name']=>$this->exception->getMessage(),
+                __INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
+                'error'=>$str_rand,
+            ];
+        }
+
         if($this->info){
             if(isset($this->info[$this->exception->getCode()])){
                 $result =  [
