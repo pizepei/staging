@@ -879,7 +879,7 @@ class Route
                         'routerType'=>$routerType,//路由类型
                         'matchStr'=>$matchStr??'',//请求参数
                         'routerStr'=>$routerStr,//路由
-                        'routeReturnExplain'=>$routeReturnExplain,//返回说明
+                        'routeReturnExplain'=>$routeReturnExplain??[],//返回说明
                         'Author'=>$Author[1]??'',//方法创建人
                         'Created'=>$Created[1]??'',//方法创建时间
 
