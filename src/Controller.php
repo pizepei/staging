@@ -25,7 +25,7 @@ class Controller
          */
         if(isset($Route->baseAuth[0]) && $Route->baseAuth[1] !='public')
         {
-            $className = 'authority\controller\\'.$Route->baseAuth[0];
+            $className = 'authority\\'.__APP__.'\\controller\\'.$Route->baseAuth[0];
             $functionName = $Route->baseAuth[1];
             $class = new $className('common');
             $authResult = $class->init($Route->baseAuth[1]);

@@ -7,7 +7,6 @@
  * @title 路由
  */
 namespace pizepei\staging;
-use authority\Resource;
 use pizepei\config\Config;
 use pizepei\model\cache\Cache;
 
@@ -955,13 +954,16 @@ class Route
          */
         foreach($routeAuthGroup as $value)
         {
-                                //模块资源  del  $tag
+             //模块资源  del  $tag
             $this->Permissions[$value[0]][$value[1][0]][] = [
                 'tag'=>$tag,
                 'explain'=>$value[1][1],
                 'extend'=>$routeAuthExtend
             ];
         }
+        //var_dump($routeAuthExtend);
+
+        //var_dump($routeAuthGroup);
     }
 
     /**
@@ -979,17 +981,42 @@ class Route
     protected function detectionAuthGroup($routeAuthGroup)
     {
         if(empty($routeAuthGroup)){return [true];}
+
+        $Resource = 'authority\\'.__APP__.'\\Resource';
         foreach($routeAuthGroup as $value)
         {
-            if(!isset(Resource::mainResource[$value[0]])){
+            //if(count($value) !=3) {return [false,'formal error ：count unequal 3 ',''];}
+            /**
+             * 一级
+             */
+            if(!isset($Resource::mainResource[$value[0]])){
                 return [false,'main illegality',$value[0]];
             }
-            if(!isset($value[1][0])){
-                return [false,'lesser inexistence',$value[1][0]];
+            /**
+             * 二级
+             */
+            var_dump($value[0]);
+            var_dump($Resource::$admin);
+
+
+            //list
+
+            /**
+             * 判断三级
+             */
+            if(!isset($value[2][0])){
+                return [false,'lesser inexistence',''];
             }
-            if(isset(Resource::$value[1][0])){
-                return [false,'lesser illegality',$value[1][0]];
+
+            if(isset($Resource::$Resource[$value[0]]['list']))
+            {
+
             }
+            var_dump($Resource::$Resource[$value[0]]);
+            //$Resource::$Resource::$value[0];
+            //if(isset($Resource::$value[0][1])){
+            //    return [false,'lesser illegality',''];
+            //}
             return [true];
         }
 
@@ -1036,7 +1063,7 @@ class Route
         $data = explode(',',$data);
         foreach($data as &$value){
             $value = explode($main,$value);
-            foreach($value as &$valueLesser){
+            foreach($value as $key=> &$valueLesser){
                 $valueLesser = (count(explode($lesser,$valueLesser)) == 1)?$valueLesser:explode($lesser,$valueLesser);
             }
         }
