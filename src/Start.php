@@ -291,7 +291,7 @@ class Start
         /**
          * 全局响应配置
          */
-        $Request->setHeader(__INIT__['header']);
+        //$Request->setHeader(__INIT__['header']);
         /**
          * 控制器return
          */

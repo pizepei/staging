@@ -475,7 +475,6 @@ class Route
     {
         $data =  file_get_contents($filePath);
         preg_match('/\/[\*]{2}\s(.*?)\*\//s',$data,$result);
-//        preg_match('/\/\*\*\r(.*?)\*\//s',$data,$result);
         /**
          * 过滤非控制器类文件
          */
@@ -711,13 +710,11 @@ class Route
                      */
                     $detectionAuthGroup = $this->detectionAuthGroup($routeAuthGroup);
                     if(!$detectionAuthGroup[0]){
-                        throw new \Exception($detectionAuthGroup[1].' '.$detectionAuthGroup[2].'  ['.$baseErrorNamespace.']');
+                        throw new \Exception($detectionAuthGroup[1].' '.'  ['.$baseErrorNamespace.']');
                     }
                     if(!$this->detectionAuthExtend($routeAuthExtend)){
                         throw new \Exception('AuthExtend illegality  ['.$baseErrorNamespace.']');
                     }
-
-
 
 
                     /**
@@ -955,15 +952,12 @@ class Route
         foreach($routeAuthGroup as $value)
         {
              //模块资源  del  $tag
-            $this->Permissions[$value[0]][$value[1][0]][] = [
+            $this->Permissions[$value[0]][$value[1]][$value[2][0]][] = [
                 'tag'=>$tag,
-                'explain'=>$value[1][1],
+                'explain'=>$value[2][1],
                 'extend'=>$routeAuthExtend
             ];
         }
-        //var_dump($routeAuthExtend);
-
-        //var_dump($routeAuthGroup);
     }
 
     /**
@@ -983,40 +977,33 @@ class Route
         if(empty($routeAuthGroup)){return [true];}
 
         $Resource = 'authority\\'.__APP__.'\\Resource';
+
+        $reflect = new \ReflectionClass($Resource);
+        $ConstData = $reflect->getConstants();
         foreach($routeAuthGroup as $value)
         {
             //if(count($value) !=3) {return [false,'formal error ：count unequal 3 ',''];}
             /**
              * 一级
              */
-            if(!isset($Resource::mainResource[$value[0]])){
-                return [false,'main illegality',$value[0]];
+            if(!isset($ConstData['mainResource'][$value[0]])){
+                return [false,'main illegality',''];
             }
             /**
              * 二级
              */
-            var_dump($value[0]);
-            var_dump($Resource::$admin);
-
-
+            if(!isset($ConstData[$value[0]][$value[1]])){
+                return [false,'second illegality',''];
+            }
             //list
 
             /**
              * 判断三级
              */
-            if(!isset($value[2][0])){
+            if(!isset($ConstData[$value[0]][$value[1]]['list'][$value[2][0]])){
                 return [false,'lesser inexistence',''];
             }
 
-            if(isset($Resource::$Resource[$value[0]]['list']))
-            {
-
-            }
-            var_dump($Resource::$Resource[$value[0]]);
-            //$Resource::$Resource::$value[0];
-            //if(isset($Resource::$value[0][1])){
-            //    return [false,'lesser illegality',''];
-            //}
             return [true];
         }
 
