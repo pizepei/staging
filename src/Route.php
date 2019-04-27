@@ -342,9 +342,6 @@ class Route
                 if(empty($PathData[$i])){
                     throw new \Exception($k.'缺少参数');
                 }
-                var_dump($PathData);
-                var_dump($v);
-                var_dump($this->ReturnSubjoin);
 
                 if(array_key_exists($v,$this->ReturnSubjoin)){
                     preg_match($this->ReturnSubjoin[$v][1],$PathData[$i],$result);
@@ -352,15 +349,9 @@ class Route
                         throw new \Exception($k.'非法的:'.$this->ReturnSubjoin[$v][0]);
                     }
                 }else if(in_array($v,self::ReturnType)){
-                    if($v == 'int')
-                    {
-
-                    }
-
                     if(!settype($PathData[$i],$v)){
                         throw new \Exception($k.'参数约束失败:'.$v);
                     }
-
 
                 }else{
                     throw new \Exception($k.'非法的参数约束:'.$v);
@@ -656,7 +647,6 @@ class Route
                      */
                     $routerStrReplace = preg_replace('/\:[A-Za-z\[]+\]/','(.*?)',$routerStr);
                     $matchStr = '/^'.preg_replace('/\//','\/',$routerStrReplace).'[\/]{0,1}$/';
-                    var_dump($matchStr);
                     /**
                      * 获取：参数
                      */
