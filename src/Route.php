@@ -319,6 +319,7 @@ class Route
                 $RouteData = current($RouteData);
                 preg_match($RouteData['MatchStr'],$this->atRoute,$PathData);
             }
+            //var_dump($PathData);
             /**
              * 去除第一个数据
              */
@@ -329,6 +330,7 @@ class Route
                  */
                 throw new \Exception($RouteData['router'].':路由不存在');
             }
+
             /**
              * 对参数进行强制过滤（根据路由上的规则：name[int]）
              */
@@ -340,6 +342,9 @@ class Route
                 if(empty($PathData[$i])){
                     throw new \Exception($k.'缺少参数');
                 }
+                var_dump($PathData);
+                var_dump($v);
+                var_dump($this->ReturnSubjoin);
 
                 if(array_key_exists($v,$this->ReturnSubjoin)){
                     preg_match($this->ReturnSubjoin[$v][1],$PathData[$i],$result);
@@ -347,9 +352,16 @@ class Route
                         throw new \Exception($k.'非法的:'.$this->ReturnSubjoin[$v][0]);
                     }
                 }else if(in_array($v,self::ReturnType)){
+                    if($v == 'int')
+                    {
+
+                    }
+
                     if(!settype($PathData[$i],$v)){
                         throw new \Exception($k.'参数约束失败:'.$v);
                     }
+
+
                 }else{
                     throw new \Exception($k.'非法的参数约束:'.$v);
                 }
@@ -380,12 +392,22 @@ class Route
         }
         //var_dump($RouteData);
         //var_dump($this->Permissions);
+
+        /**
+         * 避免在控制器中有输出导致Cannot modify header information - headers already sent by错误
+         * 在控制器实例化前设置头部
+         */
+        $Request = Request::init();
+        $Request->setHeader($Request::Header[$this->ReturnType]);
+        /**
+         * 实例化控制器
+         */
         $controller = new $RouteData['Namespace'];
 
         if(empty($RouteData['function']['Param']) && empty($RouteData['ParamObject'])){
             return $controller->$function();
         }else{
-            $Request = Request::init();
+
             $Request->PATH = $PathArray??[];
             return $controller->$function($Request);
         }
@@ -634,6 +656,7 @@ class Route
                      */
                     $routerStrReplace = preg_replace('/\:[A-Za-z\[]+\]/','(.*?)',$routerStr);
                     $matchStr = '/^'.preg_replace('/\//','\/',$routerStrReplace).'[\/]{0,1}$/';
+                    var_dump($matchStr);
                     /**
                      * 获取：参数
                      */

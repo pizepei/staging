@@ -496,7 +496,7 @@ class Request
         /**
          * 判断是否已经有这个对象
          */
-        if(!self::$object) self::$object = new static();
+        if(!self::$object) {self::$object = new static();}
         
         return self::$object;
 

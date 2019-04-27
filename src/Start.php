@@ -345,11 +345,6 @@ class Start
      */
     protected function returnString($data)
     {
-        /**
-         * 设置头部
-         */
-        $Request = Request::init();
-        $Request->setHeader($Request::Header['html']);
         return $data;
     }
     /**
@@ -358,13 +353,7 @@ class Start
      */
     protected function returnHtml($data)
     {
-        /**
-         * 设置头部
-         */
-        $Request = Request::init();
-        $Request->setHeader($Request::Header['html']);
         return $data;
-
     }
 
     /**
@@ -373,11 +362,6 @@ class Start
      */
     protected function returnJson($data,$debug)
     {
-        /**
-         * 设置头部
-         */
-        $Request = Request::init();
-        $Request->setHeader($Request::Header['json']);
 
         if($data != null){
             if(is_array($data)){
