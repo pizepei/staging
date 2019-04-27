@@ -58,10 +58,33 @@ class Controller
      * 视图
      * @param string $name
      * @param array  $data
+     * @return string|array
      */
-    public function view($name = '',array$data = [])
+    public function view($name = '',array$data = [],$type='html')
     {
-        require(__TEMPLATE__.$name.'.html');
+        /**
+         * 默认路径
+         */
+        if($name == '')
+        {
+            /**
+             * 自动拼接地址
+             * __TEMPLATE__命名空间
+             */
+
+        }else{
+
+        }
+        $file = file_get_contents(__TEMPLATE__.$name.'.'.$type);
+        if(empty($data))
+        {
+            foreach($data as $key=>$vuleu)
+                if(!is_array($vuleu)){
+                    $file = str_replace('{{'.$key.'}}',$vuleu,$file);
+                }
+        }
+        //require();
+        return $file;
     }
 
     /**
