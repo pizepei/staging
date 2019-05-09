@@ -15,9 +15,7 @@
         "pizepei/model": "dev-master",
         "pizepei/func": "dev-master",
         "pizepei/service": "dev-master",
-        "filp/whoops": "^2.2",
-        "monolog/monolog": "^1.23",
-        "twig/twig": "^2.0"
+        "monolog/monolog": "^1.23"
     },
     "autoload": {
         "psr-4": {
