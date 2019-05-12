@@ -188,7 +188,7 @@ class MyException
      * @title  获取痕迹方法 默认6级
      * @explain
      */
-    private function getTrace(int$tier=3)
+    private function getTrace(int $tier=3)
     {
         $array =[];
         foreach($this->exception->getTrace() as $key=>$value)
