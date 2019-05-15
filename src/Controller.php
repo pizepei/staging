@@ -7,7 +7,6 @@
  * @title 控制器基类
  */
 namespace pizepei\staging;
-use Whoops\Run;
 class Controller
 {
     /**
