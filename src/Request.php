@@ -81,8 +81,10 @@ class Request
             $this->Route = Route::init();
         }
     }
+
     /**
      * @param $vname
+     * @return
      */
     public function __get($vname){
         return $this->$vname;
@@ -259,9 +261,14 @@ class Request
         $this->paramFiltrationRecursive($data,$noteData);
 
     }
+
     /**
      * 递归函数处理数据类型转换
-     * @param $data
+     *
+     * @param        $data
+     * @param        $noteData
+     * @param string $type
+     * @throws \Exception
      */
     protected function paramFiltrationRecursive(&$data,$noteData,$type='object')
     {
@@ -338,6 +345,8 @@ class Request
      * @param $data
      * @param $key
      * @param $noteData
+     * @param $type
+     * @throws \Exception
      * @title  检测是否有参数约束
      */
     protected function eturnSubjoin(&$data,$key,$noteData,$type)
@@ -436,11 +445,14 @@ class Request
 
 
     }
+
     /**
      * @Author: pizepei
      * @Created: 2018/10/12 23:08
-     * @param $data
-     * @param $noteData
+     * @param        $data
+     * @param        $noteData
+     * @param string $type
+     * @throws \Exception
      * @title  对请求参数进行过滤（删除不在注解中的参数key） 测是否有参数约束
      */
     protected  function unsetParam(&$data,$noteData,$type='object')
@@ -527,10 +539,15 @@ class Request
         $result= json_decode(json_encode(simplexml_load_string($xmlstr, 'SimpleXMLElement', LIBXML_NOCDATA)), true);
         return $result;
     }
+
     /**
      * 数组转xml字符
-     * @param  string 	$xml xml字符串
-     **/
+     *
+     * @param        $data
+     * @param string $name
+     * @return bool|string
+     * @throws \Exception
+     */
     function arrayToXml($data,$name='xml'){
 
         if(!is_array($data) || count($data) <= 0){
@@ -573,11 +590,13 @@ class Request
 
         return $xml;
     }
+
     /**
      * 设置产生url
      *
      * @param $route    路由地址
      * @param $data     需要传递的参数
+     * @return string
      */
     public function setUrl($route,$data =[])
     {
