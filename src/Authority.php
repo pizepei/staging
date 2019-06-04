@@ -62,9 +62,12 @@ class Authority
          */
         $this->pattern = $pattern;
     }
+
     /**
      *  获取 property
+     *
      * @param $propertyName
+     * @return |null
      */
     public function __get($propertyName)
     {
@@ -80,7 +83,7 @@ class Authority
      */
     public function init($parameter)
     {
-        if($parameter === 'punlic'){
+        if($parameter === 'public'){
             $this->status = true;
         }
         return $this->$parameter();
