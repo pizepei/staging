@@ -7,7 +7,6 @@
  * @title 路由
  */
 namespace pizepei\staging;
-use pizepei\config\Config;
 use pizepei\model\cache\Cache;
 
 
@@ -29,11 +28,16 @@ class Route
     /**
      * 支持的请求类型
      */
-    const RequestType =['GET','POST','PUT','PATCH','DELETE','COPY','HEAD','OPTIONS','LINK','UNLINK','PURGE','LOCK','UNLOCK','PROPFIND','VIEW','CLI'];
+    const RequestType =['All','GET','POST','PUT','PATCH','DELETE','COPY','HEAD','OPTIONS','LINK','UNLINK','PURGE','LOCK','UNLOCK','PROPFIND','VIEW','CLI'];
     /**
-     * 控制器return 返回的数据类型()
+     * 请求path参数数据类型
+     * 用来限制路由生成
      */
-    const ReturnType = ['int','string','bool','float','array','null'];
+    const RequestPathParamDataType = ['int','string','float'];
+    /**
+     * get post 等请求参数数据类型
+     */
+    const RequestParamDataType = ['int','string','bool','float','array','null'];
 
     /**
      * 控制器return 返回的数据类型()
@@ -255,7 +259,11 @@ class Route
     }
 
     /**
-     * 注释路由（控制器方法上注释方式设置的路由）
+     * @Author pizepei
+     * @return mixed
+     * @throws \Exception
+     * @title  注释路由（控制器方法上注释方式设置的路由）
+     * @explain 一般是方法功能说明、逻辑说明、注意事项等。
      */
     protected function noteRoute()
     {
@@ -269,14 +277,12 @@ class Route
          * 开始使用常规路由快速匹配
          */
         if(isset($Rule[$this->atRoute])){
-        /**
-         * 在常规路由中
-         */
-            //echo '在常规路由中';
+            /**
+             * 在常规路由中
+             */
             $RouteData = &$Rule[$this->atRoute];
         }else{
             if(empty($Path)){ throw new \Exception('路由不存在'); }
-            //echo '不在常规路由中';
             /**
              * 使用快捷匹配路由匹配
              */
@@ -294,6 +300,7 @@ class Route
                     }
                 }
             }
+
             if(!isset($PathNote)){
                 //header("Status: 404 Not Found");
                 //header("HTTP/1.0 404 Not Found");
@@ -301,16 +308,35 @@ class Route
             }
             /**
              * 判断匹配到的路由数量
-             *
              * 使用正则表达式匹配并且获取参数
+             * $length为strlen()获取的匹配长度，使用匹配最才$length做路由匹配
+             *
              */
+
             if(count($PathNote[$length])>1){
                 /**
+                 * 使用模糊匹配后仍然有多个路由
+                 *      strlen()获取的匹配长度一样的情况下导致有多个路由
                  * 匹配到多个 使用正则表达式
                  */
-                foreach ($PathNote as $pnK=>$pnV){
-                    preg_match($pnV['MatchStr'],$this->atRoute,$PathData);
+                $PathNoteFor = $PathNote[$length];
+                foreach ($PathNoteFor as $pnK=>$pnV){
+
+                    preg_match($pnV['MatchStr'],$this->atRoute,$PathDataFor);
+                    /**
+                     * 判断正则表达式获取的参数数量是否和配置一致
+                     * 路径参数在正则表达式中统一用(.*?)表示因此
+                     *      如果路由前缀是相同的如/index/:id[uuid]   和 /index/:name[string] 会同时路由冲突
+                     *      /index/:id[uuid]/:name[string] 和 /index/:name[string] 不会冲突并且进入到这里
+                     *      因此这里只需要判断使用正则表达式匹配到的参数数量-1后 和$pnV['PathParam']一直就可以判断是正确路由了
+                     */
+                    if(count($pnV['PathParam']) == (count($PathDataFor)-1))
+                    {
+                        $PathData = $PathDataFor;
+                        $RouteData = $pnV;
+                    }
                 }
+
             }else{
                 /**
                  * 只有一个
@@ -319,18 +345,18 @@ class Route
                 $RouteData = current($RouteData);
                 preg_match($RouteData['MatchStr'],$this->atRoute,$PathData);
             }
-            //var_dump($PathData);
+
             /**
              * 去除第一个数据
              */
             array_shift($PathData);
-            if(count($RouteData['PathParam']) != count($PathData)){
+
+            if( !isset($RouteData['PathParam']) || (count($RouteData['PathParam']) != count($PathData))){
                 /**
                  * 严格匹配参数（如果对应的:name位置没有使用参数 或者为字符串空  认为是路由不存在 或者提示参数不存在）
                  */
-                throw new \Exception($RouteData['router'].':路由不存在');
+                throw new \Exception(($RouteData['router']??'').':路由不存在');
             }
-
             /**
              * 对参数进行强制过滤（根据路由上的规则：name[int]）
              */
@@ -342,13 +368,16 @@ class Route
                 if(empty($PathData[$i])){
                     throw new \Exception($k.'缺少参数');
                 }
-
+                /**
+                 * 参数约束
+                 */
                 if(array_key_exists($v,$this->ReturnSubjoin)){
+                    //开始
                     preg_match($this->ReturnSubjoin[$v][1],$PathData[$i],$result);
                     if(!isset($result[0]) && empty($result[0])){
                         throw new \Exception($k.'非法的:'.$this->ReturnSubjoin[$v][0]);
                     }
-                }else if(in_array($v,self::ReturnType)){
+                }else if(in_array($v,self::RequestPathParamDataType)){
                     if(!settype($PathData[$i],$v)){
                         throw new \Exception($k.'参数约束失败:'.$v);
                     }

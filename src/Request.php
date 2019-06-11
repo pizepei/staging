@@ -292,7 +292,7 @@ class Request
             /**
              * 判断类型
              */
-            if(in_array($v['fieldRestrain'][0],$this->Route::ReturnType)  ){
+            if(in_array($v['fieldRestrain'][0],$this->Route::RequestParamDataType)  ){
                 /**
                  * 参数过滤（约束）
                  */
