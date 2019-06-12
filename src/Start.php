@@ -263,8 +263,8 @@ class Start
         //}
     }
 
-    /**CLI 参数
-     *
+    /**
+     * CLI 参数
      */
     const  GETOPT =[
         'route:',//路由
@@ -309,7 +309,7 @@ class Start
          */
         $Request = Request::init();
 
-        define('__REQUEST_ID__',$Request->RequestId);//初始化配置
+        define('__REQUEST_ID__',$Request->RequestId);//初始化配置设置请求id
 
         /**
          * 全局响应配置
@@ -333,26 +333,16 @@ class Start
     {
         $Route = Route::init();
         /**
-         * 根据不同的路由进行不同的
+         * 获取调试debug数据
          */
-
-        /**
-         * 路由单独配置的调试4
-         * 路由权限分组 3
-         */
-        //var_dump($Route->atRouteData);
-
-
         $debug = $Route->atRouteData['RouterAdded']['debug']??false;
-
-        $pattern = isset($Route->routeArr[4])?$Route->routeArr[4]:false;
+        //$pattern = isset($Route->routeArr[4])?$Route->routeArr[4]:false;
         //http://tool.oschina.net/commons/
         switch ($Route->ReturnType) {
             case 'json':
                 $result = $this->returnJson($data,$debug);
                 break;
             case 'xml':
-
                 echo "xml";
                 break;
             case 'html':
@@ -362,9 +352,7 @@ class Start
             default:
                 $result = $this->returnJson($data,$debug);
         }
-
         echo $result??'';
-
     }
 
     /**
@@ -410,7 +398,8 @@ class Start
                  * 不是
                  * 判断是否路由单独开启 调试模式
                  */
-                if( __INIT__['pattern']!='exploit' || $debug==='true' ){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
+                var_dump(__INIT__['pattern']);
+                if( __INIT__['pattern']=='exploit' || $debug==='true' ){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
 
                 if(isset($data[__INIT__['ReturnJsonData']]) && isset($data[__INIT__['SuccessReturnJsonCode']['name']]) && isset(__INIT__['SuccessReturnJsonMsg']['name']))
                 {

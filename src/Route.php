@@ -49,7 +49,7 @@ class Route
      */
     const ReturnFormat = ['list','objectList','object','raw'];
     /**
-     * 附加
+     * 路由附加配置
      * debug 调试模式    auth  权限
      */
     const ReturnAddition =  ['debug','auth'];
