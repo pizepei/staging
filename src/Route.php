@@ -139,6 +139,12 @@ class Route
      * @var string
      */
     protected $authTag = '';
+
+    /**
+     * 当前路由return参数
+     * @var array
+     */
+    protected $Return = [];
     /**
      * 匹配路由（都是从请求方法先过滤的）
      *      生成路由表时
@@ -179,7 +185,7 @@ class Route
         unset($_GET['s']);
 
         /**
-         * 获取到
+         * 获取到__EXPLOIT__
          */
         if(__ROUTE__['expanded'] != ''){
             $sstr = strrchr($s,'.');
@@ -400,19 +406,19 @@ class Route
         $this->atRoute = &$RouteData['router'];//路由
         $this->ReturnType = &$RouteData['ReturnType'];//路由请求类型
 
-        $this->RouterAdded = &$RouteData['RouterAdded'];//附叫配置
+        $this->RouterAdded = &$RouteData['RouterAdded'];//附加配置
         $this->atRouteData = &$RouteData;//路由
         $this->baseAuth = &$RouteData['baseAuth']??[];//权限控制器
         $this->authTag = &$RouteData['tag']??'';//路由标识
 
         $this->baseAuth = &$RouteData['baseAuth']??[];//权限控制器
-
+        $this->Return = &$RouteData['Return']??[];
         if(!empty($RouteData['routeBaseAuth'][0])){
             $this->baseAuth = &$RouteData['routeBaseAuth']??[];//权限控制器
         }
-        //var_dump($RouteData);
-        //var_dump($this->Permissions);
+//        var_dump($this->Return);
 
+        //var_dump($this->Permissions);
         /**
          * 避免在控制器中有输出导致Cannot modify header information - headers already sent by错误
          * 在控制器实例化前设置头部

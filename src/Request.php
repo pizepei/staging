@@ -263,6 +263,24 @@ class Request
     }
 
     /**
+     * @Author 皮泽培
+     * @Created 2019/6/12 17:42
+     * @title  过滤return参数
+     * @explain 过滤控制器return参数
+     */
+    public function returnParamFiltration($data,$type='')
+    {
+        $this->initRoute();
+        $this->Route->Return;
+        if (!isset($this->Route->Return['data'])){
+            return null;
+        }
+        //开始
+        $this->paramFiltrationRecursive($data,$this->Route->Return['data']['substratum'],$type==''?$this->Route->Return['data']['fieldRestrain'][0]:$type);
+        return $data;
+    }
+
+    /**
      * 递归函数处理数据类型转换
      *
      * @param        $data
