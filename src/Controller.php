@@ -10,7 +10,7 @@ namespace pizepei\staging;
 class Controller
 {
     /**
-     * 初始化
+     * Controller constructor.
      */
     public function __construct()
     {
@@ -101,7 +101,6 @@ class Controller
      * @return array
      * @title  控制器成功返回
      */
-
     public function succeed($data,$msg=__INIT__['SuccessReturnJsonMsg']['value'],$code=__INIT__['SuccessReturnJsonCode']['value'],$count=0)
     {
         $result =  [
