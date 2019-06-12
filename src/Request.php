@@ -263,12 +263,16 @@ class Request
     }
 
     /**
+     * @param        $data
+     * @param string $type
+     * @return null
+     * @throws \Exception
      * @Author 皮泽培
      * @Created 2019/6/12 17:42
      * @title  过滤return参数
      * @explain 过滤控制器return参数
      */
-    public function returnParamFiltration($data,$type='')
+    public function returnParamFiltration(&$data,$type='')
     {
         $this->initRoute();
         $this->Route->Return;

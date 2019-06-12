@@ -41,8 +41,12 @@ class Start
      */
     protected $RternOutput = null;
 
-    /***
+    /**
      * Start constructor.
+     *
+     * @param string $pattern
+     * @param string $path
+     * @throws \Exception
      */
     public function __construct($pattern = 'ORIGINAL',$path='..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.__APP__.DIRECTORY_SEPARATOR)
     {
@@ -96,6 +100,15 @@ class Start
 
     }
 
+    /**
+     * @Author pizepei
+     * @Created 2019/6/12 21:58
+     * @param $path
+     * @param $namespace
+     * @throws \ReflectionException
+     * @title  方法标题（一般是方法的简称）
+     * @explain 一般是方法功能说明、逻辑说明、注意事项等。
+     */
     protected function getInitDefine($path,$namespace)
     {
         /**
@@ -175,10 +188,13 @@ class Start
 
         }
     }
+
     /**
      * 设置define
      * @param string $pattern 默认 传统模式  namespace
-     * @param string $path  默认 ../config/__APP__/    传统模式
+     * @param string $path 默认 ../config/__APP__/    传统模式
+     * @return string
+     * @throws \Exception
      */
     protected function setDefine($pattern = 'ORIGINAL',$path='')
     {
@@ -255,8 +271,15 @@ class Start
         'sqllog:',//是否启用dbslq日志
         'domain:',//域名
     ];
+
     /**
-     * 开始web模式驱动
+     * @Author pizepei
+     * @Created 2019/6/12 21:57
+     * @param string $pattern
+     * @throws \Exception
+     * @title  开始web模式驱动
+     * @explain 一般是方法功能说明、逻辑说明、注意事项等。
+     * @router 方法路由一般控制器只适应(get /user/:user_id[int] ))
      */
     public function start($pattern = 'WEB')
     {
@@ -298,8 +321,13 @@ class Start
         $this->output(Route::init(true));
     }
     /**
-     * 控制器输出
+     *
+     * @Author pizepei
+     * @Created 2019/6/12 21:56
      * @param $data
+     * @throws \Exception
+     * @title  控制器输出
+     * @explain 一般是方法功能说明、逻辑说明、注意事项等。
      */
     protected function output($data)
     {
@@ -340,16 +368,24 @@ class Start
     }
 
     /**
-     * 返回字符串
+     * @Author pizepei
+     * @Created 2019/6/12 21:55
      * @param $data
+     * @return mixed
+     * @title  返回字符串
+     * @explain 一般是方法功能说明、逻辑说明、注意事项等。
      */
     protected function returnString($data)
     {
         return $data;
     }
+
     /**
-     * 返回html
+     * @Author pizepei
+     * @Created 2019/6/12 21:55
      * @param $data
+     * @return mixed
+     * @title  返回html
      */
     protected function returnHtml($data)
     {
@@ -357,8 +393,12 @@ class Start
     }
 
     /**
-     * 返回json
+     * @Author pizepei
+     * @Created 2019/6/12 21:54
      * @param $data
+     * @param $debug
+     * @throws \Exception
+     * @title  返回json
      */
     protected function returnJson($data,$debug)
     {
@@ -367,12 +407,17 @@ class Start
             if(is_array($data)){
                 /**
                  * 判断是否是开发模式
-                 *
                  * 不是
-                 *
                  * 判断是否路由单独开启 调试模式
                  */
                 if( __INIT__['pattern']!='exploit' || $debug==='true' ){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
+
+                if(isset($data[__INIT__['ReturnJsonData']]) && isset($data[__INIT__['SuccessReturnJsonCode']['name']]) && isset(__INIT__['SuccessReturnJsonMsg']['name']))
+                {
+                    $data[__INIT__['ReturnJsonData']] = Request::init()->returnParamFiltration($data[__INIT__['ReturnJsonData']]);
+                }else{
+                    Request::init()->returnParamFiltration($data);
+                }
                 echo json_encode($data,JSON_UNESCAPED_UNICODE );
             }else{
                 /**
