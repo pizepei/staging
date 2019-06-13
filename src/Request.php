@@ -240,10 +240,6 @@ class Request
     protected function paramFiltration(&$data,$type)
     {
         $this->initRoute();
-
-
-        //var_dump($this->Route->atRouteData['Param'][$type]);
-
         if(!isset($this->Route->atRouteData['Param'])){
             $data = null;
             return false;
@@ -257,9 +253,7 @@ class Request
          */
         $format = $Param['fieldRestrain'][0];
         $noteData = &$Param['substratum'];
-        //var_dump($noteData);
-        $this->paramFiltrationRecursive($data,$noteData);
-
+        $this->paramFiltrationRecursive($data,$noteData,$format);
     }
 
     /**
@@ -278,6 +272,10 @@ class Request
         $this->Route->Return;
         if (!isset($this->Route->Return['data'])){
             return null;
+        }
+        if ($type ==''  && $this->Route->Return['data']['fieldRestrain'][0] =='raw')
+        {
+            return $data;
         }
         //开始
         $this->paramFiltrationRecursive($data,$this->Route->Return['data']['substratum'],$type==''?$this->Route->Return['data']['fieldRestrain'][0]:$type);
@@ -308,9 +306,6 @@ class Request
         //var_dump($noteData);
         if(__INIT__['requestParam']){$this->unsetParam($data,$noteData,$type);}
         foreach($noteData as $k=>$v){
-            //var_dump($k);
-            //var_dump($v['fieldRestrain']);
-            //var_dump($data);
             /**
              * 判断类型
              */
@@ -331,9 +326,7 @@ class Request
                      */
                     $this->eturnSubjoin($data,$k,$v,'objectList');
                 }else if($v['fieldRestrain'][0] == 'raw'){
-                    /**
-                     * 没有限制
-                     */
+                    //没有限制
                 }
 
             }else if(in_array($v['fieldRestrain'][0],$this->Route::ReturnFormat)){
@@ -343,7 +336,11 @@ class Request
                 if(isset($v['substratum'])){
                     if($v['fieldRestrain'][0] == 'object'){
                         $data[$k] = $data[$k]??'';
-                        $data[$k] = json_decode($data[$k],true);
+
+                        if (!is_array($data[$k]))
+                        {
+                            $data[$k] = json_decode($data[$k],true);
+                        }
                         $this->paramFiltrationRecursive($data[$k],$noteData[$k]['substratum']);
                     }else if($v['fieldRestrain'][0] == 'objectList'){
                         $data[$k] = $data[$k]??'';
@@ -373,7 +370,6 @@ class Request
      */
     protected function eturnSubjoin(&$data,$key,$noteData,$type)
     {
-        //var_dump($key);
         /**
          * 数据类型转换
          */
@@ -417,8 +413,6 @@ class Request
                     /**
                      * 如果存在就类型转换
                      */
-                    //var_dump($vv[$key]);
-                    //var_dump($fieldRestrain);
                     isset($vv[$key]);
                     if($fieldRestrain == 'objectList' || empty($vv[$key])) {throw new \Exception($key.'['.$key.']是必须的');}
                     
@@ -439,14 +433,21 @@ class Request
                 }
             }
         }else if($type =='object'){//非索引array
-
-            //var_dump($key);
-            //var_dump(count($noteData['fieldRestrain']));
             /**
              * 判断是否存在多的
              */
             //if(count($noteData['fieldRestrain']) <= 1){
-                if(isset($data[$key])) {settype($data[$key],$noteData['fieldRestrain'][0]);}
+            /**
+             * 进行数据类型转换 $data = null;isset($data);返回false
+             */
+            if((isset($data[$key]) || $data[$key] === null) && $noteData['fieldRestrain'][0] !=='object' && $noteData['fieldRestrain'][0] !=='objectList')
+            {
+                if(is_array($data[$key]))
+                {
+                    $data[$key] = json_encode($data[$key],LIBXML_NOCDATA);
+                }
+                settype($data[$key],$noteData['fieldRestrain'][0]);
+            }
             //}
             unset($noteData['fieldRestrain'][0]);
             foreach($noteData['fieldRestrain'] as $k=>$v){
@@ -490,7 +491,14 @@ class Request
                     //}
                     if(isset($noteData[$pk])){
                         if($noteData[$pk]['fieldRestrain'][0] != 'raw'){
-                            if(!array_key_exists($pk,$noteData)){ unset($data[$pk]);}
+                            if(!array_key_exists($pk,$noteData)){
+                                unset($data[$pk]);
+                            }else{
+                                if (!isset($noteData[$pk]['substratum']) && ($noteData[$pk]['fieldRestrain'][0] =='object' || $noteData[$pk]['fieldRestrain'][0] =='objectList'))
+                                {
+                                    throw new \Exception('参数: '.$pk.' ['.$noteData[$pk]['fieldRestrain'][0].']不能没有下级或可使用[raw]忽略参数限制');
+                                }
+                            }
                         }
                     }else{
                         /**
@@ -504,9 +512,12 @@ class Request
                     if(!is_array($pv)){
                         throw new \Exception('非法的数据结构:'.$pk.'上级应该是['.$type.']');
                     }
+                    if (!is_int($pk)){unset($data[$pk]);}//删除分索引数组的非法数据
                     foreach($pv as $kk =>&$vv){
                         if(is_array($vv)){
                             $type = 'objectList';
+                            if (!isset($noteData[$kk])){unset($pv[$kk]);continue;}
+
                             if($noteData[$kk]['fieldRestrain'][0] == 'object'){
                                 $type = 'object';
                                 $this->unsetParam($vv,$noteData[$kk]['substratum'],$type);

@@ -416,9 +416,10 @@ class Route
         if(!empty($RouteData['routeBaseAuth'][0])){
             $this->baseAuth = &$RouteData['routeBaseAuth']??[];//权限控制器
         }
+//        var_dump($RouteData);
 //        var_dump($this->Return);
 
-        //var_dump($this->Permissions);
+//        var_dump($this->Permissions);
         /**
          * 避免在控制器中有输出导致Cannot modify header information - headers already sent by错误
          * 在控制器实例化前设置头部

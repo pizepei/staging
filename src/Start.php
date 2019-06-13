@@ -398,7 +398,6 @@ class Start
                  * 不是
                  * 判断是否路由单独开启 调试模式
                  */
-                var_dump(__INIT__['pattern']);
                 if( __INIT__['pattern']=='exploit' || $debug==='true' ){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
 
                 if(isset($data[__INIT__['ReturnJsonData']]) && isset($data[__INIT__['SuccessReturnJsonCode']['name']]) && isset(__INIT__['SuccessReturnJsonMsg']['name']))
