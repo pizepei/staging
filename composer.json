@@ -14,8 +14,7 @@
         "pizepei/config-ng": "dev-master",
         "pizepei/model": "dev-master",
         "pizepei/func": "dev-master",
-        "pizepei/service": "dev-master",
-        "monolog/monolog": "^1.23"
+        "pizepei/service": "dev-master"
     },
     "autoload": {
         "psr-4": {

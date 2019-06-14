@@ -7,3 +7,5 @@ https://packagist.org/packages/filp/whoops
 ####模板引擎：
 composer require "twig/twig:^2.0"
 https://twig.symfony.com/
+####第三方日志系统
+composer require monolog/monolog
