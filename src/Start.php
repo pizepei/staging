@@ -8,6 +8,7 @@
  */
 namespace pizepei\staging;
 use pizepei\config\InitializeConfig;
+use pizepei\staging\MyException;
 use pizepei\staging\Route;
 use pizepei\staging\Request;
 use pizepei\config\Config;
@@ -83,6 +84,10 @@ class Start
             //$whoops->register();
 
         }else{
+            /**
+             * 设置错误级别？
+             */
+            new MyException($path);
             // 关闭所有PHP错误报告
             //error_reporting(0);
             //set_exception_handler(['MyException','production']);
