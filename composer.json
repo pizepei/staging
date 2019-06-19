@@ -15,6 +15,7 @@
         "pizepei/model": "dev-master",
         "pizepei/func": "dev-master",
         "pizepei/service": "dev-master",
+        "pizepei/deploy": "dev-master",
         "monolog/monolog": "^1.23"
     },
     "autoload": {
