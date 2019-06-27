@@ -126,7 +126,7 @@ class Start
             $InitializeConfig = new InitializeConfig();
             $Config = $InitializeConfig->get_config_const($path);
             $dbtabase = $InitializeConfig->get_dbtabase_const($path);
-
+            $Deploy = $InitializeConfig->get_deploy_const($path);
             $get_error_log = $InitializeConfig->get_error_log_const($path);
             /**
              * 判断是否存在配置
@@ -138,23 +138,25 @@ class Start
                 $InitializeConfig->set_config('SetDbtabase',$dbtabase,$path,$namespace);
             }
             if(!file_exists($path.'SetErrorOrLog.php')){
-
                 $InitializeConfig->set_config('SetErrorOrLog',$get_error_log,$path,$namespace);
+            }
+            if(!file_exists($path.'SetDeploy.php')){
+                $InitializeConfig->set_config('SetDeploy',$Deploy,$path,$namespace);
             }
             /**
              * 合并(只能合并一层)
              */
             $Config = array_merge($Config,$InitializeConfig->get_const($namespace.'\\SetConfig'));
             $dbtabase = array_merge($dbtabase,$InitializeConfig->get_const($namespace.'\\SetDbtabase'));
-
             $get_error_log = array_merge($get_error_log,$InitializeConfig->get_const($namespace.'\\SetErrorOrLog'));
-
+            $Deploy = array_merge($Deploy,$InitializeConfig->get_const($namespace.'\\SetDeploy'));
             /**
              * 写入
              */
             $InitializeConfig->set_config('Config',$Config,$path);
             $InitializeConfig->set_config('Dbtabase',$dbtabase,$path);
             $InitializeConfig->set_config('ErrorOrLog',$get_error_log,$path);
+            $InitializeConfig->set_config('Deploy',$Deploy,$path);
 
         }else{
             /**
@@ -181,7 +183,7 @@ class Start
             if(!file_exists($path.'ErrorOrLog.php')){
 
                 $InitializeConfig = new InitializeConfig();
-                $dbtabase = $InitializeConfig->get_dbtabase_const();
+                $dbtabase = $InitializeConfig->get_error_log_const();
 
                 $dbtabase = array_merge($dbtabase,$InitializeConfig->get_const($namespace.'\\SetErrorOrLog'));
                 /**
@@ -189,7 +191,17 @@ class Start
                  */
                 $InitializeConfig->set_config('ErrorOrLog',$dbtabase,$path);
             }
+            if(!file_exists($path.'Deploy.php')){
 
+                $InitializeConfig = new InitializeConfig();
+                $dbtabase = $InitializeConfig->get_deploy_const();
+
+                $dbtabase = array_merge($dbtabase,$InitializeConfig->get_const($namespace.'\\SetDeploy'));
+                /**
+                 * 合并
+                 */
+                $InitializeConfig->set_config('Deploy',$dbtabase,$path);
+            }
         }
     }
 
@@ -248,6 +260,8 @@ class Start
         require ($path.'Config.php');
         require($path.'Dbtabase.php');
         require($path.'ErrorOrLog.php');
+        require($path.'Deploy.php');
+
 
         /**
          * 获取配置到define;
