@@ -144,8 +144,8 @@ class Start
             if(!file_exists($path.'SetErrorOrLog.php')){
                 $InitializeConfig->set_config('SetErrorOrLog',$get_error_log,$path,$namespace);
             }
-            if(!file_exists($path.'SetDeploy.php')){
-                $InitializeConfig->set_config('SetDeploy',$Deploy,$path,$namespace);
+            if(!file_exists($path_Deploy.'SetDeploy.php')){
+                $InitializeConfig->set_config('SetDeploy',$Deploy,$path_Deploy,$namespace);
             }
             /**
              * 合并(只能合并一层)
