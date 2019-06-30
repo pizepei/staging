@@ -44,11 +44,12 @@ class Start
     /**
      * Start constructor.
      *
-     * @param string $pattern
-     * @param string $path
+     * @param string $pattern 模式
+     * @param string $path 项目配置路径
+     * @param string $deployPath 部署配置路径
      * @throws \Exception
      */
-    public function __construct($pattern = 'ORIGINAL',$path='..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.__APP__.DIRECTORY_SEPARATOR)
+    public function __construct($pattern = 'ORIGINAL',$path='..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.__APP__.DIRECTORY_SEPARATOR,$deployPath='..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR)
     {
         /**
          * 获取配置
@@ -64,7 +65,7 @@ class Start
         /**
          * 设置初始化配置
          */
-        $path = $this->setDefine($pattern,$path);
+        $path = $this->setDefine($pattern,$path,$deployPath);
         /**
          * 判断模式
          */
@@ -109,12 +110,15 @@ class Start
      * @Created 2019/6/12 21:58
      * @param $path
      * @param $namespace
+     * @param $deployPath
      * @throws \ReflectionException
      * @title  方法标题（一般是方法的简称）
      * @explain 一般是方法功能说明、逻辑说明、注意事项等。
      */
-    protected function getInitDefine($path,$namespace)
+    protected function getInitDefine($path,$namespace,$deployPath)
     {
+        $path_Deploy = '..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR;
+
         /**
          * 获取配置 合并
          */
@@ -156,7 +160,7 @@ class Start
             $InitializeConfig->set_config('Config',$Config,$path);
             $InitializeConfig->set_config('Dbtabase',$dbtabase,$path);
             $InitializeConfig->set_config('ErrorOrLog',$get_error_log,$path);
-            $InitializeConfig->set_config('Deploy',$Deploy,$path);
+            $InitializeConfig->set_config('Deploy',$Deploy,$deployPath);
 
         }else{
             /**
@@ -200,7 +204,7 @@ class Start
                 /**
                  * 合并
                  */
-                $InitializeConfig->set_config('Deploy',$dbtabase,$path);
+                $InitializeConfig->set_config('Deploy',$dbtabase,$deployPath);
             }
         }
     }
@@ -209,10 +213,11 @@ class Start
      * 设置define
      * @param string $pattern 默认 传统模式  namespace
      * @param string $path 默认 ../config/__APP__/    传统模式
+     * @param string $deployPath 部署配置路径
      * @return string
      * @throws \Exception
      */
-    protected function setDefine($pattern = 'ORIGINAL',$path='')
+    protected function setDefine($pattern = 'ORIGINAL',$path='',$deployPath='')
     {
         define('__RUN_PATTERN__',$pattern);//运行模式  SAAS    ORIGINAL
         /**
@@ -221,7 +226,7 @@ class Start
         if($pattern == 'ORIGINAL'){
             $path='..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.__APP__.DIRECTORY_SEPARATOR;
             $namespace = 'config\\'.__APP__;
-            $this->getInitDefine($path,$namespace);
+            $this->getInitDefine($path,$namespace,$deployPath);
         }else if($pattern == 'SAAS'){
             if(empty($path)){
                 throw new \Exception('SAAS配置路径必须',500);
@@ -231,7 +236,7 @@ class Start
              */
             $path .= DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'].DIRECTORY_SEPARATOR.__APP__.DIRECTORY_SEPARATOR;
             $namespace = 'config\\'.__APP__;
-            $this->getInitDefine($path,$namespace);
+            $this->getInitDefine($path,$namespace,$deployPath);
             ///**
             // * 判断是否存在配置
             // */
@@ -260,9 +265,11 @@ class Start
         require ($path.'Config.php');
         require($path.'Dbtabase.php');
         require($path.'ErrorOrLog.php');
-        require($path.'Deploy.php');
-
-
+        /**
+         * 经过考虑，这个项目在saas模式下任何一个租户都使用一个配置文件，部署配置文件由deploay流程自动化生成。
+         * 读取配置文件的路径暂时确定为项目标识项目标识定义在index入口文件
+         */
+        require('..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'Deploy.php');
         /**
          * 获取配置到define;
          */
