@@ -117,20 +117,56 @@ class Start
      */
     protected function getInitDefine($path,$namespace,$deployPath)
     {
-        $path_Deploy = '..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR;
+        /**
+         * 部署配置
+         * 判断本地目录是否有配置，没有初始化
+         *      有根据配置确定获取基础配置的途径
+         */
+        if(!file_exists($path.'Deploy.php')){
+            $InitializeConfig = new InitializeConfig();
+            $Deploy = $InitializeConfig->get_deploy_const();
+            if(!file_exists($deployPath.'SetDeploy.php')){
+                $InitializeConfig->set_config('SetDeploy',$Deploy,$deployPath,$namespace);
+            }
+            /**
+             * 写入
+             */
+            $Deploy = array_merge($Deploy,$InitializeConfig->get_const($namespace.'\\SetDeploy'));
+            $InitializeConfig->set_config('Deploy',$Deploy,$deployPath);
+        }
+        /**
+         * 经过考虑，这个项目在saas模式下任何一个租户都使用一个配置文件，部署配置文件由deploay流程自动化生成。
+         * 读取配置文件的路径暂时确定为项目标识项目标识定义在index入口文件
+         */
+        require($deployPath.'Deploy.php');
+        define('__EXPLOIT__',\Deploy::__EXPLOIT__);// 是否开发模式
+
 
         /**
-         * 获取配置 合并
+         * 判断获取配置方式
+         */
+        if(\Deploy::toLoadConfig == 'ConfigCenter')
+        {
+            /**
+             * 远程配置中心获取
+             */
+        }else if(\Deploy::toLoadConfig == 'Local'){
+            /**
+             * 本地获取
+             */
+        }
+
+        /**
+         * 判断是否是开发调试模式
+         * 调试模式
          */
         if(__EXPLOIT__){
             /**
-             * 获取基础配置
+             * 开发模式始终获取最新基础配置
              */
-
             $InitializeConfig = new InitializeConfig();
             $Config = $InitializeConfig->get_config_const($path);
             $dbtabase = $InitializeConfig->get_dbtabase_const($path);
-            $Deploy = $InitializeConfig->get_deploy_const($path);
             $get_error_log = $InitializeConfig->get_error_log_const($path);
             /**
              * 判断是否存在配置
@@ -144,23 +180,18 @@ class Start
             if(!file_exists($path.'SetErrorOrLog.php')){
                 $InitializeConfig->set_config('SetErrorOrLog',$get_error_log,$path,$namespace);
             }
-            if(!file_exists($path_Deploy.'SetDeploy.php')){
-                $InitializeConfig->set_config('SetDeploy',$Deploy,$path_Deploy,$namespace);
-            }
             /**
              * 合并(只能合并一层)
              */
             $Config = array_merge($Config,$InitializeConfig->get_const($namespace.'\\SetConfig'));
             $dbtabase = array_merge($dbtabase,$InitializeConfig->get_const($namespace.'\\SetDbtabase'));
             $get_error_log = array_merge($get_error_log,$InitializeConfig->get_const($namespace.'\\SetErrorOrLog'));
-            $Deploy = array_merge($Deploy,$InitializeConfig->get_const($namespace.'\\SetDeploy'));
             /**
              * 写入
              */
             $InitializeConfig->set_config('Config',$Config,$path);
             $InitializeConfig->set_config('Dbtabase',$dbtabase,$path);
             $InitializeConfig->set_config('ErrorOrLog',$get_error_log,$path);
-            $InitializeConfig->set_config('Deploy',$Deploy,$deployPath);
 
         }else{
             /**
@@ -195,17 +226,7 @@ class Start
                  */
                 $InitializeConfig->set_config('ErrorOrLog',$dbtabase,$path);
             }
-            if(!file_exists($path.'Deploy.php')){
 
-                $InitializeConfig = new InitializeConfig();
-                $dbtabase = $InitializeConfig->get_deploy_const();
-
-                $dbtabase = array_merge($dbtabase,$InitializeConfig->get_const($namespace.'\\SetDeploy'));
-                /**
-                 * 合并
-                 */
-                $InitializeConfig->set_config('Deploy',$dbtabase,$deployPath);
-            }
         }
     }
 
@@ -223,11 +244,11 @@ class Start
         /**
          * 传统模式
          */
-        if($pattern == 'ORIGINAL'){
+        if(__RUN_PATTERN__ == 'ORIGINAL'){
             $path='..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.__APP__.DIRECTORY_SEPARATOR;
             $namespace = 'config\\'.__APP__;
             $this->getInitDefine($path,$namespace,$deployPath);
-        }else if($pattern == 'SAAS'){
+        }else if(__RUN_PATTERN__ == 'SAAS'){
             if(empty($path)){
                 throw new \Exception('SAAS配置路径必须',500);
             }
@@ -265,11 +286,7 @@ class Start
         require ($path.'Config.php');
         require($path.'Dbtabase.php');
         require($path.'ErrorOrLog.php');
-        /**
-         * 经过考虑，这个项目在saas模式下任何一个租户都使用一个配置文件，部署配置文件由deploay流程自动化生成。
-         * 读取配置文件的路径暂时确定为项目标识项目标识定义在index入口文件
-         */
-        require('..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'Deploy.php');
+
         /**
          * 获取配置到define;
          */
