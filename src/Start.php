@@ -126,12 +126,12 @@ class Start
             $InitializeConfig = new InitializeConfig();
             $Deploy = $InitializeConfig->get_deploy_const();
             if(!file_exists($deployPath.'SetDeploy.php')){
-                $InitializeConfig->set_config('SetDeploy',$Deploy,$deployPath,$namespace);
+                $InitializeConfig->set_config('SetDeploy',$Deploy,$deployPath,'config\\SetDeploy');
             }
             /**
              * 写入
              */
-            $Deploy = array_merge($Deploy,$InitializeConfig->get_const($namespace.'\\SetDeploy'));
+            $Deploy = array_merge($Deploy,$InitializeConfig->get_const('config\\SetDeploy'));
             $InitializeConfig->set_config('Deploy',$Deploy,$deployPath);
         }
         /**
@@ -250,7 +250,7 @@ class Start
             $this->getInitDefine($path,$namespace,$deployPath);
         }else if(__RUN_PATTERN__ == 'SAAS'){
             if(empty($path)){
-                throw new \Exception('SAAS配置路径必须',500);
+                throw new \Exception('SAAS配置路径必须',10003);
             }
             /**
              * 自定义路径
