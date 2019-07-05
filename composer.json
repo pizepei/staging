@@ -16,6 +16,7 @@
         "pizepei/func": "dev-master",
         "pizepei/service": "dev-master",
         "pizepei/deploy": "dev-master",
+        "guzzlehttp/guzzle": "~6.0",
         "monolog/monolog": "^1.23"
     },
     "autoload": {
