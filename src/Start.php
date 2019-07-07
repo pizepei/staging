@@ -8,6 +8,7 @@
  */
 namespace pizepei\staging;
 use pizepei\config\InitializeConfig;
+use pizepei\deploy\LocalDeployServic;
 use pizepei\staging\MyException;
 use pizepei\staging\Route;
 use pizepei\staging\Request;
@@ -150,42 +151,18 @@ class Start
             /**
              * 远程配置中心获取
              */
-        }else if(\Deploy::toLoadConfig == 'Local'){
-            /**
-             * 本地获取
-             */
-        }
-
-        /**
-         * 判断是否是开发调试模式
-         * 调试模式
-         */
-        if(__EXPLOIT__){
-            /**
-             * 开发模式始终获取最新基础配置
-             */
-            $InitializeConfig = new InitializeConfig();
-            $Config = $InitializeConfig->get_config_const($path);
-            $dbtabase = $InitializeConfig->get_dbtabase_const($path);
-            $get_error_log = $InitializeConfig->get_error_log_const($path);
-            /**
-             * 判断是否存在配置
-             */
-            if(!file_exists($path.'SetConfig.php')){
-                $InitializeConfig->set_config('SetConfig',$Config,$path,$namespace);
-            }
-            if(!file_exists($path.'SetDbtabase.php')){
-                $InitializeConfig->set_config('SetDbtabase',$dbtabase,$path,$namespace);
-            }
-            if(!file_exists($path.'SetErrorOrLog.php')){
-                $InitializeConfig->set_config('SetErrorOrLog',$get_error_log,$path,$namespace);
-            }
-            /**
-             * 合并(只能合并一层)
-             */
-            $Config = array_merge($Config,$InitializeConfig->get_const($namespace.'\\SetConfig'));
-            $dbtabase = array_merge($dbtabase,$InitializeConfig->get_const($namespace.'\\SetDbtabase'));
-            $get_error_log = array_merge($get_error_log,$InitializeConfig->get_const($namespace.'\\SetErrorOrLog'));
+            $LocalDeployServic = new LocalDeployServic();
+            $data=[
+                'appid'=>\Deploy::INITIALIZE['appid'],//项目标识
+                'domain'=>$_SERVER['HTTP_HOST'],//当前域名
+                'time'=>time(),//
+            ];
+            $data['ProcurementType'] = 'Config';//获取类型   Config.php  Dbtabase.php  ErrorOrLogConfig.php
+            $Config = $LocalDeployServic->getConfigCenter($data);
+            $data['ProcurementType'] = 'Dbtabase';//获取类型   Config.php  Dbtabase.php  ErrorOrLogConfig.php
+            $dbtabase = $LocalDeployServic->getConfigCenter($data);
+            $data['ProcurementType'] = 'ErrorOrLogConfig';//获取类型   Config.php  Dbtabase.php  ErrorOrLogConfig.php
+            $get_error_log = $LocalDeployServic->getConfigCenter($data);
             /**
              * 写入
              */
@@ -193,41 +170,87 @@ class Start
             $InitializeConfig->set_config('Dbtabase',$dbtabase,$path);
             $InitializeConfig->set_config('ErrorOrLog',$get_error_log,$path);
 
-        }else{
+        }else if(\Deploy::toLoadConfig == 'Local'){
             /**
-             * 判断是否存在配置
+             * 本地获取
              */
-            if(!file_exists($path.'Config.php')){
-                $InitializeConfig = new InitializeConfig();
-                $Config = $InitializeConfig->get_config_const();
-                $Config = array_merge($Config,$InitializeConfig->get_const($namespace.'\\SetConfig'));
+            /**
+             * 判断是否是开发调试模式
+             * 调试模式
+             */
+            if(__EXPLOIT__){
                 /**
-                 * 合并
+                 * 开发模式始终获取最新基础配置
+                 */
+                $InitializeConfig = new InitializeConfig();
+                $Config = $InitializeConfig->get_config_const($path);
+                $dbtabase = $InitializeConfig->get_dbtabase_const($path);
+                $get_error_log = $InitializeConfig->get_error_log_const($path);
+                /**
+                 * 判断是否存在配置
+                 */
+                if(!file_exists($path.'SetConfig.php')){
+                    $InitializeConfig->set_config('SetConfig',$Config,$path,$namespace);
+                }
+                if(!file_exists($path.'SetDbtabase.php')){
+                    $InitializeConfig->set_config('SetDbtabase',$dbtabase,$path,$namespace);
+                }
+                if(!file_exists($path.'SetErrorOrLog.php')){
+                    $InitializeConfig->set_config('SetErrorOrLog',$get_error_log,$path,$namespace);
+                }
+                /**
+                 * 合并(只能合并一层)
+                 */
+                $Config = array_merge($Config,$InitializeConfig->get_const($namespace.'\\SetConfig'));
+                $dbtabase = array_merge($dbtabase,$InitializeConfig->get_const($namespace.'\\SetDbtabase'));
+                $get_error_log = array_merge($get_error_log,$InitializeConfig->get_const($namespace.'\\SetErrorOrLog'));
+                /**
+                 * 写入
                  */
                 $InitializeConfig->set_config('Config',$Config,$path);
-            }
-            if(!file_exists($path.'Dbtabase.php')){
-                $InitializeConfig = new InitializeConfig();
-                $dbtabase = $InitializeConfig->get_dbtabase_const();
-                $dbtabase = array_merge($dbtabase,$InitializeConfig->get_const($namespace.'\\SetDbtabase'));
-                /**
-                 * 合并
-                 */
                 $InitializeConfig->set_config('Dbtabase',$dbtabase,$path);
-            }
-            if(!file_exists($path.'ErrorOrLog.php')){
+                $InitializeConfig->set_config('ErrorOrLog',$get_error_log,$path);
 
-                $InitializeConfig = new InitializeConfig();
-                $dbtabase = $InitializeConfig->get_error_log_const();
-
-                $dbtabase = array_merge($dbtabase,$InitializeConfig->get_const($namespace.'\\SetErrorOrLog'));
+            }else{
                 /**
-                 * 合并
+                 * 判断是否存在配置
                  */
-                $InitializeConfig->set_config('ErrorOrLog',$dbtabase,$path);
+                if(!file_exists($path.'Config.php')){
+                    $InitializeConfig = new InitializeConfig();
+                    $Config = $InitializeConfig->get_config_const();
+                    $Config = array_merge($Config,$InitializeConfig->get_const($namespace.'\\SetConfig'));
+                    /**
+                     * 合并
+                     */
+                    $InitializeConfig->set_config('Config',$Config,$path);
+                }
+                if(!file_exists($path.'Dbtabase.php')){
+                    $InitializeConfig = new InitializeConfig();
+                    $dbtabase = $InitializeConfig->get_dbtabase_const();
+                    $dbtabase = array_merge($dbtabase,$InitializeConfig->get_const($namespace.'\\SetDbtabase'));
+                    /**
+                     * 合并
+                     */
+                    $InitializeConfig->set_config('Dbtabase',$dbtabase,$path);
+                }
+                if(!file_exists($path.'ErrorOrLog.php')){
+
+                    $InitializeConfig = new InitializeConfig();
+                    $dbtabase = $InitializeConfig->get_error_log_const();
+
+                    $dbtabase = array_merge($dbtabase,$InitializeConfig->get_const($namespace.'\\SetErrorOrLog'));
+                    /**
+                     * 合并
+                     */
+                    $InitializeConfig->set_config('ErrorOrLog',$dbtabase,$path);
+                }
+
             }
+
 
         }
+
+
     }
 
     /**

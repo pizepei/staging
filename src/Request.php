@@ -119,6 +119,17 @@ class Request
     {
         return $this->input($name,'post');
     }
+
+    /**
+     * 获取raw
+     * @param string $name
+     * @return null
+     * @throws \Exception
+     */
+    public function raw($name='')
+    {
+        return $this->input($name,'raw');
+    }
     /**
      * 获取非路径参数外的参数数据
      * @param string $name  ['get','key']  或者字符串key
@@ -196,8 +207,9 @@ class Request
                  * 在请求发送过程中会对数据进行序列化处理，以键值对形式？key1=value1&key2=value2的方式发送到服务器
                  */
                 parse_str(file_get_contents("php://input"),$this->RAW);
+            }else{
+                $this->RAW = json_decode(file_get_contents("php://input",'r'),true);
             }
-
         }else{
 
             if(!isset($_SERVER['HTTP_CONTENT_TYPE'])){
@@ -440,7 +452,7 @@ class Request
             /**
              * 进行数据类型转换 $data = null;isset($data);返回false
              */
-            if((isset($data[$key]) || $data[$key] === null) && $noteData['fieldRestrain'][0] !=='object' && $noteData['fieldRestrain'][0] !=='objectList')
+            if(isset($data[$key]) && $noteData['fieldRestrain'][0] !=='object' && $noteData['fieldRestrain'][0] !=='objectList' && $data[$key] === null)
             {
                 if(is_array($data[$key]))
                 {
