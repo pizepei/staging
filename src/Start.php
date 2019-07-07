@@ -148,27 +148,55 @@ class Start
          */
         if(\Deploy::toLoadConfig == 'ConfigCenter')
         {
-            /**
-             * 远程配置中心获取
-             */
-            $LocalDeployServic = new LocalDeployServic();
-            $data=[
-                'appid'=>\Deploy::INITIALIZE['appid'],//项目标识
-                'domain'=>$_SERVER['HTTP_HOST'],//当前域名
-                'time'=>time(),//
-            ];
-            $data['ProcurementType'] = 'Config';//获取类型   Config.php  Dbtabase.php  ErrorOrLogConfig.php
-            $Config = $LocalDeployServic->getConfigCenter($data);
-            $data['ProcurementType'] = 'Dbtabase';//获取类型   Config.php  Dbtabase.php  ErrorOrLogConfig.php
-            $dbtabase = $LocalDeployServic->getConfigCenter($data);
-            $data['ProcurementType'] = 'ErrorOrLogConfig';//获取类型   Config.php  Dbtabase.php  ErrorOrLogConfig.php
-            $get_error_log = $LocalDeployServic->getConfigCenter($data);
-            /**
-             * 写入
-             */
-            $InitializeConfig->set_config('Config',$Config,$path);
-            $InitializeConfig->set_config('Dbtabase',$dbtabase,$path);
-            $InitializeConfig->set_config('ErrorOrLog',$get_error_log,$path);
+
+            if(__EXPLOIT__){
+                /**
+                 * 远程配置中心获取
+                 */
+                $LocalDeployServic = new LocalDeployServic();
+                $data=[
+                    'appid'=>\Deploy::INITIALIZE['appid'],//项目标识
+                    'domain'=>$_SERVER['HTTP_HOST'],//当前域名
+                    'time'=>time(),//
+                ];
+                $data['ProcurementType'] = 'Config';//获取类型   Config.php  Dbtabase.php  ErrorOrLogConfig.php
+                $Config = $LocalDeployServic->getConfigCenter($data);
+                $data['ProcurementType'] = 'Dbtabase';//获取类型   Config.php  Dbtabase.php  ErrorOrLogConfig.php
+                $dbtabase = $LocalDeployServic->getConfigCenter($data);
+                $data['ProcurementType'] = 'ErrorOrLogConfig';//获取类型   Config.php  Dbtabase.php  ErrorOrLogConfig.php
+                $get_error_log = $LocalDeployServic->getConfigCenter($data);
+                /**
+                 * 写入
+                 */
+                $InitializeConfig->set_config('Config',$Config['config'],$path,'','基础配置文件',$Config['date'],$Config['time'],$Config['appid']);
+                $InitializeConfig->set_config('Dbtabase',$dbtabase['config'],$path,'','数据库配置文件',$dbtabase['date'],$dbtabase['time'],$dbtabase['appid']);
+                $InitializeConfig->set_config('ErrorOrLog',$get_error_log['config'],$path,'','错误日志配置文件',$get_error_log['date'],$get_error_log['time'],$get_error_log['appid']);
+            }else{
+                /**
+                 * 判断是否存在配置
+                 */
+                $LocalDeployServic = new LocalDeployServic();
+                $data=[
+                    'appid'=>\Deploy::INITIALIZE['appid'],//项目标识
+                    'domain'=>$_SERVER['HTTP_HOST'],//当前域名
+                    'time'=>time(),//
+                ];
+                if(!file_exists($path.'Config.php')){
+                    $data['ProcurementType'] = 'Config';//获取类型   Config.php  Dbtabase.php  ErrorOrLogConfig.php
+                    $Config = $LocalDeployServic->getConfigCenter($data);
+                    $InitializeConfig->set_config('Config',$Config['config'],$path,'','基础配置文件',$Config['date'],$Config['time'],$Config['appid']);
+                }
+                if(!file_exists($path.'Dbtabase.php')){
+                    $data['ProcurementType'] = 'Dbtabase';//获取类型   Config.php  Dbtabase.php  ErrorOrLogConfig.php
+                    $dbtabase = $LocalDeployServic->getConfigCenter($data);
+                    $InitializeConfig->set_config('Dbtabase',$dbtabase['config'],$path,'','数据库配置文件',$dbtabase['date'],$dbtabase['time'],$dbtabase['appid']);
+                }
+                if(!file_exists($path.'ErrorOrLog.php')){
+                    $data['ProcurementType'] = 'ErrorOrLogConfig';//获取类型   Config.php  Dbtabase.php  ErrorOrLogConfig.php
+                    $get_error_log = $LocalDeployServic->getConfigCenter($data);
+                    $InitializeConfig->set_config('ErrorOrLog',$get_error_log['config'],$path,'','错误日志配置文件',$get_error_log['date'],$get_error_log['time'],$get_error_log['appid']);
+                }
+            }
 
         }else if(\Deploy::toLoadConfig == 'Local'){
             /**
@@ -244,13 +272,8 @@ class Start
                      */
                     $InitializeConfig->set_config('ErrorOrLog',$dbtabase,$path);
                 }
-
             }
-
-
         }
-
-
     }
 
     /**
