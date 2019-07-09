@@ -687,6 +687,7 @@ class Request
         'png'=>['Content-Type'=>'image/png'],
         'html'=>['Content-Type'=>'text/html; charset=UTF-8'],
         'json'=>['Content-Type'=>'application/json;charset=UTF-8'],
+        'gif'=>['Content-Type'=>'image/gif'],
     ];
 
 }

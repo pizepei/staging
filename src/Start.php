@@ -436,11 +436,15 @@ class Start
             case 'html':
                 $result = $this->returnHtml($data,$debug);
                 break;
+            case 'gif':
 
+                break;
             default:
-                $result = $this->returnJson($data,$debug);
+                echo $result = $this->returnJson($data,$debug);
         }
-        echo $result??'';
+        if (isset($result)){
+            echo $result??'';
+        }
     }
 
     /**
