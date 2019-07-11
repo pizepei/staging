@@ -371,7 +371,7 @@ class Route
                 /**
                  *判断空参数
                  */
-                if(empty($PathData[$i])){
+                if(empty($PathData[$i]) && $PathData[$i] !=='0'){
                     throw new \Exception($k.'缺少参数');
                 }
                 /**
