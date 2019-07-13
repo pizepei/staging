@@ -194,7 +194,7 @@ class Request
         /**
          * 判断是否定义数据类型
          */
-        if(isset($this->Route->atRouteData['Param']['raw']['fieldRestrain'][0])){
+        if(isset($this->Route->atRouteData['Param']['raw']['fieldRestrain'][0]) && $_SERVER['HTTP_CONTENT_TYPE'] !== 'application/xml'){
 
             if($this->Route->atRouteData['Param']['raw']['fieldRestrain'][0] == 'xml'){
                 $this->RAW = $this->xmlToArray(file_get_contents("php://input",'r'));
@@ -573,7 +573,7 @@ class Request
      * @return array    转换得到的数组
      */
      public function xmlToArray($xml,$isfile=false){
-        //禁止引用外部xml实体
+         //禁止引用外部xml实体
         libxml_disable_entity_loader(true);
         if($isfile){
             if(!file_exists($xml)) return false;
