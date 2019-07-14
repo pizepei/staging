@@ -431,7 +431,7 @@ class Start
                 $result = $this->returnJson($data,$debug);
                 break;
             case 'xml':
-                echo "xml";
+
                 break;
             case 'html':
                 $result = $this->returnHtml($data,$debug);

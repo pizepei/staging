@@ -230,7 +230,7 @@ class Request
             /**
              * xml
              */
-            if($_SERVER['HTTP_CONTENT_TYPE'] == 'application/xml'){
+            if($_SERVER['HTTP_CONTENT_TYPE'] == 'application/xml' || $_SERVER['HTTP_CONTENT_TYPE'] == 'text/xml'){
                 $this->RAW = $this->xmlToArray(file_get_contents("php://input",'r'));
             }
             /**
@@ -688,6 +688,8 @@ class Request
         'html'=>['Content-Type'=>'text/html; charset=UTF-8'],
         'json'=>['Content-Type'=>'application/json;charset=UTF-8'],
         'gif'=>['Content-Type'=>'image/gif'],
+        'xml'=>['Content-Type'=>'text/xml'],
+
     ];
 
 }
