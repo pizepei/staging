@@ -51,7 +51,7 @@ class Request
         /**
          * 生成请求id
          */
-        $this->RequestId = Helper::int()->getUuid(true,45,__INIT__['uuid_identifier']);
+        $this->RequestId = Helper::init()->getUuid(true,45,__INIT__['uuid_identifier']);
 
         /**
          * 释放内存
