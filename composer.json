@@ -13,7 +13,6 @@
         "php": ">=7.0.0",
         "pizepei/config-ng": "dev-master",
         "pizepei/model": "dev-master",
-        "pizepei/func": "dev-master",
         "pizepei/helper": "dev-master",
         "pizepei/service": "dev-master",
         "pizepei/deploy": "dev-master",
