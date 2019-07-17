@@ -11,6 +11,7 @@ namespace pizepei\staging;
 
 
 use pizepei\func\Func;
+use pizepei\helper\Helper;
 
 class Request
 {
@@ -50,7 +51,7 @@ class Request
         /**
          * 生成请求id
          */
-        $this->RequestId = Func::M('str')::getUuid(true,45,__INIT__['uuid_identifier']);
+        $this->RequestId = Helper::int()->getUuid(true,45,__INIT__['uuid_identifier']);
 
         /**
          * 释放内存

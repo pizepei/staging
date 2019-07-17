@@ -13,6 +13,7 @@ namespace pizepei\staging;
 use pizepei\func\Func;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
+use pizepei\helper\Helper;
 
 class MyException
 {
@@ -50,7 +51,8 @@ class MyException
     public function error_handler($errno, $errstr, $errfile, $errline)
     {
         header("Content-Type:application/json;charset=UTF-8");
-        $str_rand = Func::M('str')::str_rand(20);
+
+        $str_rand = Helper::str()->str_rand(20);
         /**
          * 判断是否是开发模式
          */
@@ -212,7 +214,8 @@ class MyException
      */
     protected function setCodeCipher()
     {
-        $str_rand = Func::M('str')::str_rand(20);
+
+        $str_rand = Helper::str()->str_rand(20);
         /**
          * 判断是否是权限和登录
          */
