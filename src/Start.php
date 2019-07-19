@@ -331,9 +331,10 @@ class Start
         /**
          * 包含配置
          */
-        require ($path.'Config.php');
-        require($path.'Dbtabase.php');
-        require($path.'ErrorOrLog.php');
+        include_once ($path.'Config.php');
+        include_once($path.'Dbtabase.php');
+        include_once($path.'ErrorOrLog.php');
+        include_once ('..'.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'pizepei'.DIRECTORY_SEPARATOR.'helper'.DIRECTORY_SEPARATOR.'src'.DIRECTORY_SEPARATOR. 'function.php');
 
         /**
          * 获取配置到define;
