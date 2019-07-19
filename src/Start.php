@@ -6,6 +6,8 @@
  * Time: 15:47
  * @title 脚手架启动文件
  */
+declare(strict_types=1);
+
 namespace pizepei\staging;
 use pizepei\config\InitializeConfig;
 use pizepei\deploy\LocalDeployServic;

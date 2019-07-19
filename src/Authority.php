@@ -6,6 +6,7 @@
  * Time: 16:24
  * @title 权限控制基础类 
  */
+declare(strict_types=1);
 
 namespace pizepei\staging;
 

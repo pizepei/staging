@@ -6,6 +6,7 @@
  * Time: 9:37
  * @title 请求类
  */
+declare(strict_types=1);
 
 namespace pizepei\staging;
 

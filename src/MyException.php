@@ -175,8 +175,8 @@ class MyException
         $Route = Route::init();
         return [
             'route'=>[
-                'controller'=>$Route->controller.'->'.$Route->method,
-                'router'=>$Route->atRoute,
+//                'controller'=>$Route->controller.'->'.$Route->method,
+//                'router'=>$Route->atRoute,
             ],
             'sql'=>isset($GLOBALS['DBTABASE']['sqlLog'])?$GLOBALS['DBTABASE']['sqlLog']:'',
             'File'=>str_replace(getcwd(), "", $this->exception->getFile()).'['.$this->exception->getLine().']',

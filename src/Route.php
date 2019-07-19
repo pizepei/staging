@@ -6,6 +6,8 @@
  * Time: 16:06
  * @title 路由
  */
+declare(strict_types=1);
+
 namespace pizepei\staging;
 use pizepei\model\cache\Cache;
 

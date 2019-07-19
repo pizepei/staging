@@ -6,6 +6,8 @@
  * Time: 17:48
  * @title 控制器基类
  */
+declare(strict_types=1);
+
 namespace pizepei\staging;
 class Controller
 {
