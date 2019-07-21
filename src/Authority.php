@@ -50,14 +50,19 @@ class Authority
     protected $Payload = [];
 
     protected $parameter = '';
-
+    /**
+     * @var App|null
+     */
+    protected $app = null;
     /**
      * Authority constructor.
-     *
      * @param $pattern jwt模式
+     * @param App $app
      */
-    public function __construct($pattern)
+    public function __construct($pattern,App $app)
     {
+        $this->app = $app;
+
         /**
          * jwt模式
          */
@@ -108,7 +113,7 @@ class Authority
      */
     public function jurisdictionTidy(array $data)
     {
-        $Route = Route::init();
+        $Route = $this->app->Route();
         $Route->authTag;
 
         if(!isset($data[$Route->authTag])){

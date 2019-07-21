@@ -36,12 +36,20 @@ class Request
      * @var null
      */
     protected  $RequestId = null;
+    /**
+     * 应用容器
+     * @var App|null
+     */
+    protected $app = null;
 
     /**
-     * 获取到所以的请求
+     * Request constructor.
+     * @param App $app
+     * @throws \Exception
      */
-    protected function __construct()
+    public function __construct(App $app)
     {
+        $this->app = $app;
         $this->GET = $_GET;
         unset($this->GET['s']);
 //        $this->COOKIE = $_COOKIE;
@@ -52,7 +60,7 @@ class Request
         /**
          * 生成请求id
          */
-        $this->RequestId = Helper::init()->getUuid(true,45,__INIT__['uuid_identifier']);
+        $this->RequestId = Helper::init()->getUuid(true,45,$app->__INIT__['uuid_identifier']);
 
         /**
          * 释放内存
@@ -60,7 +68,7 @@ class Request
         /**
          * 判断模式exploit调试模式不释放$_POST、$_GET内存
          */
-        if(__INIT__['pattern'] != 'exploit'){
+        if($app->__INIT__['pattern'] != 'exploit'){
             $_POST = null;
             //$_GET = null;
             //$_COOKIE = null;
@@ -80,7 +88,7 @@ class Request
      */
     protected function initRoute(){
         if($this->Route == null){
-            $this->Route = Route::init();
+            $this->Route = $this->app->Route();
         }
     }
 
@@ -323,12 +331,12 @@ class Request
             /**
              * 判断类型
              */
-            if(in_array($v['fieldRestrain'][0],$this->Route::RequestParamDataType)  ){
+            if(in_array($v['fieldRestrain'][0],($this->app->Route())::RequestParamDataType)  ){
                 /**
                  * 参数过滤（约束）
                  */
                 $this->eturnSubjoin($data,$k,$v,$type);
-            }else if((in_array($v['fieldRestrain'][0],$this->Route::ReturnFormat) && $type =='objectList') ){
+            }else if((in_array($v['fieldRestrain'][0],$this->app->Route()::ReturnFormat) && $type =='objectList') ){
                 if($v['fieldRestrain'][0] == 'object'){
                     /**
                      * 参数过滤（约束）
@@ -343,7 +351,7 @@ class Request
                     //没有限制
                 }
 
-            }else if(in_array($v['fieldRestrain'][0],$this->Route::ReturnFormat)){
+            }else if(in_array($v['fieldRestrain'][0],$this->app->Route()::ReturnFormat)){
                 /**
                  * 数据格式 一般情况是数组
                  */
@@ -400,7 +408,7 @@ class Request
                     if($noteData['fieldRestrain'][0] == 'objectList'){
 
                         foreach($noteData['substratum'] as $kkk=>&$vvv){
-                                if(in_array($vvv['fieldRestrain'][0],$this->Route::ReturnFormat)){
+                                if(in_array($vvv['fieldRestrain'][0],$this->app->Route()::ReturnFormat)){
                                     /**
                                      *
                                      */
@@ -673,7 +681,7 @@ class Request
      */
     public function setHeader($header)
     {
-        if(__PATTERN__ === 'WEB'){
+        if($this->app->__PATTERN__ === 'WEB'){
             foreach ($header as $k=>$v){
                 @header("{$k}: {$v}");
             }

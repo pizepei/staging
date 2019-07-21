@@ -23,12 +23,20 @@ class MyException
      */
     //private $exception = null;
     /**
+     * 应用容器
+     * @var App|null
+     */
+    protected $app = null;
+
+
+    /**
      * MyException constructor.
      * @param string $path
      * @param string $exception
      * @param array  $info
      */
-    public function __construct(string $path,$exception=null,array$info=[]) {
+    public function __construct(string $path,$exception=null,array$info=[],App $app) {
+        $this->app  =$app;
         $this->path = $path;
         $this->info = $info;
 
@@ -57,18 +65,18 @@ class MyException
          * 判断是否是开发模式
          */
         $result = [
-            __INIT__['ErrorReturnJsonCode']['name']=>50000,
+            $this->app->__INIT__['ErrorReturnJsonCode']['name']=>50000,
         ];
-        if(__EXPLOIT__){
-            $Route = Route::init();
+        if($this->app->__EXPLOIT__){
+            $this->app->Route($this->app);
             /**
              * 开发模式
              */
-            $result[__INIT__['ErrorReturnJsonMsg']['name']] = $errstr.'['.$errno.']';
-            $result[__INIT__['ReturnJsonData']] = [
+            $result[$this->app->__INIT__['ErrorReturnJsonMsg']['name']] = $errstr.'['.$errno.']';
+            $result[$this->app->__INIT__['ReturnJsonData']] = [
                 'route'=>[
-                    'controller'=>$Route->controller.'->'.$Route->method,
-                    'router'=>$Route->atRoute,
+                    'controller'=>$this->app->Route()->controller.'->'.$this->app->Route()->method,
+                    'router'=>$this->app->Route()->atRoute,
                 ],
                 'File'=>str_replace(getcwd(), "", $errfile).'['.$errline.']',
             ];
@@ -77,7 +85,7 @@ class MyException
             /**
              * 生产模式
              */
-            $result[ __INIT__['ErrorReturnJsonMsg']['name']] = '系统繁忙['.$str_rand.']';
+            $result[ $this->app->__INIT__['ErrorReturnJsonMsg']['name']] = '系统繁忙['.$str_rand.']';
         }
         $result['error'] = $str_rand;
         $this->createLog($result);
@@ -100,7 +108,7 @@ class MyException
         /**
          * 判断是否是开发模式
          */
-        if(__EXPLOIT__){
+        if($this->app->__EXPLOIT__){
             /**
              * 开发模式
              */
@@ -157,9 +165,9 @@ class MyException
     private  function resultData($msg,$code,$data=[])
     {
         $result =  [
-            __INIT__['ErrorReturnJsonMsg']['name']=>$msg,
-            __INIT__['ErrorReturnJsonCode']['name']=>$code,
-            __INIT__['ReturnJsonData']=>$data,
+            $this->app->__INIT__['ErrorReturnJsonMsg']['name']=>$msg,
+            $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$code,
+            $this->app->__INIT__['ReturnJsonData']=>$data,
         ];
         return $result;
     }
@@ -171,12 +179,11 @@ class MyException
      */
     private function exploitData()
     {
-
-        $Route = Route::init();
+        
         return [
             'route'=>[
-//                'controller'=>$Route->controller.'->'.$Route->method,
-//                'router'=>$Route->atRoute,
+                'controller'=>$this->app->Route()->controller.'->'.$this->app->Route()->method,
+                'router'=>$this->app->Route()->atRoute,
             ],
             'sql'=>isset($GLOBALS['DBTABASE']['sqlLog'])?$GLOBALS['DBTABASE']['sqlLog']:'',
             'File'=>str_replace(getcwd(), "", $this->exception->getFile()).'['.$this->exception->getLine().']',
@@ -221,8 +228,8 @@ class MyException
          */
         if(\ErrorOrLog::NOT_LOGGOD_IN_CODE == $this->exception->getCode()   || \ErrorOrLog::JURISDICTION_CODE == $this->exception->getCode() ){
             $result =  [
-                __INIT__['ErrorReturnJsonMsg']['name']=>$this->exception->getMessage(),
-                __INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
+                $this->app->__INIT__['ErrorReturnJsonMsg']['name']=>$this->exception->getMessage(),
+                $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
                 'error'=>$str_rand,
             ];
         }
@@ -230,14 +237,14 @@ class MyException
         if($this->info){
             if(isset($this->info[$this->exception->getCode()])){
                 $result =  [
-                    __INIT__['ErrorReturnJsonMsg']['name']=>$this->info[$this->exception->getCode()][0].'['.$str_rand.']',
-                    __INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
+                    $this->app->__INIT__['ErrorReturnJsonMsg']['name']=>$this->info[$this->exception->getCode()][0].'['.$str_rand.']',
+                    $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
                     'error'=>$str_rand,
                 ];
             }else{
                 $result =  [
-                    __INIT__['ErrorReturnJsonMsg']['name']=>'系统繁忙['.$str_rand.']',
-                    __INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
+                    $this->app->__INIT__['ErrorReturnJsonMsg']['name']=>'系统繁忙['.$str_rand.']',
+                    $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
                 ];
             }
             $result['error'] = $str_rand;
@@ -250,8 +257,8 @@ class MyException
         if($this->exception->getCode() === 0)
         {
             $result =  [
-                __INIT__['ErrorReturnJsonMsg']['name']=>'系统繁忙['.$str_rand.']',
-                __INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
+                $this->app->__INIT__['ErrorReturnJsonMsg']['name']=>'系统繁忙['.$str_rand.']',
+                $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
                 'error'=>$str_rand,
             ];
         }
@@ -271,11 +278,11 @@ class MyException
                     if(isset(\ErrorOrLog::SYSTEM_CODE[$this->exception->getCode()]))
                     {
                         $result =  [
-                            __INIT__['ErrorReturnJsonMsg']['name']=>
+                            $this->app->__INIT__['ErrorReturnJsonMsg']['name']=>
                                 is_int(\ErrorOrLog::SYSTEM_CODE[$this->exception->getCode()][0])?
                                     \ErrorOrLog::HINT_MSG[\ErrorOrLog::SYSTEM_CODE[$this->exception->getCode()][0]]:
                                     \ErrorOrLog::SYSTEM_CODE[$this->exception->getCode()][0].'['.$str_rand.']',
-                            __INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
+                            $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
                             'error'=>$str_rand,
                         ];
                     }
@@ -285,11 +292,11 @@ class MyException
                     if(isset(\ErrorOrLog::USE_CODE[$this->exception->getCode()]))
                     {
                         $result =  [
-                            __INIT__['ErrorReturnJsonMsg']['name']=>
+                            $this->app->__INIT__['ErrorReturnJsonMsg']['name']=>
                                 is_int(\ErrorOrLog::USE_CODE[$this->exception->getCode()][0])?
                                     \ErrorOrLog::HINT_MSG[\ErrorOrLog::USE_CODE[$this->exception->getCode()][0]].'['.$str_rand.']':
                                     \ErrorOrLog::USE_CODE[$this->exception->getCode()][0].'['.$str_rand.']',
-                            __INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
+                            $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
                             'error'=>$str_rand,
                         ];
                     }

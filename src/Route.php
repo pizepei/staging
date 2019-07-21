@@ -171,16 +171,24 @@ class Route
      *
      */
 
+
+
+    /**
+     * @var App|null
+     */
+    protected $app = null;
+    
     /**
      *构造方法
      */
-    protected function __construct()
+    public function __construct(App $app)
     {
+        $this->app = $app;
         /**
          * 合并ReturnSubjoin
          */
-        $this->ReturnSubjoin= array_merge($this->ReturnSubjoin,__ROUTE__['ReturnSubjoin']);
-        $s = isset($_GET['s'])?$_GET['s']:'/'.__ROUTE__['index'];//默认路由
+        $this->ReturnSubjoin= array_merge($this->ReturnSubjoin,$this->app->__ROUTE__['ReturnSubjoin']);
+        $s = isset($_GET['s'])?$_GET['s']:'/'.$this->app->__ROUTE__['index'];//默认路由
 
         $this->atRoute = $s;
         //var_dump($s);
@@ -189,14 +197,14 @@ class Route
         /**
          * 获取到__EXPLOIT__
          */
-        if(__ROUTE__['expanded'] != ''){
+        if($this->app->__ROUTE__['expanded'] != ''){
             $sstr = strrchr($s,'.');
 
-            if($sstr != __ROUTE__['expanded'] ){
+            if($sstr !=$this->app-> __ROUTE__['expanded'] ){
                 /**
                  * 如果路由没有expanded
                  */
-                 $s = '/'.__ROUTE__['expanded'];
+                 $s = '/'.$this->app->__ROUTE__['expanded'];
             }
         }
         /**
@@ -217,10 +225,10 @@ class Route
          * 判断文件类型
          */
 
-        if( __ROUTE__['type']== 'note'){
+        if($this->app-> __ROUTE__['type']== 'note'){
             $this->annotation();
             //$this->noteRoute();
-        }else if( __ROUTE__['type']== 'file'){
+        }else if( $this->app->__ROUTE__['type']== 'file'){
             /**
              * 获取路由
              */
@@ -426,19 +434,19 @@ class Route
          * 避免在控制器中有输出导致Cannot modify header information - headers already sent by错误
          * 在控制器实例化前设置头部
          */
-        $Request = Request::init();
-        $Request->setHeader($Request::Header[$this->ReturnType]);
+
+        $this->app->Request()->setHeader($this->app->Request()::Header[$this->ReturnType]);
         /**
          * 实例化控制器
          */
-        $controller = new $RouteData['Namespace'];
+        $controller = new $RouteData['Namespace']($this->app);
 
         if(empty($RouteData['function']['Param']) && empty($RouteData['ParamObject'])){
             return $controller->$function();
         }else{
 
-            $Request->PATH = $PathArray??[];
-            return $controller->$function($Request);
+            $this->app->Request()->PATH = $PathArray??[];
+            return $controller->$function($this->app->Request());
         }
 
     }
@@ -468,7 +476,7 @@ class Route
         /**
          * 判断应用模式
          */
-        if(__INIT__['pattern'] == 'exploit'){
+        if($this->app->__INIT__['pattern'] == 'exploit'){
             /**
              * 开发模式
              * 获取文件路径
@@ -1257,16 +1265,14 @@ class Route
     /**
      * 启动请求转移（实例化控制器）
      */
-    protected function begin()
+    public function begin()
     {
 
         /**
          * 判断文件类型
          */
-        if( __ROUTE__['type']== 'note'){
+        if( $this->app->__ROUTE__['type']== 'note'){
             return $this->noteRoute();
-
-
 
         }else if( __ROUTE__['type']== 'file'){
             /**

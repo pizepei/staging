@@ -12,15 +12,22 @@ namespace pizepei\staging;
 class Controller
 {
     /**
-     * Controller constructor.
+     * 应用容器
+     * @var App|null
      */
-    public function __construct()
+    protected $app = null;
+    /**
+     * Controller constructor.
+     * @param App $app
+     */
+    public function __construct(App $app)
     {
+        $this->app = $app;
         /**
          * 权限类
          */
         //路由
-        $Route = Route::init();
+        $Route = $this->app->Route();
         /**
          * 判断是否有设置权限控制器
          */
