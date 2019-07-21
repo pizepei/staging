@@ -18,6 +18,7 @@
         "pizepei/deploy": "dev-master",
         "guzzlehttp/guzzle": "~6.0",
         "pizepei/random-information": "dev-master",
+        "pizepei/container": "dev-master",
         "monolog/monolog": "^1.23"
     },
     "autoload": {
