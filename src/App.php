@@ -393,11 +393,10 @@ class App extends Container
     public function start($pattern = 'WEB')
     {
         if($this->__PATTERN__ === 'CLI'){
+            # 命令行模式
+
             $getopt = getopt('',self::GETOPT);
             $this->__CLI__SQL_LOG__ = $getopt['sqllog']??'false';
-            /**
-             * 命令行模式
-             */
             $_SERVER['HTTP_HOST']       = 'localhost';
             $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
             $_SERVER['REQUEST_METHOD']  = 'CLI';
@@ -411,23 +410,14 @@ class App extends Container
         }else{
             $this->__CLI__SQL_LOG__ = $getopt['sqllog']??'false';
         }
-        /**
-         * 请求类
-         */
-        /**
-         * 路由类
-         */
-        $this->Route($this);
-        $this->Request($this);
-        $this->__REQUEST_ID__ = $this->Request()->RequestId;#初始化配置设置请求id
 
-        /**
-         * 全局响应配置
-         */
+        $this->Route($this);    #路由类
+        $this->Request($this);  #请求类
+        $this->__REQUEST_ID__ = $this->Request()->RequestId;    #获取请求类初始化设置的请求id
+
+        # 全局响应配置 ：设置 Header
         $this->Request()->setHeader($this->__INIT__['header']);
-        /**
-         * 控制器return
-         */
+        #控制器return  ：实例化控制器
         $this->output($this->Route()->begin());
     }
     /**
