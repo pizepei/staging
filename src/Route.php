@@ -9,6 +9,7 @@
 declare(strict_types=1);
 
 namespace pizepei\staging;
+use pizepei\helper\Helper;
 use pizepei\model\cache\Cache;
 
 
@@ -188,12 +189,12 @@ class Route
          * 合并ReturnSubjoin
          */
         $this->ReturnSubjoin= array_merge($this->ReturnSubjoin,$this->app->__ROUTE__['ReturnSubjoin']);
-        $s = isset($_GET['s'])?$_GET['s']:'/'.$this->app->__ROUTE__['index'];//默认路由
 
-        $this->atRoute = $s;
-        //var_dump($s);
-        unset($_GET['s']);
-
+        if ($_SERVER['PATH_INFO'] == ''){
+            $this->atRoute = isset($_GET['s'])?$_GET['s']:'/'.$this->app->__ROUTE__['index'];//默认路由
+        }else{
+            $this->atRoute = $_SERVER['PATH_INFO'];
+        }
         /**
          * 获取到__EXPLOIT__
          */

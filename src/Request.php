@@ -50,8 +50,11 @@ class Request
     public function __construct(App $app)
     {
         $this->app = $app;
-        $this->GET = $_GET;
-        unset($this->GET['s']);
+        if (Helper::init()->is_empty($_SERVER['PATH_INFO'])){
+            $this->GET = $_GET;
+            unset($this->GET['s']);
+        }
+
 //        $this->COOKIE = $_COOKIE;
         $this->POST = $_POST;
         $this->PATH = [];
