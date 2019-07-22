@@ -386,8 +386,7 @@ class App extends Container
     /**
      * @Author pizepei
      * @Created 2019/6/12 21:57
-     * @param string $pattern
-     * @throws \Exception
+     * @param string $pattern  CLI
      * @title  开始web模式驱动
      * @explain 一般是方法功能说明、逻辑说明、注意事项等。
      */
