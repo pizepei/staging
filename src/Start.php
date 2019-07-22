@@ -99,14 +99,7 @@ class Start
 
 
     }
-    /**
-     * 基本初始化
-     */
-    protected function init()
-    {
 
-
-    }
 
     /**
      * @Author pizepei

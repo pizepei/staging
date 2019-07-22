@@ -33,9 +33,9 @@ class Controller
          */
         if(isset($Route->baseAuth[0]) && isset($Route->baseAuth[1]) && $Route->baseAuth[1] !='public')
         {
-            $className = 'authority\\'.__APP__.'\\controller\\'.$Route->baseAuth[0];
+            $className = 'authority\\'.$this->app->__APP__.'\\controller\\'.$Route->baseAuth[0];
             $functionName = $Route->baseAuth[1];
-            $class = new $className('common');
+            $class = new $className('common',$this->app);
             $authResult = $class->init($Route->baseAuth[1]);
             $this->authExtend = $class->authExtend;
             $this->Payload = $class->Payload;
@@ -83,7 +83,7 @@ class Controller
         }else{
 
         }
-        $file = file_get_contents(__TEMPLATE__.$name.'.'.$type);
+        $file = file_get_contents($this->app->__TEMPLATE__.$name.'.'.$type);
         if(empty($data))
         {
             foreach($data as $key=>$vuleu)
@@ -110,17 +110,17 @@ class Controller
      * @return array
      * @title  控制器成功返回
      */
-    public function succeed($data,$msg=__INIT__['SuccessReturnJsonMsg']['value'],$code=__INIT__['SuccessReturnJsonCode']['value'],$count=0)
+    public function succeed($data,$msg='',$code='',$count=0)
     {
         $result =  [
-            __INIT__['SuccessReturnJsonMsg']['name']=>$msg,
-            __INIT__['SuccessReturnJsonCode']['name']=>$code,
-            __INIT__['ReturnJsonData']=>$data,
+            $this->app->__INIT__['SuccessReturnJsonMsg']['name']=>$msg==''?$this->app->__INIT__['SuccessReturnJsonMsg']['value']:$msg,
+            $this->app->__INIT__['SuccessReturnJsonCode']['name']=>$code==''?$this->app->__INIT__['SuccessReturnJsonCode']['value']:$code,
+            $this->app->__INIT__['ReturnJsonData']=>$data,
         ];
         if($count>0){
-            $result[__INIT__['ReturnJsonCount']] = $count;
+            $result[$this->app->__INIT__['ReturnJsonCount']] = $count;
         }else{
-            $result[__INIT__['ReturnJsonCount']] = is_array($data)?count($data):0;
+            $result[$this->app->__INIT__['ReturnJsonCount']] = is_array($data)?count($data):0;
         }
         return $result;
     }
@@ -135,12 +135,12 @@ class Controller
      * @return array
      * @title  控制器错误返回
      */
-    public function error($data,$msg=__INIT__['ErrorReturnJsonMsg']['value'],$code=__INIT__['ErrorReturnJsonCode']['value'])
+    public function error($data,$msg='',$code='')
     {
         $result =  [
-            __INIT__['ErrorReturnJsonMsg']['name']=>$msg,
-            __INIT__['ErrorReturnJsonCode']['name']=>$code,
-            __INIT__['ReturnJsonData']=>$data,
+            $this->app->__INIT__['ErrorReturnJsonMsg']['name']=>$msg==''?$this->app->__INIT__['ErrorReturnJsonMsg']['value']:$msg,
+            $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$code==''?$this->app->__INIT__['ErrorReturnJsonCode']['value']:$code,
+            $this->app->__INIT__['ReturnJsonData']=>$data,
         ];
         return $result;
     }

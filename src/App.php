@@ -1,12 +1,18 @@
 <?php
-
-
+/**
+ * Created by PhpStorm.
+ * User: pizepei
+ * Date: 2019/07/20
+ * Time: 16:30
+ * @title 框架容器类
+ */
 namespace pizepei\staging;
 
 
 use pizepei\config\InitializeConfig;
 use pizepei\container\Container;
 use pizepei\deploy\LocalDeployServic;
+use pizepei\helper\Helper;
 use pizepei\model\db\TableAlterLogModel;
 use pizepei\terminalInfo\TerminalInfo;
 
@@ -48,13 +54,25 @@ class App extends Container
      * @var null
      */
     private $__REQUEST_ID__ = null;
+
+    /**
+     * 系统初始化内存
+     * @var int
+     */
+    private $__INIT_MEMORY_GET_USAGE__ = 0;
+    /**
+     * 系统初始化时间
+     * @var float
+     */
+    private $__INIT_MICROTIME__ = 0;
     /**
      * 获取一个不能访问或者不存在的属性时
      * @param $name
      */
     public function __get($name)
     {
-        return $this->$name;
+
+        return $this->$name??null;
     }
     /**
      * 容器绑定标识
@@ -72,26 +90,32 @@ class App extends Container
      * Container constructor.
      * @param string $deployPath
      */
-    public function __construct(bool $exploit = false,$app_path='app',$pattern = 'ORIGINAL',$path='..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.__APP__.DIRECTORY_SEPARATOR,$deployPath='..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR)
+    public function __construct(bool $exploit = false,$app_path='app',$pattern = 'ORIGINAL',$path='',$deployPath='')
     {
-        $this->__EXPLOIT__ = $exploit;
-        /**
-         * 获取配置
-         * 判断环境
-         */
+        $this->__INIT_MEMORY_GET_USAGE__ = memory_get_usage()/1024; #系统初始化内存
+        $this->__INIT_MICROTIME__ = microtime(true);   #系统初始化时间
+
+        $this->__APP__ =  $app_path;    #应用路径
+        $this->__EXPLOIT__ = $exploit;  #是否开发调试模式
+
+        #关于配置：先读取deploy配置确定当前项目配置是从配置中心获取还是使用本地配置
+        #普通配置
+        if (empty($path)){$path='..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.$app_path.DIRECTORY_SEPARATOR;}
+        #项目级别配置
+        if (empty($deployPath)){$deployPath='..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR;}
+        if (Helper::init(false,$this)->is_empty($app_path)){
+            throw new \Exception('应用路径不能为空'.PHP_VERSION);
+        }
+        #获取配置、判断环境
         if(PHP_VERSION <= 7){
             throw new \Exception('PHP版本必须<=7,当前版本'.PHP_VERSION);
         }
         /**
          * 服务器版本php_uname('s').php_uname('r');
          */
-        /**
-         * 设置初始化配置
-         */
+        # 设置初始化配置
         $path = $this->setDefine($pattern,$path,$deployPath);
-        /**
-         * 判断是否为开发调试模式
-         */
+        # 判断是否为开发调试模式
         if($this->__EXPLOIT__){
             $this->MyException($path,null,[],$this);
         }else{
@@ -103,6 +127,7 @@ class App extends Container
             //error_reporting(0);
             //set_exception_handler(['MyException','production']);
         }
+        static::$instance = $this;
     }
 
     /**
@@ -289,8 +314,8 @@ class App extends Container
          * 传统模式
          */
         if($this->__RUN_PATTERN__ == 'ORIGINAL'){
-            $path='..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.__APP__.DIRECTORY_SEPARATOR;
-            $namespace = 'config\\'.__APP__;
+            $path='..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.$this->__APP__.DIRECTORY_SEPARATOR;
+            $namespace = 'config\\'.$this->__APP__;
             $this->getInitDefine($path,$namespace,$deployPath);
         }else if($this->__RUN_PATTERN__ == 'SAAS'){
             if(empty($path)){
@@ -299,8 +324,8 @@ class App extends Container
             /**
              * 自定义路径
              */
-            $path .= DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'].DIRECTORY_SEPARATOR.__APP__.DIRECTORY_SEPARATOR;
-            $namespace = 'config\\'.__APP__;
+            $path .= DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'].DIRECTORY_SEPARATOR.$this->__APP__.DIRECTORY_SEPARATOR;
+            $namespace = 'config\\'.$this->__APP__;
             $this->getInitDefine($path,$namespace,$deployPath);
         }
         /**
@@ -316,8 +341,8 @@ class App extends Container
         $this->__INIT__ = \Config::UNIVERSAL['init'];//初始化配置
         $this->__ROUTE__ = \Config::UNIVERSAL['route'];//路由配置
         $this->__DS__ = DIRECTORY_SEPARATOR;//系统路径符
-        $this->__APP__FILE__ = DIRECTORY_SEPARATOR;//应用的绝对目录
-        $this->__TEMPLATE__ = '..'.DIRECTORY_SEPARATOR.__APP__.DIRECTORY_SEPARATOR.'template'.DIRECTORY_SEPARATOR;//模板路径
+        $this->__APP__FILE__ = DIRECTORY_SEPARATOR;//应用的绝对目录（不知道干什么用的）
+        $this->__TEMPLATE__ = '..'.DIRECTORY_SEPARATOR.$this->__APP__.DIRECTORY_SEPARATOR.'template'.DIRECTORY_SEPARATOR;//模板路径
 
 //        define('__INIT__',\Config::UNIVERSAL['init']);//初始化配置
 //        define('__ROUTE__',\Config::UNIVERSAL['route']);//路由配置
@@ -348,7 +373,7 @@ class App extends Container
      * 初始化配置
      * @var array
      */
-    private $__INIT__ = null;
+    private $__INIT__ = [];
     /**
      * CLI 参数
      */
@@ -417,11 +442,9 @@ class App extends Container
      */
     protected function output($data)
     {
-
         /**
          * 获取调试debug数据
          */
-
         $debug = $this->Route()->atRouteData['RouterAdded']['debug']??false;
         //$pattern = isset($Route->routeArr[4])?$Route->routeArr[4]:false;
         //http://tool.oschina.net/commons/
@@ -481,7 +504,6 @@ class App extends Container
      */
     protected function returnJson($data,$debug)
     {
-
         if($data != null){
             if(is_array($data)){
                 /**
@@ -489,7 +511,7 @@ class App extends Container
                  * 不是
                  * 判断是否路由单独开启 调试模式
                  */
-                if( $this->__INIT__['pattern']=='exploit' || $debug==='true' ){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
+                if( $this->__EXPLOIT__ || $debug==='true' ){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
 
                 if(isset($data[$this->__INIT__['ReturnJsonData']]) && isset($data[$this->__INIT__['SuccessReturnJsonCode']['name']]) && isset($this->__INIT__['SuccessReturnJsonMsg']['name']))
                 {
@@ -502,7 +524,7 @@ class App extends Container
                 /**
                  * 控制器returnd 的是字符串
                  */
-                if( __INIT__['pattern']=='exploit' || $debug==='true'){
+                if( $this->__EXPLOIT__ || $debug==='true'){
                     echo json_encode(['data'=>$data,'SYSTEMSTATUS'=>$this->getSystemStatus()],JSON_UNESCAPED_UNICODE );
                 }else{
                     echo json_encode(['data'=>$data],JSON_UNESCAPED_UNICODE );
@@ -512,7 +534,7 @@ class App extends Container
             /**
              * 控制器没有return;
              */
-            if( __INIT__['pattern']=='exploit' || $debug==='true'){
+            if( $this->__EXPLOIT__ || $debug==='true'){
                 echo json_encode(['SYSTEMSTATUS'=>$this->getSystemStatus()],JSON_UNESCAPED_UNICODE );
             }
         }
@@ -522,12 +544,11 @@ class App extends Container
     /**
      * 获取系统状态
      */
-    protected function getSystemStatus()
+    protected function getSystemStatus():array
     {
         /**
          * 路由类
          */
-
         return $data =[
             'requestId'=>$this->__REQUEST_ID__,
             /**
@@ -561,15 +582,20 @@ class App extends Container
             /**
              * 系统状态
              */
-            '系统开始时的内存(K)'=>__INIT_MEMORY_GET_USAGE__,
+            '系统开始时的内存(K)'=>$this->__INIT_MEMORY_GET_USAGE__,
             '系统结束时的内存(KB)'=>round(memory_get_usage()/1024/1024,5),
             '系统内存峰值(KB)' =>round(memory_get_peak_usage()/1024/1024,5),
-            '执行耗时(S)' =>round(microtime(true)-__INIT_MICROTIME__,4),
+            '执行耗时(S)' =>round(microtime(true)-($this->__INIT_MICROTIME__),4),
 
         ];
 
 
-
     }
-
+    /**
+     * 基本初始化
+     */
+    public static function init()
+    {
+        return static::$instance;
+    }
 }

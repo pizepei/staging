@@ -263,7 +263,7 @@ class Route
              * 获取类命名空间
              */
             $this->controller = &$this->fileRouteData[$this->atRoute][0];
-            $this->atPath = '\\'.__APP__.'\\'.$this->controller;
+            $this->atPath = '\\'.$this->app->__APP__.'\\'.$this->controller;
             /**
              * 获取控制器方法
              */
@@ -481,7 +481,7 @@ class Route
              * 开发模式
              * 获取文件路径
              */
-            $this->getFilePathData(dirname(getcwd()).DIRECTORY_SEPARATOR.__APP__,$fileData);
+            $this->getFilePathData(dirname(getcwd()).DIRECTORY_SEPARATOR.$this->app->__APP__,$fileData);
             $this->filePathData = $fileData;
             /**
              * 分离获取所有注解块
@@ -505,7 +505,7 @@ class Route
                  * 生生产模式
                  * 获取文件路径
                  */
-                $this->getFilePathData(dirname(getcwd()).DIRECTORY_SEPARATOR.__APP__,$fileData);
+                $this->getFilePathData(dirname(getcwd()).DIRECTORY_SEPARATOR.$this->app->__APP__,$fileData);
                 $this->filePathData = $fileData;
                 /**
                  * 分离获取所有注解块
@@ -912,7 +912,7 @@ class Route
                         'PathParam' =>$PathParam??[],//路径参数（路由参数如user/:id  id就是路由参数）
                         'Param'=>$routeParamData??'',//路由参数（url上的或者post等）
                         'Return'=>$routeReturnData??[],//返回参数
-                        'ReturnType' => $routeReturnType??__INIT__['return'],//返回类型
+                        'ReturnType' => $routeReturnType??$this->app->__INIT__['return'],//返回类型
                         'function'=>$function,//控制器方法
                         'routeAuthGroup'=>$routeAuthGroup,//路由的权限分组
                         'routeAuthExtend'=>$routeAuthExtend,//权限扩展信息
@@ -952,7 +952,7 @@ class Route
                         'PathParam' =>$PathParam??[],//路径参数（路由参数如user/:id  id就是路由参数）
                         'Param'=>$routeParamData??'',//路由参数（url上的或者post等）
                         'Return'=>$routeReturnData??[],//返回参数
-                        'ReturnType' => $routeReturnType??__INIT__['return'],//返回类型
+                        'ReturnType' => $routeReturnType??$this->app->__INIT__['return'],//返回类型
                         'function'=>$function,//控制器方法
                     ];
                 }
@@ -1035,7 +1035,7 @@ class Route
     {
         if(empty($routeAuthGroup)){return [true];}
 
-        $Resource = 'authority\\'.__APP__.'\\Resource';
+        $Resource = 'authority\\'.$this->app->__APP__.'\\Resource';
 
         $reflect = new \ReflectionClass($Resource);
         $ConstData = $reflect->getConstants();

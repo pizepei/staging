@@ -61,7 +61,6 @@ class Request
          * 生成请求id
          */
         $this->RequestId = Helper::init()->getUuid(true,45,$app->__INIT__['uuid_identifier']);
-
         /**
          * 释放内存
          */
@@ -326,7 +325,7 @@ class Request
          * 对请求参数进行过滤（删除不在注解中的参数key）
          */
         //var_dump($noteData);
-        if(__INIT__['requestParam']){$this->unsetParam($data,$noteData,$type);}
+        if($this->app->__INIT__['requestParam']){$this->unsetParam($data,$noteData,$type);}
         foreach($noteData as $k=>$v){
             /**
              * 判断类型
@@ -624,7 +623,7 @@ class Request
                         /**
                          * 安全策略
                          */
-                        if($i > __INIT__['requestParamTier']){
+                        if($i > $this->app->__INIT__['requestParamTier']){
                             throw new \Exception('请求数据超过限制:xml层级超过限制');
                         }
                         /**
