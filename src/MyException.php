@@ -179,10 +179,10 @@ class MyException
      */
     private function exploitData()
     {
-        
+
         return [
             'route'=>[
-                'controller'=>$this->app->Route()->controller.'->'.$this->app->Route()->method,
+                'controller'=>($this->app->Route($this->app)->controller??'').'->'.($this->app->Route()->method??''),
                 'router'=>$this->app->Route()->atRoute,
             ],
             'sql'=>isset($GLOBALS['DBTABASE']['sqlLog'])?$GLOBALS['DBTABASE']['sqlLog']:'',

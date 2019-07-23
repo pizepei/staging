@@ -237,6 +237,18 @@ class Route
             $this->fileRoute();
         }
     }
+
+    public function __isset($name)
+    {
+        
+        if (isset($this->name)){
+            return true;
+        }
+        return null;
+        // TODO: Implement __isset() method.
+    }
+
+
     /**
      * 文件路由(以单独文件定义的路由)
      */
@@ -598,22 +610,17 @@ class Route
                 }
                 $function['name'] = $functionName[1];
                 $function['Param'] = $functionParam;
-                preg_match_all('/[^ ]+[A-Z-a-z_.:\/\]\[]+/s',$routerData[1],$routerData);
+                preg_match_all('/[^ ]+[A-Z-a-z_0-9.:\/\]\[]+/s',$routerData[1],$routerData);
 
                 if(!isset($routerData[0][1])){continue;}//不规范的路由
                 $routerData = $routerData[0];
                 $routerData[0] = strtoupper($routerData[0]);
-
-                /**
-                 * 判断请求类型
-                 */
-                //var_dump($routerData);
+                # 判断请求类型
                 if(!in_array($routerData[0],self::RequestType)){throw new \Exception('不规范的请求类型'.$baseNamespace.'->'.$routerData[0]);}
 
-                /**
-                 * 判断是否是独立路由
-                 */
+                # 判断是否是独立路由
                 if(strpos($routerData[1],'/') === 0){
+                    # 独立路由
                     $routerStr = '/'.ltrim($routerData[1],'/');
                 }else{
 
@@ -621,7 +628,6 @@ class Route
                     $routerStr = '/'.ltrim($basePath[1].$routerData[1],'/');
 
                 }
-
                 /**
                  * 设置附件路由配置
                  */
@@ -740,11 +746,7 @@ class Route
                     if(!$this->detectionAuthExtend($routeAuthExtend)){
                         throw new \Exception('AuthExtend illegality  ['.$baseErrorNamespace.']');
                     }
-
-
-                    /**
-                     * 处理权限
-                     */
+                    # 处理权限控制器
                     if(isset($routeBaseAuth[1]))
                     {
                         $routeBaseAuth = explode(':',$routeBaseAuth[1]);
@@ -752,7 +754,6 @@ class Route
                         $routeBaseAuth = [];
                     }
                     $routeBaseAuth[1] = $routeBaseAuth[1]??'';
-
                     /*** ***********切割请求参数[url 参数  post等参数 不包括路由参数] return***************/
                     $routeParam = $routeParam[1]??[];
 
@@ -760,12 +761,10 @@ class Route
                         preg_match('/(.*?)[\n\r]/s',$routeTitle[1],$routeTitle);//获取路由名称
                     }
                     /**
-                     * 获取依赖注入的 对象
+                     * 获取依赖注入的 对象 容器下主要是为了适配IDE
                      * 目前只支持Request对象（严格区分大小写）
                      */
                     if($routeParam != []){
-                        //var_dump($routeParam);
-
                         preg_match('/(.*?)[ ]{0,10}[\r\n]/s',$routeParam,$routeParamObject);//请求参数
                         $routeParamObject = $routeParamObject[1]??'';
                         if(empty($routeParamObject)){ throw new \Exception('设置了@param但是没有传入对象信息');}

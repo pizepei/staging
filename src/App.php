@@ -410,7 +410,6 @@ class App extends Container
         }else{
             $this->__CLI__SQL_LOG__ = $getopt['sqllog']??'false';
         }
-
         $this->Route($this);    #路由类
         $this->Request($this);  #请求类
         $this->__REQUEST_ID__ = $this->Request()->RequestId;    #获取请求类初始化设置的请求id
