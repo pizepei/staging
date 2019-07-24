@@ -582,7 +582,7 @@ class App extends Container
     /**
      * 基本初始化
      */
-    public static function init()
+    public static function init():self
     {
         return static::$instance;
     }
