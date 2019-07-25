@@ -391,7 +391,7 @@ class Start
         /**
          * 请求类
          */
-        $Request = Request::init();
+        $Request = $this->app->Request();
 
         define('__REQUEST_ID__',$Request->RequestId);//初始化配置设置请求id
 

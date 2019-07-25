@@ -50,8 +50,9 @@ class Request
     public function __construct(App $app)
     {
         $this->app = $app;
+        $this->GET = $_GET;
+
         if (Helper::init()->is_empty($_SERVER['PATH_INFO'])){
-            $this->GET = $_GET;
             unset($this->GET['s']);
         }
 
@@ -151,7 +152,6 @@ class Request
      */
     public function input($name = '',$type='get')
     {
-        $this->initRoute();
         /**
          * 判断参数
          */
@@ -159,6 +159,7 @@ class Request
             $type = $name[0];
             $name = $name[1];
         }
+
         if(!in_array($type,$this->inputType)){
             throw new \Exception('错误的类型：'.$type);
         }
@@ -174,8 +175,8 @@ class Request
                 $this->getRaw();
             }
 
-            if(isset($this->Route->atRouteData['Param']['raw']['fieldRestrain'][1])){
-                if(isset($this->Route->atRouteData['Param']['raw']['fieldRestrain'][1]) == 'raw'){
+            if(isset($this->app->Route()->atRouteData['Param']['raw']['fieldRestrain'][1])){
+                if(isset($this->app->Route()->atRouteData['Param']['raw']['fieldRestrain'][1]) == 'raw'){
                     /**
                      * 对数据不做处理
                      */
@@ -183,8 +184,6 @@ class Request
             }else{
                 $this->paramFiltration($this->$TypeS,$type);
             }
-
-
             /**
              * 处理完成修改状态
              */
@@ -206,14 +205,15 @@ class Request
         /**
          * 判断是否定义数据类型
          */
-        if(isset($this->Route->atRouteData['Param']['raw']['fieldRestrain'][0]) && $_SERVER['HTTP_CONTENT_TYPE'] !== 'application/xml'){
 
-            if($this->Route->atRouteData['Param']['raw']['fieldRestrain'][0] == 'xml'){
+        if(isset($this->app->Route()->atRouteData['Param']['raw']['fieldRestrain'][0]) && $_SERVER['HTTP_CONTENT_TYPE'] !== 'application/xml'){
+
+            if($this->app->Route()->atRouteData['Param']['raw']['fieldRestrain'][0] == 'xml'){
                 $this->RAW = $this->xmlToArray(file_get_contents("php://input",'r'));
 
-            }else if($this->Route->atRouteData['Param']['raw']['fieldRestrain'][0] == 'json'){
+            }else if($this->app->Route()->atRouteData['Param']['raw']['fieldRestrain'][0] == 'json'){
                 $this->RAW = json_decode(file_get_contents("php://input",'r'),true);
-            }else if($this->Route->atRouteData['Param']['raw']['fieldRestrain'][0] == 'url'){
+            }else if($this->app->Route()->atRouteData['Param']['raw']['fieldRestrain'][0] == 'url'){
                 /**
                  * application/x-www-form-urlencoded方式是Jquery的Ajax请求默认方式
                  * 在请求发送过程中会对数据进行序列化处理，以键值对形式？key1=value1&key2=value2的方式发送到服务器
@@ -263,15 +263,15 @@ class Request
      */
     protected function paramFiltration(&$data,$type)
     {
-        $this->initRoute();
-        if(!isset($this->Route->atRouteData['Param'])){
+        if(!isset($this->app->Route()->atRouteData['Param'])){
             $data = null;
             return false;
         }
-        if(!isset($this->Route->atRouteData['Param'][$type])){
+        if(!isset($this->app->Route()->atRouteData['Param'][$type])){
             return null;
         }
-        $Param = $this->Route->atRouteData['Param'][$type];
+
+        $Param = $this->app->Route()->atRouteData['Param'][$type];
         /**
          * 获取数据格式
          */
@@ -292,23 +292,19 @@ class Request
      */
     public function returnParamFiltration(&$data,$type='')
     {
-        $this->initRoute();
-        $this->Route->Return;
-        if (!isset($this->Route->Return['data'])){
+        if (!isset($this->app->Route()->Return['data'])){
             return null;
         }
-        if ($type ==''  && $this->Route->Return['data']['fieldRestrain'][0] =='raw')
+        if ($type ==''  && $this->app->Route()->Return['data']['fieldRestrain'][0] =='raw')
         {
             return $data;
         }
         //开始
-        $this->paramFiltrationRecursive($data,$this->Route->Return['data']['substratum'],$type==''?$this->Route->Return['data']['fieldRestrain'][0]:$type);
+        $this->paramFiltrationRecursive($data,$this->app->Route()->Return['data']['substratum'],$type==''?$this->app->Route()->Return['data']['fieldRestrain'][0]:$type);
         return $data;
     }
-
     /**
      * 递归函数处理数据类型转换
-     *
      * @param        $data
      * @param        $noteData
      * @param string $type
@@ -321,7 +317,7 @@ class Request
         /**
          * 安全策略
          */
-        if($iii > __INIT__['requestParamTier']){
+        if($iii > $this->app->__INIT__['requestParamTier']){
             throw new \Exception('请求数据超过限制:参数层级超过限制');
         }
         /**
@@ -442,12 +438,12 @@ class Request
                     
                     if(isset($vv[$key])) {settype($vv[$key],$fieldRestrain);}
                     foreach($noteData['fieldRestrain'] as $k=>$v){
-                        if(isset($this->Route->ReturnSubjoin[$v])){
+                        if(isset($this->app->Route()->ReturnSubjoin[$v])){
                             if(!isset($vv[$key]) || $vv[$key] ==''){
                                 throw new \Exception($noteData['fieldExplain'].'['.$key.']是必须的');
                             }
-                            if($this->Route->ReturnSubjoin[$v][1] != 'empty'){
-                                preg_match($this->Route->ReturnSubjoin[$v][1],$vv[$key],$result);
+                            if($this->app->Route()->ReturnSubjoin[$v][1] != 'empty'){
+                                preg_match($this->app->Route()->ReturnSubjoin[$v][1],$vv[$key],$result);
                                 if(empty($result) || $result ==null){
                                     throw new \Exception($noteData['fieldExplain'].'['.$key.']:'.'格式错误');
                                 }
@@ -475,12 +471,12 @@ class Request
             //}
             unset($noteData['fieldRestrain'][0]);
             foreach($noteData['fieldRestrain'] as $k=>$v){
-                if(isset($this->Route->ReturnSubjoin[$v])){
+                if(isset($this->app->Route()->ReturnSubjoin[$v])){
                     if(!isset($data[$key]) || $data[$key] ==''){
                         throw new \Exception($noteData['fieldExplain'].'['.$key.']是必须的');
                     }
-                    if($this->Route->ReturnSubjoin[$v][1] != 'empty'){
-                        preg_match($this->Route->ReturnSubjoin[$v][1],$data[$key],$result);
+                    if($this->app->Route()->ReturnSubjoin[$v][1] != 'empty'){
+                        preg_match($this->app->Route()->ReturnSubjoin[$v][1],$data[$key],$result);
                         if(empty($result) || $result ==null){
                             throw new \Exception($noteData['fieldExplain'].'['.$key.']:'.'格式错误');
                         }
@@ -548,7 +544,6 @@ class Request
                             }else if($noteData[$kk]['fieldRestrain'][0] != 'raw'){
                                 $this->unsetParam($vv,$noteData[$kk]['substratum'],$type);
                             }
-
                         }else{
                             if(!array_key_exists($kk,$noteData)){ unset($data[$pk][$kk]);}
                         }
@@ -557,19 +552,7 @@ class Request
             }
         }
     }
-    /**
-     * 初始化
-     */
-    public static  function init()
-    {
-        /**
-         * 判断是否已经有这个对象
-         */
-        if(!self::$object) {self::$object = new static();}
-        
-        return self::$object;
 
-    }
     /**
      * 重定向请求
      * @param $url
@@ -599,14 +582,12 @@ class Request
 
     /**
      * 数组转xml字符
-     *
      * @param        $data
      * @param string $name
      * @return bool|string
      * @throws \Exception
      */
     function arrayToXml($data,$name='xml'){
-
         if(!is_array($data) || count($data) <= 0){
             return false;
         }
@@ -623,15 +604,11 @@ class Request
             }else{
                 if(is_array($val)){
                     foreach($val as $k=>$v){
-                        /**
-                         * 安全策略
-                         */
+                        # 安全策略
                         if($i > $this->app->__INIT__['requestParamTier']){
                             throw new \Exception('请求数据超过限制:xml层级超过限制');
                         }
-                        /**
-                         * 策略数据
-                         */
+                        # 策略数据
                         if(is_array($v)){
                             $xml .=$this->arrayToXml($v,$key);
                         }else{
@@ -650,21 +627,16 @@ class Request
 
     /**
      * 设置产生url
-     *
      * @param $route    路由地址
      * @param $data     需要传递的参数
      * @return string
      */
     public function setUrl($route,$data =[])
     {
-        /**
-         * 判断是否有参数
-         */
+        # 判断是否有参数
         $para = '';
         if(!empty($data)){
-            /**
-             * 拼接
-             */
+            # 拼接
             foreach ($data as $k=>$v){
                 $para .= $k.'='.$v.'&';
             }

@@ -240,8 +240,8 @@ class Route
 
     public function __isset($name)
     {
-        
-        if (isset($this->name)){
+        if (isset($this->$name)){
+
             return true;
         }
         return null;
@@ -1266,27 +1266,6 @@ class Route
             }
         }
     }
-    /**
-     * 初始化
-     * @param bool $status
-     * @return null|static
-     */
-    public static  function init($status = false)
-    {
-        /**
-         * 判断是否已经有这个对象
-         *  var_dump($this->atRoute);
-         */
-        if(self::$object != null){
-            return self::$object;
-        }else{
-            self::$object = new static();
-        }
-        //var_dump(static::$object);
-        if($status == true){
-            return self::$object ->begin();
-        }
 
-    }
 
 }

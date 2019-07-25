@@ -19,11 +19,11 @@ use pizepei\terminalInfo\TerminalInfo;
 /**
  * Class App
  * @package pizepei\staging
- * @method  Authority Authority(string $pattern,App $app) 权限基础类
- * @method  Request Request(App $app) 请求类
- * @method  Controller Controller(App $app) 控制器类
+ * @method  Authority Authority(string $pattern,App $app  = App) 权限基础类
+ * @method  Request Request(App $app  = App) 请求类
+ * @method  Controller Controller(App $app  = App) 控制器类
  * @method  MyException MyException(string $path,$exception=null,array$info=[],App $app) 权限基础类
- * @method  Route Route(App $app) 路由类
+ * @method  Route Route(App $app = App) 路由类
  * @method  InitializeConfig InitializeConfig(App $app) 初始化配置类
  */
 class App extends Container
