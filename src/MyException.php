@@ -147,13 +147,11 @@ class MyException
 
     private function production($exception)
     {
-        echo json_encode($this->setCodeCipher(),JSON_UNESCAPED_UNICODE);
-
-        //exit(json_encode($this->setCodeCipher(),JSON_UNESCAPED_UNICODE));
+        echo json_encode($this->setCodeCipher(),\Config::UNIVERSAL['init']['json_encode']);
     }
     private function exploit($exception)
     {
-        exit(json_encode($this->resultData($this->exception->getMessage(),$this->exception->getCode(),$this->exploitData()),JSON_UNESCAPED_UNICODE));
+        echo(json_encode($this->resultData($this->exception->getMessage(),$this->exception->getCode(),$this->exploitData()),\Config::UNIVERSAL['init']['json_encode']));
     }
 
     /**
@@ -166,7 +164,7 @@ class MyException
     {
         $result =  [
             $this->app->__INIT__['ErrorReturnJsonMsg']['name']=>$msg,
-            $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$code,
+            $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$code==0?$this->app->__INIT__['ErrorReturnJsonCode']['value']:$this->exception->getCode(),
             $this->app->__INIT__['ReturnJsonData']=>$data,
         ];
         return $result;
@@ -238,13 +236,13 @@ class MyException
             if(isset($this->info[$this->exception->getCode()])){
                 $result =  [
                     $this->app->__INIT__['ErrorReturnJsonMsg']['name']=>$this->info[$this->exception->getCode()][0].'['.$str_rand.']',
-                    $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
+                    $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode()==0?$this->app->__INIT__['ErrorReturnJsonCode']['value']:$this->exception->getCode(),
                     'error'=>$str_rand,
                 ];
             }else{
                 $result =  [
                     $this->app->__INIT__['ErrorReturnJsonMsg']['name']=>'系统繁忙['.$str_rand.']',
-                    $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
+                    $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode()==0?$this->app->__INIT__['ErrorReturnJsonCode']['value']:$this->exception->getCode(),
                 ];
             }
             $result['error'] = $str_rand;
@@ -258,7 +256,7 @@ class MyException
         {
             $result =  [
                 $this->app->__INIT__['ErrorReturnJsonMsg']['name']=>'系统繁忙['.$str_rand.']',
-                $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
+                $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode()==0?$this->app->__INIT__['ErrorReturnJsonCode']['value']:$this->exception->getCode(),
                 'error'=>$str_rand,
             ];
         }

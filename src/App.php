@@ -507,15 +507,15 @@ class App extends Container
                 }else{
                     $this->Request()->returnParamFiltration($data);
                 }
-                echo json_encode($data,JSON_UNESCAPED_UNICODE );
+                echo json_encode($data,\Config::UNIVERSAL['init']['json_encode']);
             }else{
                 /**
                  * 控制器returnd 的是字符串
                  */
                 if( $this->__EXPLOIT__ || $debug==='true'){
-                    echo json_encode(['data'=>$data,'SYSTEMSTATUS'=>$this->getSystemStatus()],JSON_UNESCAPED_UNICODE );
+                    echo json_encode(['data'=>$data,'SYSTEMSTATUS'=>$this->getSystemStatus()],\Config::UNIVERSAL['init']['json_encode']);
                 }else{
-                    echo json_encode(['data'=>$data],JSON_UNESCAPED_UNICODE );
+                    echo json_encode(['data'=>$data],\Config::UNIVERSAL['init']['json_encode']);
                 }
             }
         }else{
@@ -523,7 +523,7 @@ class App extends Container
              * 控制器没有return;
              */
             if( $this->__EXPLOIT__ || $debug==='true'){
-                echo json_encode(['SYSTEMSTATUS'=>$this->getSystemStatus()],JSON_UNESCAPED_UNICODE );
+                echo json_encode(['SYSTEMSTATUS'=>$this->getSystemStatus()],\Config::UNIVERSAL['init']['json_encode'] );
             }
         }
     }

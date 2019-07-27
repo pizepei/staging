@@ -206,7 +206,7 @@ class Request
          * 判断是否定义数据类型
          */
 
-        if(isset($this->app->Route()->atRouteData['Param']['raw']['fieldRestrain'][0]) && $_SERVER['HTTP_CONTENT_TYPE'] !== 'application/xml'){
+        if(isset($this->app->Route()->atRouteData['Param']['raw']['fieldRestrain'][0]) && $_SERVER['HTTP_CONTENT_TYPE'] !== 'application/xml' && $_SERVER['HTTP_CONTENT_TYPE'] !== 'text/xml'){
 
             if($this->app->Route()->atRouteData['Param']['raw']['fieldRestrain'][0] == 'xml'){
                 $this->RAW = $this->xmlToArray(file_get_contents("php://input",true));
