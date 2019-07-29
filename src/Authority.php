@@ -104,7 +104,7 @@ class Authority
         // *方法路由：注册到不同操作权限资源里面用authGroup【admin.bbx:user.bbx】中文名字、注册扩展扩展authExtend  控制器：方法（方法里面有返回数据、）
         $AccountService = new AccountService();
         $Redis = Redis::init();
-        $this->Payload =  $AccountService->decodeLogonJwt($this->pattern,$_SERVER['HTTP_ACCESS_TOKEN'],$Redis);
+        $this->Payload =  $AccountService->decodeLogonJwt($this->pattern,$_SERVER['HTTP_ACCESS_TOKEN']??'',$Redis);
     }
     /**
      * 权限判断(使用数据缓存或者数据库的版本)
