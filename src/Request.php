@@ -174,7 +174,6 @@ class Request
             if($TypeS == 'RAW'){
                 $this->getRaw();
             }
-
             if(isset($this->app->Route()->atRouteData['Param']['raw']['fieldRestrain'][1])){
                 if(isset($this->app->Route()->atRouteData['Param']['raw']['fieldRestrain'][1]) == 'raw'){
                     /**
@@ -182,7 +181,8 @@ class Request
                      */
                 }
             }else{
-                $this->paramFiltration($this->$TypeS,$type);
+                $dataType = $type=='raw'?'rule':$type;
+                $this->paramFiltration($this->$TypeS,$dataType);
             }
             /**
              * 处理完成修改状态
@@ -268,9 +268,9 @@ class Request
             return false;
         }
         if(!isset($this->app->Route()->atRouteData['Param'][$type])){
+            $data = null;
             return null;
         }
-
         $Param = $this->app->Route()->atRouteData['Param'][$type];
         /**
          * 获取数据格式
