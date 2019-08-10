@@ -84,11 +84,12 @@ class Controller
 
         }
         $file = file_get_contents($this->app->__TEMPLATE__.$name.'.'.$type);
-        if(empty($data))
+        if(!empty($data))
         {
             foreach($data as $key=>$vuleu)
                 if(!is_array($vuleu)){
-                    $file = str_replace('{{'.$key.'}}',$vuleu,$file);
+                    $file = str_replace("'{{{$key}}}'",$vuleu,$file);
+                    $file = str_replace("{{{$key}}}",$vuleu,$file);
                 }
         }
         //require();
