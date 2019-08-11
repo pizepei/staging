@@ -477,8 +477,13 @@ class App extends Container
      * @return mixed
      * @title  返回html
      */
-    protected function returnHtml($data)
+    protected function returnHtml($data,$debug)
     {
+        # 如果依然是一个数组 就序列化为json
+        if (is_array($data)){
+            $this->Request()->setHeader($this->Request()::Header['json']);
+            return $this->returnJson($data,$debug);
+        }
         return $data;
     }
 
