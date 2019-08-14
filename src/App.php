@@ -14,6 +14,7 @@ use pizepei\container\Container;
 use pizepei\deploy\LocalDeployServic;
 use pizepei\helper\Helper;
 use pizepei\model\db\TableAlterLogModel;
+use pizepei\model\redis\Redis;
 use pizepei\terminalInfo\TerminalInfo;
 
 /**
@@ -433,7 +434,8 @@ class App extends Container
         /**
          * 获取调试debug数据
          */
-        $debug = $this->Route()->atRouteData['RouterAdded']['debug']??false;
+        $debug = $this->Route()->atRouteData['RouterAdded']['debug']??'default';
+
         //$pattern = isset($Route->routeArr[4])?$Route->routeArr[4]:false;
         //http://tool.oschina.net/commons/
         switch ($this->Route()->ReturnType) {
@@ -499,12 +501,8 @@ class App extends Container
     {
         if($data != null){
             if(is_array($data)){
-                /**
-                 * 判断是否是开发模式
-                 * 不是
-                 * 判断是否路由单独开启 调试模式
-                 */
-                if( $this->__EXPLOIT__ || $debug==='true' ){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
+                # 判断是否是开发模式 不是 判断是否路由单独开启 调试模式    如果是开发模式 路由单独关闭debug 也会关闭调试模式
+                if( ($this->__EXPLOIT__ || $debug ==='true') && $debug !=='false' ){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
 
                 if(isset($data[$this->__INIT__['ReturnJsonData']]) && isset($data[$this->__INIT__['SuccessReturnJsonCode']['name']]) && isset($this->__INIT__['SuccessReturnJsonMsg']['name']))
                 {
@@ -517,7 +515,7 @@ class App extends Container
                 /**
                  * 控制器returnd 的是字符串
                  */
-                if( $this->__EXPLOIT__ || $debug==='true'){
+                if( ($this->__EXPLOIT__ || $debug==='true') && $debug !=='false'){
                     echo json_encode(['data'=>$data,'SYSTEMSTATUS'=>$this->getSystemStatus()],\Config::UNIVERSAL['init']['json_encode']);
                 }else{
                     echo json_encode(['data'=>$data],\Config::UNIVERSAL['init']['json_encode']);
@@ -527,7 +525,7 @@ class App extends Container
             /**
              * 控制器没有return;
              */
-            if( $this->__EXPLOIT__ || $debug==='true'){
+            if(( $this->__EXPLOIT__ || $debug==='true') && $debug !=='false'){
                 echo json_encode(['SYSTEMSTATUS'=>$this->getSystemStatus()],\Config::UNIVERSAL['init']['json_encode'] );
             }
         }
@@ -535,54 +533,48 @@ class App extends Container
 
 
     /**
-     * 获取系统状态
+     * @Author 皮泽培
+     * @Created 2019/8/14 16:42
+     * @return array
+     * @title  获取系统状态
+     * @throws \Exception
      */
     protected function getSystemStatus():array
     {
-        /**
-         * 路由类
-         */
-        return $data =[
-            'requestId'=>$this->__REQUEST_ID__,
-            /**
-             * 路由控制器
-             */
-            'controller' => $this->Route()->controller,
-            /**
-             * 控制器方法
-             */
-            'function_method' => $this->Route()->method,
-            /**
-             * 请求方法 get post
-             */
-            'request_method' =>$_SERVER['REQUEST_METHOD'],
-            /**
-             * 完整路由（去除域名的url地址）
-             */
-            'request_url'=> $_SERVER['REQUEST_URI'],
-            /**
-             * 解释路由
-             */
-            'route' =>$this->Route()->atRoute,
-            /**
-             * 历史slq
-             */
-            'sql' =>isset($GLOBALS['DBTABASE']['sqlLog'])?$GLOBALS['DBTABASE']['sqlLog']:'',
-            /**
-             * ip信息
-             */
-            'clientInfo'=>$this->__INIT__['clientInfo']?terminalInfo::getArowserPro():terminalInfo::get_ip(),
-            /**
-             * 系统状态
-             */
-            '系统开始时的内存(K)'=>$this->__INIT_MEMORY_GET_USAGE__,
-            '系统结束时的内存(KB)'=>round(memory_get_usage()/1024/1024,5),
-            '系统内存峰值(KB)' =>round(memory_get_peak_usage()/1024/1024,5),
-            '执行耗时(S)' =>round(microtime(true)-($this->__INIT_MICROTIME__),4),
-
-        ];
-
-
+        $data['requestId'] = $this->__REQUEST_ID__;
+        if (in_array('controller',$this->__INIT__['SYSTEMSTATUS'])){
+            $data['controller'] = $this->Route()->controller;#路由控制器
+        }
+        if (in_array('function_method',$this->__INIT__['SYSTEMSTATUS'])){
+            $data['function_method'] = $this->Route()->method;#控制器方法
+        }
+        if (in_array('request_method',$this->__INIT__['SYSTEMSTATUS'])){
+            $data['request_method'] =$_SERVER['REQUEST_METHOD'];#请求方法 get post
+        }
+        if (in_array('request_url',$this->__INIT__['SYSTEMSTATUS'])){
+            $data['request_url'] = $_SERVER['REQUEST_URI'];#完整路由（去除域名的url地址）
+        }
+        if (in_array('route',$this->__INIT__['SYSTEMSTATUS'])){
+            $data['route'] = $this->Route()->atRoute;#解释路由
+        }
+        if (in_array('sql',$this->__INIT__['SYSTEMSTATUS'])){
+            $data['sql'] = isset($GLOBALS['DBTABASE']['sqlLog'])?$GLOBALS['DBTABASE']['sqlLog']:'';#历史slq
+        }
+        if (in_array('clientInfo',$this->__INIT__['SYSTEMSTATUS'])){ # clientInfo 客户端信息
+            if ($this->__INIT__['clientInfo']){
+                terminalInfo::$redis = Redis::init();
+                $data['clientInfo'] = terminalInfo::getInfo();
+            }else{
+                $data['clientInfo'] = terminalInfo::get_ip();
+            }
+        }
+        if (in_array('system',$this->__INIT__['SYSTEMSTATUS'])){ # 系统运行状态
+            $data ['Began to memory (K)'] = $this->__INIT_MEMORY_GET_USAGE__;#系统开始时的内存(K)
+            $data ['The end of the memory (KB)'] = round(memory_get_usage()/1024/1024,5);#系统结束时的内存(KB)
+            $data ['The peak of memory (KB)'] = round(memory_get_peak_usage()/1024/1024,5);#系统内存峰值(KB)
+            $data ['Perform time (S)'] = round(microtime(true)-($this->__INIT_MICROTIME__),4);#执行耗时(S)
+        }
+        return $data;
     }
     /**
      * 基本初始化
