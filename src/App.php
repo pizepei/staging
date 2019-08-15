@@ -150,15 +150,12 @@ class App extends Container
          * 判断本地目录是否有配置，没有初始化
          *      有根据配置确定获取基础配置的途径
          */
-        if(!file_exists($path.'Deploy.php')){
-
+        if(!file_exists($deployPath.'Deploy.php')){
             $Deploy = $this->InitializeConfig()->get_deploy_const();
             if(!file_exists($deployPath.'SetDeploy.php')){
                 $this->InitializeConfig()->set_config('SetDeploy',$Deploy,$deployPath,'config\\SetDeploy');
             }
-            /**
-             * 写入
-             */
+            # 合并写入
             $Deploy = array_merge($Deploy,$this->InitializeConfig()->get_const('config\\SetDeploy'));
             $this->InitializeConfig()->set_config('Deploy',$Deploy,$deployPath);
         }
@@ -168,16 +165,11 @@ class App extends Container
          */
         require($deployPath.'Deploy.php');
         $this->__EXPLOIT__ = \Deploy::__EXPLOIT__;//设置模式
-        /**
-         * 判断获取配置方式
-         */
+        # 判断获取配置方式
         if(\Deploy::toLoadConfig == 'ConfigCenter')
         {
-
             if($this->__EXPLOIT__){
-                /**
-                 * 远程配置中心获取
-                 */
+                # 远程配置中心获取
                 $LocalDeployServic = new LocalDeployServic();
                 $data=[
                     'appid'=>\Deploy::INITIALIZE['appid'],//项目标识
