@@ -185,9 +185,7 @@ class Route
     public function __construct(App $app)
     {
         $this->app = $app;
-        /**
-         * 合并ReturnSubjoin
-         */
+        # 合并ReturnSubjoin
         $this->ReturnSubjoin= array_merge($this->ReturnSubjoin,$this->app->__ROUTE__['ReturnSubjoin']);
 
         if ($_SERVER['PATH_INFO'] == ''){
@@ -221,62 +219,18 @@ class Route
          * s 为路由
          */
         $_SERVER['QUERY_STRING'];
-
-        /**
-         * 判断文件类型
-         */
-
-        if($this->app-> __ROUTE__['type']== 'note'){
-            $this->annotation();
+        # 生成 使用 注解路由
+        $this->annotation();
             //$this->noteRoute();
-        }else if( $this->app->__ROUTE__['type']== 'file'){
-            /**
-             * 获取路由
-             */
-            $this->getRouteConfig();
-            $this->fileRoute();
-        }
     }
-
     public function __isset($name)
     {
         if (isset($this->$name)){
-
             return true;
         }
         return null;
         // TODO: Implement __isset() method.
     }
-
-
-    /**
-     * 文件路由(以单独文件定义的路由)
-     */
-    protected function fileRoute()
-    {
-        /**
-         * 判断路由是否存在
-         */
-        $this->atRoute = str_replace(__ROUTE__['expanded'],'',$this->atRoute);
-        if(isset($this->fileRouteData[$this->atRoute])){
-            # 获取控制器权限数据
-            $this->routeArr = &$this->fileRouteData[$this->atRoute];
-            # 判断请求类型
-            if(strtoupper($this->fileRouteData[$this->atRoute][2]) != 'ALL'){
-                if(strtoupper($this->fileRouteData[$this->atRoute][2]) != $_SERVER['REQUEST_METHOD']) {
-                    throw new \Exception('不存在的请求');
-                }
-            }
-            # 获取类命名空间
-            $this->controller = &$this->fileRouteData[$this->atRoute][0];
-            $this->atPath = '\\'.$this->app->__APP__.'\\'.$this->controller;
-            # 获取控制器方法
-            $this->method = &$this->fileRouteData[$this->atRoute][1];
-        }else{
-            throw new \Exception('路由不存在',404);
-        }
-    }
-
     /**
      * @Author pizepei
      * @return mixed

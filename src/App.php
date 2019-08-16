@@ -98,11 +98,11 @@ class App extends Container
 
         $this->__APP__ =  $app_path;    #应用路径
         $this->__EXPLOIT__ = $exploit;  #是否开发调试模式
-
         #关于配置：先读取deploy配置确定当前项目配置是从配置中心获取还是使用本地配置
         #普通配置
         if (empty($path)){$path='..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.$app_path.DIRECTORY_SEPARATOR;}
         #项目级别配置
+
         if (empty($deployPath)){$deployPath='..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR;}
         if (Helper::init(false,$this)->is_empty($app_path)){
             throw new \Exception('应用路径不能为空'.PHP_VERSION);
@@ -111,11 +111,9 @@ class App extends Container
         if(PHP_VERSION <= 7){
             throw new \Exception('PHP版本必须<=7,当前版本'.PHP_VERSION);
         }
-        /**
-         * 服务器版本php_uname('s').php_uname('r');
-         */
-        # 设置初始化配置
+        # 设置初始化配置   服务器版本php_uname('s').php_uname('r');
         $path = $this->setDefine($pattern,$path,$deployPath);
+
         # 判断是否为开发调试模式
         if($this->__EXPLOIT__){
             $this->MyException($path,null,[],$this);
@@ -129,6 +127,7 @@ class App extends Container
             //set_exception_handler(['MyException','production']);
         }
         static::$instance = $this;
+
     }
 
     /**
@@ -406,7 +405,6 @@ class App extends Container
         $this->Route($this);    #路由类
         $this->Request($this);  #请求类
         $this->__REQUEST_ID__ = $this->Request()->RequestId;    #获取请求类初始化设置的请求id
-
         # 全局响应配置 ：设置 Header
         $this->Request()->setHeader($this->__INIT__['header']);
         #控制器return  ：实例化控制器
