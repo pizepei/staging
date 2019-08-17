@@ -240,42 +240,119 @@ class Route
      */
     protected function noteRoute()
     {
-        
-        # 获取路由信息 通过请求方式筛选   有正常的、还有PATH
-        $Rule = &$this->noteRouter[$_SERVER['REQUEST_METHOD']]['Rule'];//常规
-        $Path = &$this->noteRouter[$_SERVER['REQUEST_METHOD']]['Path'];//路径
-        # 开始使用常规路由快速匹配
-        if(isset($Rule[$this->atRoute])){
-            # 在常规路由中
-            $RouteData = &$Rule[$this->atRoute];
+//        var_dump(\RouteInfo::$_SERVER['REQUEST_METHOD']);
+        switch ($_SERVER['REQUEST_METHOD']){
+            case 'GET':
+                $RouteData = isset(\RouteInfo::GET['Rule'][$this->atRoute])?\RouteInfo::GET['Rule'][$this->atRoute]:\RouteInfo::GET['Path'];
+                break;
+            case 'POST':
+                $Rule = \RouteInfo::POST;
+                $RouteData = isset(\RouteInfo::POST['Rule'][$this->atRoute])?\RouteInfo::POST['Rule'][$this->atRoute]:\RouteInfo::POST['Path'];
+
+                break;
+            case 'PUT':
+                $Rule = \RouteInfo::PUT;
+                $RouteData = isset(\RouteInfo::PUT['Rule'][$this->atRoute])?\RouteInfo::PUT['Rule'][$this->atRoute]:\RouteInfo::PUT['Path'];
+                break;
+            case 'PATCH';
+                $Rule = \RouteInfo::PATCH;
+                $RouteData = isset(\RouteInfo::PATCH['Rule'][$this->atRoute])?\RouteInfo::PATCH['Rule'][$this->atRoute]:\RouteInfo::PATCH['Path'];
+                break;
+            case 'DELETE';
+                $Rule = \RouteInfo::DELETE;
+                $RouteData = isset(\RouteInfo::DELETE['Rule'][$this->atRoute])?\RouteInfo::DELETE['Rule'][$this->atRoute]:\RouteInfo::DELETE['Path'];
+
+                break;
+            case 'COPY';
+                $Rule = \RouteInfo::COPY;
+                $RouteData = isset(\RouteInfo::COPY['Rule'][$this->atRoute])?\RouteInfo::COPY['Rule'][$this->atRoute]:\RouteInfo::COPY['Path'];
+
+                break;
+            case 'HEAD';
+                $Rule = \RouteInfo::HEAD;
+                $RouteData = isset(\RouteInfo::HEAD['Rule'][$this->atRoute])?\RouteInfo::HEAD['Rule'][$this->atRoute]:\RouteInfo::HEAD['Path'];
+
+                break;
+            case 'OPTIONS';
+                $Rule = \RouteInfo::OPTIONS;
+                $RouteData = isset(\RouteInfo::OPTIONS['Rule'][$this->atRoute])?\RouteInfo::OPTIONS['Rule'][$this->atRoute]:\RouteInfo::OPTIONS['Path'];
+
+                break;
+            case 'LINK';
+                $Rule = \RouteInfo::LINK;
+                $RouteData = isset(\RouteInfo::LINK['Rule'][$this->atRoute])?\RouteInfo::LINK['Rule'][$this->atRoute]:\RouteInfo::LINK['Path'];
+
+                break;
+            case 'UNLINK';
+                $Rule = \RouteInfo::UNLINK;
+                $RouteData = isset(\RouteInfo::UNLINK['Rule'][$this->atRoute])?\RouteInfo::UNLINK['Rule'][$this->atRoute]:\RouteInfo::UNLINK['Path'];
+
+                break;
+            case 'PURGE';
+                $Rule = \RouteInfo::PURGE;
+                $RouteData = isset(\RouteInfo::PURGE['Rule'][$this->atRoute])?\RouteInfo::PURGE['Rule'][$this->atRoute]:\RouteInfo::PURGE['Path'];
+
+                break;
+            case 'LOCK';
+                $Rule = \RouteInfo::LOCK;
+                $RouteData = isset(\RouteInfo::LOCK['Rule'][$this->atRoute])?\RouteInfo::LOCK['Rule'][$this->atRoute]:\RouteInfo::LOCK['Path'];
+
+                break;
+            case 'UNLOCK';
+                $Rule = \RouteInfo::UNLOCK;
+                $RouteData = isset(\RouteInfo::UNLOCK['Rule'][$this->atRoute])?\RouteInfo::UNLOCK['Rule'][$this->atRoute]:\RouteInfo::UNLOCK['Path'];
+
+                break;
+            case 'PROPFIND';
+                $Rule = \RouteInfo::PROPFIND;
+                $RouteData = isset(\RouteInfo::PROPFIND['Rule'][$this->atRoute])?\RouteInfo::PROPFIND['Rule'][$this->atRoute]:\RouteInfo::PROPFIND['Path'];
+
+                break;
+            case 'VIEW';
+                $Rule = \RouteInfo::VIEW;
+                $RouteData = isset(\RouteInfo::VIEW['Rule'][$this->atRoute])?\RouteInfo::VIEW['Rule'][$this->atRoute]:\RouteInfo::VIEW['Path'];
+
+                break;
+            case 'CLI';
+                $Rule = \RouteInfo::CLI;
+                $RouteData = isset(\RouteInfo::CLI['Rule'][$this->atRoute])?\RouteInfo::CLI['Rule'][$this->atRoute]:\RouteInfo::CLI['Path'];
+
+                break;
+            case 'All';
+                $Rule = \RouteInfo::All;
+                $RouteData = isset(\RouteInfo::All['Rule'][$this->atRoute])?\RouteInfo::All['Rule'][$this->atRoute]:\RouteInfo::All['Path'];
+
+                break;
+            default:
+                $RouteData = [];
+        }
+        if (isset($RouteData['router']) && is_string($RouteData['router'])){
+            # 匹配到常规路由
         }else{
+            # 使用路径路由匹配模式
+            if(empty($RouteData)){ throw new \Exception('路由不存在'); }
             # 不在常规路由中 同时也没有模糊匹配（path中确定的部分简单匹配）
-            if(empty($Path)){ throw new \Exception('路由不存在'); }
             # 使用快捷匹配路由匹配
             $length = 0;
-            foreach ($Path as $k=>$v){
+            $PathNote = [];
+            foreach ($RouteData as $k=>$v){
                 # 通过长度进行匹配
                 if(strpos($this->atRoute,$v['PathNote']) === 0){
                     # 使用最佳匹配长度结果（匹配长度最长的）
                     if(strlen($v['PathNote']) > $length){
-                        $length = strlen($v['PathNote']);
-                        $PathNote[$length][$k] = $Path[$k];
+                        $length = strlen($v['PathNote']); # 重新定义长度
+                        $PathNote[$length][$k] = &$v;
                     }else if(strlen($v['PathNote']) == $length){
-                        $PathNote[$length][$k] = $Path[$k];
+                        $PathNote[$length][$k] = &$v;
                     }
                 }
             }
-
-            if(!isset($PathNote)){
+            if(empty($PathNote)){
                 //header("Status: 404 Not Found");
                 //header("HTTP/1.0 404 Not Found");
                 throw new \Exception('路由不存在',404);
             }
-            /**
-             * 判断匹配到的路由数量
-             * 使用正则表达式匹配并且获取参数
-             * $length为strlen()获取的匹配长度，使用匹配最才$length做路由匹配
-             */
+            # 判断匹配到的路由数量、使用正则表达式匹配并且获取参数、$length为strlen()获取的匹配长度，使用匹配最才$length做路由匹配
             if(count($PathNote[$length])>1){
                 /**
                  * 使用模糊匹配后仍然有多个路由
@@ -284,7 +361,6 @@ class Route
                  */
                 $PathNoteFor = $PathNote[$length];
                 foreach ($PathNoteFor as $pnK=>$pnV){
-
                     preg_match($pnV['MatchStr'],$this->atRoute,$PathDataFor);
                     /**
                      * 判断正则表达式获取的参数数量是否和配置一致
@@ -299,57 +375,37 @@ class Route
                         $RouteData = $pnV;
                     }
                 }
-
             }else{
-                /**
-                 * 只有一个
-                 */
-                $RouteData =$PathNote[$length];
-                $RouteData = current($RouteData);
-                preg_match($RouteData['MatchStr'],$this->atRoute,$PathData);
+                # 只有一个
+                $RouteData = current($PathNote[$length]);
+                preg_match($RouteData['MatchStr'],$this->atRoute,$PathData);# 使用正则表达式匹配
             }
 
-            /**
-             * 去除第一个数据
-             */
             array_shift($PathData);
-
             if( !isset($RouteData['PathParam']) || (count($RouteData['PathParam']) != count($PathData))){
-                /**
-                 * 严格匹配参数（如果对应的:name位置没有使用参数 或者为字符串空  认为是路由不存在 或者提示参数不存在）
-                 */
+                # 严格匹配参数（如果对应的:name位置没有使用参数 或者为字符串空  认为是路由不存在 或者提示参数不存在）
                 throw new \Exception(($RouteData['router']??'').':路由不存在');
             }
-            /**
-             * 对参数进行强制过滤（根据路由上的规则：name[int]）
-             */
+            # 对参数进行强制过滤（根据路由上的规则：name[int]）
             $i=0;
             foreach ($RouteData['PathParam'] as $k=>$v){
-                /**
-                 *判断空参数
-                 */
+                # 判断排除 空参数
                 if(empty($PathData[$i]) && $PathData[$i] !=='0'){
                     throw new \Exception($k.'缺少参数');
                 }
-                /**
-                 * 参数约束
-                 */
-                if(array_key_exists($v,$this->ReturnSubjoin)){
-                    //开始
+                # 参数约束  array_key_exists($v,$this->ReturnSubjoin)
+                if(isset($this->ReturnSubjoin[$v])){
+                    # 开始 匹配路径参数
                     preg_match($this->ReturnSubjoin[$v][1],$PathData[$i],$result);
-                    if(!isset($result[0]) && empty($result[0])){
-                        throw new \Exception($k.'非法的:'.$this->ReturnSubjoin[$v][0]);
-                    }
+                    if(!isset($result[0]) && empty($result[0])){throw new \Exception($k.'非法的:'.$this->ReturnSubjoin[$v][0]);}
                 }else if(in_array($v,self::RequestPathParamDataType)){
-                    if(!settype($PathData[$i],$v)){
-                        throw new \Exception($k.'参数约束失败:'.$v);
-                    }
+                    if(!settype($PathData[$i],$v)){throw new \Exception($k.'参数约束失败:'.$v);}
 
                 }else{
                     throw new \Exception($k.'非法的参数约束:'.$v);
                 }
                 $PathArray[$k] = $PathData[$i];
-                $i++;
+                ++$i;
             }
         }
         /**
@@ -358,23 +414,19 @@ class Route
         $function = $RouteData['function']['name'];
         $this->controller = &$RouteData['Namespace'];
         $this->method = &$RouteData['function']['name'];
-        $this->atRoute = &$RouteData['router'];//路由
-        $this->ReturnType = &$RouteData['ReturnType'];//路由请求类型
+        $this->atRoute = &$RouteData['router'];             #路由
+        $this->ReturnType = &$RouteData['ReturnType'];      #路由请求类型
 
-        $this->RouterAdded = &$RouteData['RouterAdded'];//附加配置
-        $this->atRouteData = &$RouteData;//路由
-        $this->baseAuth = &$RouteData['baseAuth']??[];//权限控制器
-        $this->authTag = &$RouteData['tag']??'';//路由标识
-
-        $this->baseAuth = &$RouteData['baseAuth']??[];//权限控制器
+        $this->RouterAdded = &$RouteData['RouterAdded'];    #附加配置
+        $this->atRouteData = &$RouteData;                   #路由
+        $this->baseAuth = &$RouteData['baseAuth']??[];      #权限控制器
+        $this->authTag = &$RouteData['tag']??'';            #路由标识
         $this->Return = &$RouteData['Return']??[];
         if(!empty($RouteData['routeBaseAuth'][0])){
             $this->baseAuth = &$RouteData['routeBaseAuth']??[];//权限控制器
         }
-        /**
-         * 避免在控制器中有输出导致Cannot modify header information - headers already sent by错误
-         * 因此在控制器实例化前设置头部
-         */
+
+        # 避免在控制器中有输出导致Cannot modify header information - headers already sent by错误=>因此在控制器实例化前设置头部
         $this->app->Request()->setHeader($this->app->Request()::Header[$this->ReturnType]);
         # 实例化控制器
         $controller = new $RouteData['Namespace']($this->app);
@@ -382,8 +434,7 @@ class Route
         if(empty($RouteData['function']['Param']) && empty($RouteData['ParamObject'])){
             return $controller->$function();
         }else{
-
-            $this->app->Request()->PATH = $PathArray??[];
+            $this->app->Request()->PATH = $PathArray??[]; # 设置匹配到的路径参数
             return $controller->$function($this->app->Request());
         }
 
@@ -418,37 +469,28 @@ class Route
      */
     public function annotation()
     {
+
         $fileData =array();
-        /**
-         * 判断应用模式
-         */
-        if($this->app->__INIT__['pattern'] == 'exploit'){#开发模式
+        # 判断应用模式  如果是开发模式  或者其中一个配置文件不存在 都会重新生成权限与路由配置文件
+        if($this->app->__EXPLOIT__ == 1 || !file_exists($this->app->__DEPLOY_CONFIG_PATH__.'Route.php') || !file_exists($this->app->__DEPLOY_CONFIG_PATH__.'Permissions.php')){
+
             # 获取应用目录下所有文件路径
             $this->getFilePathData(dirname(getcwd()).DIRECTORY_SEPARATOR.$this->app->__APP__,$fileData);
             $this->filePathData = $fileData;
             # 分离获取所有注解块
             $this->noteBlock();
-        }else{
-            # 获取路由缓存
-            $CacheData = Cache::get(['public','route'],'route');
-            $Permissions = Cache::get(['public','Permissions'],'Permissions');
-
-            if($CacheData && $Permissions){
-                # 如果缓存存在
-                $this->noteRouter = $CacheData;
-                $this->Permissions = $CacheData;
-
-            }else{
-                # 没有缓存 生产模式 获取文件路径
-                $this->getFilePathData(dirname(getcwd()).DIRECTORY_SEPARATOR.$this->app->__APP__,$fileData);
-                $this->filePathData = $fileData;
-                # 分离获取所有注解块
-                $this->noteBlock();
-                # 缓存路由
-                Cache::set(['public','route'],$this->noteRouter,0,'route');
-                Cache::set(['public','Permissions'],$this->Permissions,0,'Permissions');
-            }
+            # 设置Route   Permissions  类
+            $this->app->InitializeConfig()->set_config('RouteInfo',$this->noteRouter,$this->app->__DEPLOY_CONFIG_PATH__);
+            $this->app->InitializeConfig()->set_config('PermissionsInfo',$this->Permissions,$this->app->__DEPLOY_CONFIG_PATH__);
         }
+        # 包含配置
+        require ($this->app->__DEPLOY_CONFIG_PATH__.'RouteInfo.php');
+        require ($this->app->__DEPLOY_CONFIG_PATH__.'PermissionsInfo.php');
+
+//        $this->noteRouter = $CacheData;
+//        $this->Permissions = $CacheData;
+
+
     }
     /**
      * 获取所有注解块
@@ -1174,51 +1216,16 @@ class Route
             }
         }
     }
-    /**
-     * 处理一个注解块
-     */
+
     /**
      * 启动请求转移（实例化控制器）
+     * @return mixed
+     * @throws \Exception
      */
     public function begin()
     {
-
-        /**
-         * 判断文件类型
-         */
-        if( $this->app->__ROUTE__['type']== 'note'){
-            return $this->noteRoute();
-        }else if( __ROUTE__['type']== 'file'){
-            #实例化控制器
-            $atPath = &$this->atPath;
-            $new = new $this->atPath;
-            $method = &$this->method;
-            /**
-             * 控制器方法
-             */
-            return $new->$method();
-        }
-    }
-    /**
-     * 获取路由配置
-     */
-    protected function getRouteConfig()
-    {
-        /**
-         * 打开route目录
-         */
-        $file_dir = scandir( __ROUTE__['file_dir']);
-        foreach ($file_dir as $k =>$v){
-
-            if(!is_dir(__ROUTE__['file_dir'].__DS__.$v)){
-                /**
-                 * 合并【按文件字母升序排列】
-                 */
-                $this->fileRouteData = array_merge($this->fileRouteData,require(__ROUTE__['file_dir'].__DS__.$v));
-            }else{
-                //echo '目录'.$v;
-            }
-        }
+        # 处理路由 ->路由匹配路由->实例化控制器
+        return $this->noteRoute();
     }
 
 

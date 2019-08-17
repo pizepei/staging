@@ -55,17 +55,6 @@ class App extends Container
      * @var null
      */
     private $__REQUEST_ID__ = null;
-
-    /**
-     * 系统初始化内存
-     * @var int
-     */
-    private $__INIT_MEMORY_GET_USAGE__ = 0;
-    /**
-     * 系统初始化时间
-     * @var float
-     */
-    private $__INIT_MICROTIME__ = 0;
     /**
      * 获取一个不能访问或者不存在的属性时
      * @param $name
@@ -88,22 +77,52 @@ class App extends Container
         'InitializeConfig'      =>InitializeConfig::class
     ];
     /**
+     * 项目根目录  默认是上级目录层
+     * @var int|string
+     */
+    protected $DOCUMENT_ROOT = 1;
+    /**
+     * 应用配置
+     * @var string
+     */
+    protected $__CONFIG_PATH__ = '';
+    /**
+     * 项目级别的部署配置
+     * @var string
+     */
+    protected $__DEPLOY_CONFIG_PATH__ = '';
+    /**
+     * 应用目录名称
+     * @var string
+     */
+    protected $__APP__ = 'app';
+
+    protected $__USE_PATTERN__ = '';
+
+    /**
      * Container constructor.
      * @param string $deployPath
      */
     public function __construct(bool $exploit = false,$app_path='app',$pattern = 'ORIGINAL',$path='',$deployPath='')
     {
-        $this->__INIT_MEMORY_GET_USAGE__ = memory_get_usage()/1024; #系统初始化内存
-        $this->__INIT_MICROTIME__ = microtime(true);   #系统初始化时间
 
-        $this->__APP__ =  $app_path;    #应用路径
-        $this->__EXPLOIT__ = $exploit;  #是否开发调试模式
-        #关于配置：先读取deploy配置确定当前项目配置是从配置中心获取还是使用本地配置
-        #普通配置
-        if (empty($path)){$path='..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.$app_path.DIRECTORY_SEPARATOR;}
+        $this->DOCUMENT_ROOT = dirname($_SERVER['DOCUMENT_ROOT'],$this->DOCUMENT_ROOT).DIRECTORY_SEPARATOR;#定义项目根目录
+        $this->__APP__ =  $app_path;            #应用路径
+        $this->__EXPLOIT__ = $exploit;          #是否开发调试模式  (使用应用级别的因为在项目级别可能会地址SAAS模式下所有的租户都开启了调试模式)
+        $this->__USE_PATTERN__ = $pattern;      #应用模式 ORIGINAL       SAAS
+        #应用级别配置
+        $pathFof = '';
+        if ($this->__USE_PATTERN__ == 'SAAS'){
+            if (empty($path)){$pathFof = DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'];}
+        }
+        $this->__CONFIG_PATH__ = empty($path)?$this->DOCUMENT_ROOT.'config'.$pathFof.DIRECTORY_SEPARATOR.$this->__APP__.DIRECTORY_SEPARATOR:$path;
+
         #项目级别配置
-
-        if (empty($deployPath)){$deployPath='..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR;}
+        if (empty($deployPath)){
+            $this->__DEPLOY_CONFIG_PATH__ = $this->DOCUMENT_ROOT.'config'.DIRECTORY_SEPARATOR;
+        }else{
+            $this->__DEPLOY_CONFIG_PATH__ = $deployPath;
+        }
         if (Helper::init(false,$this)->is_empty($app_path)){
             throw new \Exception('应用路径不能为空'.PHP_VERSION);
         }
@@ -112,24 +131,19 @@ class App extends Container
             throw new \Exception('PHP版本必须<=7,当前版本'.PHP_VERSION);
         }
         # 设置初始化配置   服务器版本php_uname('s').php_uname('r');
-        $path = $this->setDefine($pattern,$path,$deployPath);
-
+        $path = $this->setDefine($pattern,$path,$deployPath); #关于配置：先读取deploy配置确定当前项目配置是从配置中心获取还是使用本地配置
         # 判断是否为开发调试模式
         if($this->__EXPLOIT__){
             $this->MyException($path,null,[],$this);
         }else{
-            /**
-             * 设置错误级别？
-             */
+            # 设置错误级别
             $this->MyException($path,null,[],$this);
             // 关闭所有PHP错误报告
             //error_reporting(0);
             //set_exception_handler(['MyException','production']);
         }
         static::$instance = $this;
-
     }
-
     /**
      * @Author pizepei
      * @Created 2019/6/12 21:58
@@ -142,8 +156,7 @@ class App extends Container
      */
     protected function getInitDefine($path,$namespace,$deployPath)
     {
-        $this->InitializeConfig($this);
-
+        $this->InitializeConfig($this); # 初始化配置类
         /**
          * 部署配置
          * 判断本地目录是否有配置，没有初始化
@@ -302,13 +315,10 @@ class App extends Container
     protected function setDefine($pattern = 'ORIGINAL',$path='',$deployPath='')
     {
         $this->__RUN_PATTERN__ = $pattern;//运行模式  SAAS    ORIGINAL
-        /**
-         * 传统模式
-         */
-        if($this->__RUN_PATTERN__ == 'ORIGINAL'){
-            $path='..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.$this->__APP__.DIRECTORY_SEPARATOR;
-            $namespace = 'config\\'.$this->__APP__;
-            $this->getInitDefine($path,$namespace,$deployPath);
+
+        $namespace = 'config\\'.$this->__APP__; # 命名空间
+        if($this->__RUN_PATTERN__ == 'ORIGINAL'){ # 传统模式
+            $this->getInitDefine($this->__CONFIG_PATH__,$namespace,$this->__DEPLOY_CONFIG_PATH__);
         }else if($this->__RUN_PATTERN__ == 'SAAS'){
             if(empty($path)){
                 throw new \Exception('SAAS配置路径必须',10003);
@@ -323,24 +333,17 @@ class App extends Container
         /**
          * 包含配置
          */
-        include_once ($path.'Config.php');
-        include_once($path.'Dbtabase.php');
-        include_once($path.'ErrorOrLog.php');
-        include_once ('..'.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'pizepei'.DIRECTORY_SEPARATOR.'helper'.DIRECTORY_SEPARATOR.'src'.DIRECTORY_SEPARATOR. 'function.php');
+        require ($this->__CONFIG_PATH__.'Config.php');
+        require($this->__CONFIG_PATH__.'Dbtabase.php');
+        require($this->__CONFIG_PATH__.'ErrorOrLog.php');
+        require ('..'.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'pizepei'.DIRECTORY_SEPARATOR.'helper'.DIRECTORY_SEPARATOR.'src'.DIRECTORY_SEPARATOR. 'function.php');
         /**
          * 获取配置到define;
          */
         $this->__INIT__ = \Config::UNIVERSAL['init'];//初始化配置
         $this->__ROUTE__ = \Config::UNIVERSAL['route'];//路由配置
         $this->__DS__ = DIRECTORY_SEPARATOR;//系统路径符
-        $this->__APP__FILE__ = DIRECTORY_SEPARATOR;//应用的绝对目录（不知道干什么用的）
-        $this->__TEMPLATE__ = '..'.DIRECTORY_SEPARATOR.$this->__APP__.DIRECTORY_SEPARATOR.'template'.DIRECTORY_SEPARATOR;//模板路径
-
-//        define('__INIT__',\Config::UNIVERSAL['init']);//初始化配置
-//        define('__ROUTE__',\Config::UNIVERSAL['route']);//路由配置
-//        define('__DS__',DIRECTORY_SEPARATOR);//路由配置
-//        define('__APP__FILE__',DIRECTORY_SEPARATOR);//应用的绝对目录
-//        define('__TEMPLATE__','..'.DIRECTORY_SEPARATOR.__APP__.DIRECTORY_SEPARATOR.'template'.DIRECTORY_SEPARATOR);//模板路径
+        $this->__TEMPLATE__ = $this->DOCUMENT_ROOT.$this->__APP__.DIRECTORY_SEPARATOR.'template'.DIRECTORY_SEPARATOR;//模板路径
         return $path;
     }
 
@@ -421,12 +424,8 @@ class App extends Container
      */
     protected function output($data)
     {
-        /**
-         * 获取调试debug数据
-         */
+        # 获取调试debug数据
         $debug = $this->Route()->atRouteData['RouterAdded']['debug']??'default';
-
-        //$pattern = isset($Route->routeArr[4])?$Route->routeArr[4]:false;
         //http://tool.oschina.net/commons/
         switch ($this->Route()->ReturnType) {
             case 'json':
@@ -531,7 +530,7 @@ class App extends Container
      */
     protected function getSystemStatus():array
     {
-        $data['requestId'] = $this->__REQUEST_ID__;
+        $data['requestId'] = &$this->__REQUEST_ID__;
         if (in_array('controller',$this->__INIT__['SYSTEMSTATUS'])){
             $data['controller'] = $this->Route()->controller;#路由控制器
         }
@@ -559,11 +558,10 @@ class App extends Container
             }
         }
         if (in_array('system',$this->__INIT__['SYSTEMSTATUS'])){ # 系统运行状态
-            $data ['Began to memory (K)'] = $this->__INIT_MEMORY_GET_USAGE__;#系统开始时的内存(K)
-            $data ['The end of the memory (KB)'] = round(memory_get_usage()/1024/1024,5);#系统结束时的内存(KB)
-            $data ['The peak of memory (KB)'] = round(memory_get_peak_usage()/1024/1024,5);#系统内存峰值(KB)
-            $data ['Perform time (S)'] = round(microtime(true)-($this->__INIT_MICROTIME__),4);#执行耗时(S)
+            $data ['OS'] = php_uname('s').' '.php_uname('r');
+            $data ['PHP_VERSION'] = PHP_VERSION;#系统版本
         }
+        $data ['Perform time (S)'] = round(microtime(true)-($_SERVER['REQUEST_TIME_FLOAT']),4);#执行耗时(S)
         return $data;
     }
     /**
