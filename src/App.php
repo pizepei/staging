@@ -552,7 +552,8 @@ class App extends Container
         if (in_array('clientInfo',$this->__INIT__['SYSTEMSTATUS'])){ # clientInfo 客户端信息
             if ($this->__INIT__['clientInfo']){
                 terminalInfo::$redis = Redis::init();
-                $data['clientInfo'] = terminalInfo::getInfo();
+                $data['clientInfo'] = terminalInfo::agentInfoCache(true);
+
             }else{
                 $data['clientInfo'] = terminalInfo::get_ip();
             }
