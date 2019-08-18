@@ -244,6 +244,7 @@ class Route
         switch ($_SERVER['REQUEST_METHOD']){
             case 'GET':
                 $RouteData = isset(\RouteInfo::GET['Rule'][$this->atRoute])?\RouteInfo::GET['Rule'][$this->atRoute]:\RouteInfo::GET['Path'];
+
                 break;
             case 'POST':
                 $Rule = \RouteInfo::POST;
@@ -327,6 +328,7 @@ class Route
                 $RouteData = [];
         }
         if (isset($RouteData['router']) && is_string($RouteData['router'])){
+
             # 匹配到常规路由
         }else{
             # 使用路径路由匹配模式
@@ -335,15 +337,17 @@ class Route
             # 使用快捷匹配路由匹配
             $length = 0;
             $PathNote = [];
+//            foreach ($this->yieldForeach($RouteData) as $k=>$v){
+//            }
             foreach ($RouteData as $k=>$v){
                 # 通过长度进行匹配
                 if(strpos($this->atRoute,$v['PathNote']) === 0){
                     # 使用最佳匹配长度结果（匹配长度最长的）
                     if(strlen($v['PathNote']) > $length){
                         $length = strlen($v['PathNote']); # 重新定义长度
-                        $PathNote[$length][$k] = &$v;
+                        $PathNote[$length][$k] = $v;
                     }else if(strlen($v['PathNote']) == $length){
-                        $PathNote[$length][$k] = &$v;
+                        $PathNote[$length][$k] = $v;
                     }
                 }
             }
@@ -352,6 +356,7 @@ class Route
                 //header("HTTP/1.0 404 Not Found");
                 throw new \Exception('路由不存在',404);
             }
+
             # 判断匹配到的路由数量、使用正则表达式匹配并且获取参数、$length为strlen()获取的匹配长度，使用匹配最才$length做路由匹配
             if(count($PathNote[$length])>1){
                 /**
@@ -378,9 +383,10 @@ class Route
             }else{
                 # 只有一个
                 $RouteData = current($PathNote[$length]);
-                preg_match($RouteData['MatchStr'],$this->atRoute,$PathData);# 使用正则表达式匹配
-            }
 
+                preg_match($RouteData['MatchStr'],$this->atRoute,$PathData);# 使用正则表达式匹配
+
+            }
             array_shift($PathData);
             if( !isset($RouteData['PathParam']) || (count($RouteData['PathParam']) != count($PathData))){
                 # 严格匹配参数（如果对应的:name位置没有使用参数 或者为字符串空  认为是路由不存在 或者提示参数不存在）
@@ -439,7 +445,23 @@ class Route
         }
 
     }
-
+    public function yieldForeach($data)
+    {
+        foreach ($data as $key=>$value){
+            if(strpos($this->atRoute,$value['PathNote']) === 0){
+                # 使用最佳匹配长度结果（匹配长度最长的）
+                if(strlen($v['PathNote']) > $length){
+                    $length = strlen($v['PathNote']); # 重新定义长度
+                    (yield $key=>$value);
+                }else if(strlen($v['PathNote']) == $length){
+                    (yield $key=>$value);
+                }
+            }
+        }
+        if(count($PathNote[$length])>1) {
+            (yield 0=>null);
+        }
+    }
     /**
      * 禁止外部获取的类属性
      */
@@ -608,12 +630,12 @@ class Route
                 $function['Param'] = $functionParam;
                 preg_match_all('/[^ ]+[A-Z-a-z_0-9.:\/\]\[]+/s',$routerData[1],$routerData);
 
-                if(!isset($routerData[0][1])){continue;}//不规范的路由
+                if(!isset($routerData[0][1])){continue;}# 跳过不规范的路由
+
                 $routerData = $routerData[0];
                 $routerData[0] = strtoupper($routerData[0]);
                 # 判断请求类型
                 if(!in_array($routerData[0],self::RequestType)){throw new \Exception('不规范的请求类型'.$baseNamespace.'->'.$routerData[0]);}
-
                 # 判断是否是独立路由
                 if(strpos($routerData[1],'/') === 0){
                     # 独立路由
@@ -624,6 +646,7 @@ class Route
                     $routerStr = '/'.ltrim($basePath[1].$routerData[1],'/');
 
                 }
+
                 /**
                  * 设置附件路由配置
                  */
@@ -651,14 +674,11 @@ class Route
                     $routerType = 'Rule';
                 }else{
                     $routerType = 'Path';
-                    /**
-                     * 获取简单路径路由用来快速匹配
-                     */
+                    # 获取简单路径路由用来快速匹配
                     preg_match('/(.*?):/s',$routerStr,$PathNote);
                     $PathNote = $PathNote[1]??'';
-                    /**
-                     * 准备正则表达式
-                     */
+
+                    # 准备正则表达式
                     $routerStrReplace = preg_replace('/\:[A-Za-z\[]+\]/','(.*?)',$routerStr);
                     $matchStr = '/^'.preg_replace('/\//','\/',$routerStrReplace).'[\/]{0,1}$/';
                     /**
