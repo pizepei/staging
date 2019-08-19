@@ -15,12 +15,6 @@ use pizepei\model\cache\Cache;
 
 class Route
 {
-
-    /**
-     * 完善缓存,完善&使用
-     * 从头开始整理代码逻辑优化代码
-     * 进行测试
-     */
     /**
      * 当前对象
      * @var null
@@ -43,7 +37,7 @@ class Route
     const RequestParamDataType = ['int','string','bool','float','array','null'];
 
     /**
-     * 控制器return 返回的数据类型()
+     * 控制器return 返回的数据类型
      */
     const ReturnDataType = ['html','xml','json','string'];
 
@@ -105,7 +99,6 @@ class Route
      * 路由数据
      * @var null
      */
-    protected $fileRouteData = array();
     protected $noteRouter = array();
     /**
      * 当前路由的所有信息
@@ -113,13 +106,8 @@ class Route
      */
     protected $atRouteData = [];
     /**
-     * 当前路由数据
-     * @var array
-     */
-    protected $routeArr = array();
-    /**
      * 控制器发返回类型
-     * @var null
+     * @var null|string
      */
     protected $ReturnType = null;
     /**
@@ -164,21 +152,13 @@ class Route
      * 匹配到路由进行请求转发（给控制器）
      *      1、通过路由表进行所以参数的处理（吧路由表相关参数给请求类Request）
      *      2、根据路由表Param 吧 请求类Request实例 注入给 路由对应的 控制器方法
-     *
-     *
      * 一个请求处理完
-     *      
-     *
-     *
      */
-
-
 
     /**
      * @var App|null
      */
     protected $app = null;
-    
     /**
      *构造方法
      */
@@ -187,24 +167,11 @@ class Route
         $this->app = $app;
         # 合并ReturnSubjoin
         $this->ReturnSubjoin= array_merge($this->ReturnSubjoin,$this->app->__ROUTE__['ReturnSubjoin']);
-
+        # 判断路由没事 获取当前路由 atRoute
         if ($_SERVER['PATH_INFO'] == ''){
             $this->atRoute = isset($_GET['s'])?$_GET['s']:'/'.$this->app->__ROUTE__['index'];//默认路由
         }else{
             $this->atRoute = $_SERVER['PATH_INFO'];
-        }
-        /**
-         * 获取到__EXPLOIT__
-         */
-        if($this->app->__ROUTE__['expanded'] != ''){
-            $sstr = strrchr($s,'.');
-
-            if($sstr !=$this->app-> __ROUTE__['expanded'] ){
-                /**
-                 * 如果路由没有expanded
-                 */
-                 $s = '/'.$this->app->__ROUTE__['expanded'];
-            }
         }
         /**
          * 请求类型
@@ -514,8 +481,12 @@ class Route
 
 
     }
+
     /**
-     * 获取所有注解块
+     * @Author 皮泽培
+     * @Created 2019/8/19 14:38
+     * @title  获取注解块
+     * @throws \Exception
      */
     protected function noteBlock()
     {
@@ -537,8 +508,13 @@ class Route
         preg_match('/@title[\s]{1,6}(.*?)[\r\n]/s',$result[1],$title);
         preg_match('/User:[\s]{1,6}(.*?)[\r\n]/s',$result[1],$User);
         preg_match('/@basePath[\s]{1,6}(.*?)[\s]{1,4}/s',$result[1],$basePath);
+        preg_match('/@baseControl[\s]{1,6}(.*?)[\s]{1,4}/s',$result[1],$baseControl);
         preg_match('/@authGroup[\s]{1,6}(.*?)[\r\n]/s',$result[1],$authGroup);
         preg_match('/@baseAuth[\s]{1,6}(.*?)[\r\n]/s',$result[1],$baseAuth);
+
+        if (isset($baseControl[1])){
+            $baseControl = $baseControl[1];
+        }
         /**
          * 处理权限
          */
