@@ -96,9 +96,14 @@ class App extends Container
      * @var string
      */
     protected $__APP__ = 'app';
-
+    /**
+     * @var string
+     */
     protected $__USE_PATTERN__ = '';
-
+    /**
+     * @var string  widnows  or   linux
+     */
+    protected $__OS__ = 'linux';
     /**
      * Container constructor.
      * @param string $deployPath
@@ -110,6 +115,9 @@ class App extends Container
         $this->__APP__ =  $app_path;            #应用路径
         $this->__EXPLOIT__ = $exploit;          #是否开发调试模式  (使用应用级别的因为在项目级别可能会地址SAAS模式下所有的租户都开启了调试模式)
         $this->__USE_PATTERN__ = $pattern;      #应用模式 ORIGINAL       SAAS
+        if (DIRECTORY_SEPARATOR ==='\\'){
+            $this->__OS__ = 'widnows';
+        }
         #应用级别配置
         $pathFof = '';
         if ($this->__USE_PATTERN__ == 'SAAS'){
