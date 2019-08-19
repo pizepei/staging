@@ -27,8 +27,11 @@ class MyException
      * @var App|null
      */
     protected $app = null;
-
-
+    /**
+     * json_encode 函数配置
+     * @var int
+     */
+    protected $json_encode = 320;
     /**
      * MyException constructor.
      * @param string $path
@@ -39,6 +42,10 @@ class MyException
         $this->app  =$app;
         $this->path = $path;
         $this->info = $info;
+        #判断是否已经加载配置文件
+        if (class_exists('\Config')){
+            $this->json_encode = \Config::UNIVERSAL['init']['json_encode'];
+        }
 
         $this->exception = $exception;
         if($exception){
@@ -65,15 +72,15 @@ class MyException
          * 判断是否是开发模式
          */
         $result = [
-            $this->app->__INIT__['ErrorReturnJsonCode']['name']=>50000,
+            $this->app->__INIT__['ErrorReturnJsonCode']['name']??'code'=>50000,
         ];
         if($this->app->__EXPLOIT__){
             $this->app->Route($this->app);
             /**
              * 开发模式
              */
-            $result[$this->app->__INIT__['ErrorReturnJsonMsg']['name']] = $errstr.'['.$errno.']';
-            $result[$this->app->__INIT__['ReturnJsonData']] = [
+            $result[$this->app->__INIT__['ErrorReturnJsonMsg']['name']??'code'] = $errstr.'['.$errno.']';
+            $result[$this->app->__INIT__['ReturnJsonData']??'data'] = [
                 'route'=>[
                     'controller'=>$this->app->Route()->controller.'->'.$this->app->Route()->method,
                     'router'=>$this->app->Route()->atRoute,
@@ -85,7 +92,7 @@ class MyException
             /**
              * 生产模式
              */
-            $result[ $this->app->__INIT__['ErrorReturnJsonMsg']['name']] = '系统繁忙['.$str_rand.']';
+            $result[ $this->app->__INIT__['ErrorReturnJsonMsg']['name']??'msg'] = '系统繁忙['.$str_rand.']';
         }
         $result['error'] = $str_rand;
         $this->createLog($result);
@@ -147,11 +154,11 @@ class MyException
 
     private function production($exception)
     {
-        echo json_encode($this->setCodeCipher(),\Config::UNIVERSAL['init']['json_encode']);
+        echo json_encode($this->setCodeCipher(),$this->json_encode);
     }
     private function exploit($exception)
     {
-        echo(json_encode($this->resultData($this->exception->getMessage(),$this->exception->getCode(),$this->exploitData()),\Config::UNIVERSAL['init']['json_encode']));
+        echo(json_encode($this->resultData($this->exception->getMessage(),$this->exception->getCode(),$this->exploitData()),$this->json_encode));
     }
 
     /**
@@ -163,9 +170,9 @@ class MyException
     private  function resultData($msg,$code,$data=[])
     {
         $result =  [
-            $this->app->__INIT__['ErrorReturnJsonMsg']['name']=>$msg,
-            $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$code==0?$this->app->__INIT__['ErrorReturnJsonCode']['value']:$this->exception->getCode(),
-            $this->app->__INIT__['ReturnJsonData']=>$data,
+            $this->app->__INIT__['ErrorReturnJsonMsg']['name']??'msg'=>$msg,
+            $this->app->__INIT__['ErrorReturnJsonCode']['name']??'code'=>$code==0?$this->app->__INIT__['ErrorReturnJsonCode']['value']??100:$this->exception->getCode(),
+            $this->app->__INIT__['ReturnJsonData']??'data'=>$data,
         ];
         return $result;
     }
@@ -177,9 +184,14 @@ class MyException
      */
     private function exploitData()
     {
-
+        if(!$this->app->has('Route')){
+            $route = [
+                'controller'=>'system',
+                'router'=>$_SERVER['PATH_INFO'],
+            ];
+        }
         return [
-            'route'=>[
+            'route'=>isset($route)?$route:[
                 'controller'=>($this->app->Route($this->app)->controller??'').'->'.($this->app->Route()->method??''),
                 'router'=>$this->app->Route()->atRoute,
             ],

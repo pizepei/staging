@@ -130,8 +130,6 @@ class App extends Container
         if(PHP_VERSION <= 7){
             throw new \Exception('PHP版本必须<=7,当前版本'.PHP_VERSION);
         }
-        # 设置初始化配置   服务器版本php_uname('s').php_uname('r');
-        $path = $this->setDefine($pattern,$path,$deployPath); #关于配置：先读取deploy配置确定当前项目配置是从配置中心获取还是使用本地配置
         # 判断是否为开发调试模式
         if($this->__EXPLOIT__){
             $this->MyException($path,null,[],$this);
@@ -142,6 +140,9 @@ class App extends Container
             //error_reporting(0);
             //set_exception_handler(['MyException','production']);
         }
+        # 设置初始化配置   服务器版本php_uname('s').php_uname('r');
+        $path = $this->setDefine($pattern,$path,$deployPath); #关于配置：先读取deploy配置确定当前项目配置是从配置中心获取还是使用本地配置
+
         static::$instance = $this;
     }
     /**
