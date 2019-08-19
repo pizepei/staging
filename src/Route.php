@@ -10,8 +10,6 @@ declare(strict_types=1);
 
 namespace pizepei\staging;
 use pizepei\helper\Helper;
-use pizepei\model\cache\Cache;
-
 
 class Route
 {
@@ -169,10 +167,16 @@ class Route
         $this->ReturnSubjoin= array_merge($this->ReturnSubjoin,$this->app->__ROUTE__['ReturnSubjoin']);
         # 判断路由没事 获取当前路由 atRoute
         if ($_SERVER['PATH_INFO'] == ''){
-            $this->atRoute = isset($_GET['s'])?$_GET['s']:'/'.$this->app->__ROUTE__['index'];//默认路由
+            $atRoute = isset($_GET['s'])?$_GET['s']:'/'.$this->app->__ROUTE__['index'];//默认路由
         }else{
-            $this->atRoute = $_SERVER['PATH_INFO'];
+            $atRoute = $_SERVER['PATH_INFO'];
         }
+        if ($this->app->__ROUTE__['postfix'] !==[]){
+            foreach ($this->app->__ROUTE__['postfix'] as $value){
+                $atRoute = str_replace($value,'',$atRoute);
+            }
+        }
+        $this->atRoute = $atRoute;
         /**
          * 请求类型
          */
@@ -207,11 +211,10 @@ class Route
      */
     protected function noteRoute()
     {
-//        var_dump(\RouteInfo::$_SERVER['REQUEST_METHOD']);
         switch ($_SERVER['REQUEST_METHOD']){
             case 'GET':
                 $RouteData = isset(\RouteInfo::GET['Rule'][$this->atRoute])?\RouteInfo::GET['Rule'][$this->atRoute]:\RouteInfo::GET['Path'];
-
+                var_dump($this->atRoute);
                 break;
             case 'POST':
                 $Rule = \RouteInfo::POST;
@@ -476,10 +479,6 @@ class Route
         require ($this->app->__DEPLOY_CONFIG_PATH__.'RouteInfo.php');
         require ($this->app->__DEPLOY_CONFIG_PATH__.'PermissionsInfo.php');
 
-//        $this->noteRouter = $CacheData;
-//        $this->Permissions = $CacheData;
-
-
     }
 
     /**
@@ -512,12 +511,7 @@ class Route
         preg_match('/@authGroup[\s]{1,6}(.*?)[\r\n]/s',$result[1],$authGroup);
         preg_match('/@baseAuth[\s]{1,6}(.*?)[\r\n]/s',$result[1],$baseAuth);
 
-        if (isset($baseControl[1])){
-            $baseControl = $baseControl[1];
-        }
-        /**
-         * 处理权限
-         */
+        # 处理权限
         if(isset($baseAuth[1]))
         {
             $baseAuth = explode(':',$baseAuth[1]);
@@ -526,20 +520,14 @@ class Route
         }
         $basePath[1] = $basePath[1]??'';
 
-        /**
-         * 如果有就删除 /
-         */
+        # 如果有就删除 /
         $basePath[1] = rtrim($basePath[1],'/');
         $title[1] = $title[1]??'未定义';//标题
         $User[1] = $User[1]??'未定义';//创建人
         preg_match('/namespace (.*?);/s',$data,$namespace);
-        /**
-         * 过滤非控制器类文件
-         */
+        # 过滤非控制器类文件
         if(!isset($namespace[1])){return ;}
-        /**
-         * 获取类名称
-         */
+        # 获取类名称
         preg_match('/class[\s]{1,6}(.*?)[\s]{1,6}/s',$data,$class);
         /**
          * 定义完整命名空间
@@ -554,6 +542,20 @@ class Route
          * 判断是否存在注解块
          */
         if(!isset($noteBlock[1])){return ;}
+
+        if (isset($baseControl[1])){
+            $baseControl = $baseControl[1];
+            if (DIRECTORY_SEPARATOR ==='\\'){
+                $data =  file_get_contents(str_replace('/',DIRECTORY_SEPARATOR,$this->app->DOCUMENT_ROOT.'vendor'.DIRECTORY_SEPARATOR.trim(trim($baseControl,'/'),'\\').'.php'));
+            }else{
+                $data =  file_get_contents(str_replace('\\',DIRECTORY_SEPARATOR,$this->app->DOCUMENT_ROOT.'vendor'.DIRECTORY_SEPARATOR.trim(trim($baseControl,'/'),'\\').'.php'));
+            }
+            preg_match_all('/\/\*\*[\s](.*?){/s',$data,$basicsNoteBlock);//获取方法以及注解块
+            if (isset($basicsNoteBlock[1])){
+                $noteBlock[1] = array_merge($basicsNoteBlock[1],$noteBlock[1]);
+            }
+        }
+
         /**
          * 循环处理控制器中每一个注解块（如果其中没有@router关键字就抛弃注解块）
          */
