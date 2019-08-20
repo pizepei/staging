@@ -53,7 +53,7 @@ class MyException
         }
         @set_exception_handler(array($this, 'exception_handler'));
         @set_error_handler(array($this, 'error_handler'));
-        //throw new Exception('DOH!!');
+        //throw new Exception('DOH!!');error_get_last
     }
 
     /**
@@ -65,23 +65,27 @@ class MyException
      */
     public function error_handler($errno, $errstr, $errfile, $errline)
     {
-        header("Content-Type:application/json;charset=UTF-8");
 
+        header("Content-Type:application/json;charset=UTF-8");
+        # 错误代码方便查日志
         $str_rand = Helper::str()->str_rand(20);
-        /**
-         * 判断是否是开发模式
-         */
+
+        if(!$this->app->has('Route')){
+            $route = [
+                'controller'=>'system',
+                'router'=>$_SERVER['PATH_INFO'],
+            ];
+        }
+        # 系统错误统一 50000
         $result = [
             $this->app->__INIT__['ErrorReturnJsonCode']['name']??'code'=>50000,
         ];
+        #判断是否是开发模式
         if($this->app->__EXPLOIT__){
-            $this->app->Route($this->app);
-            /**
-             * 开发模式
-             */
+            # 开发模式
             $result[$this->app->__INIT__['ErrorReturnJsonMsg']['name']??'code'] = $errstr.'['.$errno.']';
             $result[$this->app->__INIT__['ReturnJsonData']??'data'] = [
-                'route'=>[
+                'route'=>$route??[
                     'controller'=>$this->app->Route()->controller.'->'.$this->app->Route()->method,
                     'router'=>$this->app->Route()->atRoute,
                 ],

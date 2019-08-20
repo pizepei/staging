@@ -214,7 +214,6 @@ class Route
         switch ($_SERVER['REQUEST_METHOD']){
             case 'GET':
                 $RouteData = isset(\RouteInfo::GET['Rule'][$this->atRoute])?\RouteInfo::GET['Rule'][$this->atRoute]:\RouteInfo::GET['Path'];
-                var_dump($this->atRoute);
                 break;
             case 'POST':
                 $Rule = \RouteInfo::POST;
@@ -542,7 +541,8 @@ class Route
          * 判断是否存在注解块
          */
         if(!isset($noteBlock[1])){return ;}
-
+//        。
+//        throw new \Exception('CS');
         if (isset($baseControl[1])){
             $baseControl = $baseControl[1];
             if (DIRECTORY_SEPARATOR ==='\\'){
@@ -1184,29 +1184,19 @@ class Route
      */
     public function getFilePathData($dir,&$fileData)
     {
-        /**
-         * 打开应用目录
-         * 获取所有文件路径
-         */
+         # 打开应用目录获取所有文件路径
         if (is_dir($dir)){
             if ($dh = opendir($dir)){
                 while (($file = readdir($dh)) !== false){
                     if($file != '.' && $file != '..'){
-                        /**
-                         * 判断是否是目录
-                         */
+                        # 判断是否是目录
                         if(is_dir($dir.DIRECTORY_SEPARATOR.$file)){
                             $this->getFilePathData($dir.DIRECTORY_SEPARATOR.$file,$fileData);
-//                            echo "目录:" . $file . "<br>";
                         }else{
-                            /**
-                             * 判断是否是php文件
-                             */
-//                            var_dump(strrchr($file,'.'));
+                             # 判断是否是php文件
                             if(strrchr($file,'.php') == '.php'){
                                 $fileData[] = $dir.DIRECTORY_SEPARATOR.$file;
                             }
-//                            echo "文件:" . $file . "<br>";
                         }
                     }
                 }
@@ -1214,7 +1204,6 @@ class Route
             }
         }
     }
-
     /**
      * 启动请求转移（实例化控制器）
      * @return mixed

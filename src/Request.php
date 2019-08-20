@@ -181,8 +181,8 @@ class Request
                      */
                 }
             }else{
-                $dataType = $type=='raw'?'rule':$type;
-                $this->paramFiltration($this->$TypeS,$dataType);
+
+                $this->paramFiltration($this->$TypeS,$type);
             }
             /**
              * 处理完成修改状态

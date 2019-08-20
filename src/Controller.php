@@ -68,8 +68,12 @@ class Controller
      * @param array  $data
      * @return string|array
      */
-    public function view($name = '',array$data = [],$type='html')
+    public function view(string $name = '',array$data = [],string $path='',string $type='html'):string
     {
+
+        if ($path ==''){
+            $path = $this->app->__TEMPLATE__;
+        }
         /**
          * 默认路径
          */
@@ -79,11 +83,10 @@ class Controller
              * 自动拼接地址
              * __TEMPLATE__命名空间
              */
-
         }else{
 
         }
-        $file = file_get_contents($this->app->__TEMPLATE__.$name.'.'.$type);
+        $file = file_get_contents($path.$name.'.'.$type);
         if(!empty($data))
         {
             foreach($data as $key=>$vuleu)
