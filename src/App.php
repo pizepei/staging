@@ -9,6 +9,7 @@
 namespace pizepei\staging;
 
 
+use app\HelperClass;
 use pizepei\config\InitializeConfig;
 use pizepei\container\Container;
 use pizepei\deploy\LocalDeployServic;
@@ -20,15 +21,21 @@ use pizepei\terminalInfo\TerminalInfo;
 /**
  * Class App
  * @package pizepei\staging
- * @method  Authority Authority(string $pattern,App $app  = App) 权限基础类
- * @method  Request Request(App $app  = App) 请求类
- * @method  Controller Controller(App $app  = App) 控制器类
- * @method  MyException MyException(string $path,$exception=null,array$info=[],App $app) 权限基础类
- * @method  Route Route(App $app = App) 路由类
- * @method  InitializeConfig InitializeConfig(App $app) 初始化配置类
+ * @property Authority              $Authority  权限基础类属性
+ * @method  Authority               Authority(string $pattern,App $app  = App) 权限基础类
+ * @method  Request                 Request(App $app  = App) 请求类
+ * @method  Controller              Controller(App $app  = App) 控制器类
+ * @method  MyException             MyException(string $path,$exception=null,array$info=[],App $app) 权限基础类
+ * @method  Route                   Route(App $app = App) 路由类
+ * @method  InitializeConfig        InitializeConfig(App $app) 初始化配置类
+ * @method  Helper                  Helper(string $son = '') 助手类
  */
 class App extends Container
 {
+    /**
+     * 容器标识
+     */
+    const CONTAINER_NAME = 'App';
     /**
      * 是否开启开发调试模式
      * @var bool
@@ -55,15 +62,7 @@ class App extends Container
      * @var null
      */
     private $__REQUEST_ID__ = null;
-    /**
-     * 获取一个不能访问或者不存在的属性时
-     * @param $name
-     */
-    public function __get($name)
-    {
 
-        return $this->$name??null;
-    }
     /**
      * 容器绑定标识
      * @var array
@@ -74,7 +73,8 @@ class App extends Container
         'MyException'           =>MyException::class,
         'Request'               =>Request::class,
         'Route'                 =>Route::class,
-        'InitializeConfig'      =>InitializeConfig::class
+        'InitializeConfig'      =>InitializeConfig::class,
+        'Helper'                =>Helper::class
     ];
     /**
      * 项目根目录  默认是上级目录层
@@ -110,7 +110,6 @@ class App extends Container
      */
     public function __construct(bool $exploit = false,$app_path='app',$pattern = 'ORIGINAL',$path='',$deployPath='')
     {
-
         $this->DOCUMENT_ROOT = dirname($_SERVER['DOCUMENT_ROOT'],$this->DOCUMENT_ROOT).DIRECTORY_SEPARATOR;#定义项目根目录
         $this->__APP__ =  $app_path;            #应用路径
         $this->__EXPLOIT__ = $exploit;          #是否开发调试模式  (使用应用级别的因为在项目级别可能会地址SAAS模式下所有的租户都开启了调试模式)
@@ -123,6 +122,7 @@ class App extends Container
         if ($this->__USE_PATTERN__ == 'SAAS'){
             if (empty($path)){$pathFof = DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'];}
         }
+        # 应用配置路径
         $this->__CONFIG_PATH__ = empty($path)?$this->DOCUMENT_ROOT.'config'.$pathFof.DIRECTORY_SEPARATOR.$this->__APP__.DIRECTORY_SEPARATOR:$path;
 
         #项目级别配置
@@ -131,7 +131,11 @@ class App extends Container
         }else{
             $this->__DEPLOY_CONFIG_PATH__ = $deployPath;
         }
-        if (Helper::init(false,$this)->is_empty($app_path)){
+        # 启动Helper容器  C:\Users\84873\Desktop\refactor\normative\container\app\AppContainer.php
+        $this->Helper();
+
+        $this->Helper('\\container\\'.$this->__APP__.'\HelperClass');
+        if ($this->Helper()->is_empty($app_path)){
             throw new \Exception('应用路径不能为空'.PHP_VERSION);
         }
         #获取配置、判断环境
@@ -151,7 +155,15 @@ class App extends Container
         # 设置初始化配置   服务器版本php_uname('s').php_uname('r');
         $path = $this->setDefine($pattern,$path,$deployPath); #关于配置：先读取deploy配置确定当前项目配置是从配置中心获取还是使用本地配置
 
-        static::$instance = $this;
+        self::$containerInstance[static::CONTAINER_NAME] = $this;
+    }
+    /**
+     * 获取一个不能访问或者不存在的属性时
+     * @param $name
+     */
+    public function __get($name)
+    {
+        return $this->$name??null;
     }
     /**
      * @Author pizepei
@@ -574,11 +586,5 @@ class App extends Container
         $data ['Perform time (S)'] = round(microtime(true)-($_SERVER['REQUEST_TIME_FLOAT']),4);#执行耗时(S)
         return $data;
     }
-    /**
-     * 基本初始化
-     */
-    public static function init():self
-    {
-        return static::$instance;
-    }
+
 }

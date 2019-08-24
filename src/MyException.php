@@ -13,7 +13,6 @@ namespace pizepei\staging;
 use pizepei\func\Func;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
-use pizepei\helper\Helper;
 
 class MyException
 {
@@ -68,7 +67,7 @@ class MyException
 
         header("Content-Type:application/json;charset=UTF-8");
         # 错误代码方便查日志
-        $str_rand = Helper::str()->str_rand(20);
+        $str_rand = $this->app->Helper()->str()->str_rand(20);
 
         if(!$this->app->has('Route')){
             $route = [
@@ -236,7 +235,7 @@ class MyException
     protected function setCodeCipher()
     {
 
-        $str_rand = Helper::str()->str_rand(20);
+        $str_rand = $this->app->Helper()->str()->str_rand(20);
         /**
          * 判断是否是权限和登录
          */

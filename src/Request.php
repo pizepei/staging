@@ -10,10 +10,6 @@ declare(strict_types=1);
 
 namespace pizepei\staging;
 
-
-use pizepei\func\Func;
-use pizepei\helper\Helper;
-
 class Request
 {
     /**
@@ -52,7 +48,7 @@ class Request
         $this->app = $app;
         $this->GET = $_GET;
 
-        if (Helper::init()->is_empty($_SERVER['PATH_INFO'])){
+        if ($this->app->Helper()->is_empty($_SERVER['PATH_INFO'])){
             unset($this->GET['s']);
         }
 
@@ -64,7 +60,7 @@ class Request
         /**
          * 生成请求id
          */
-        $this->RequestId = Helper::init()->getUuid(true,45,$app->__INIT__['uuid_identifier']);
+        $this->RequestId = $this->app->Helper()->getUuid(true,45,$app->__INIT__['uuid_identifier']);
         /**
          * 释放内存
          */
