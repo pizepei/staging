@@ -23,35 +23,17 @@ class Controller
     public function __construct(App $app)
     {
         $this->app = $app;
-        /**
-         * 权限类
-         */
-        //路由
         $Route = $this->app->Route();
-        /**
-         * 判断是否有设置权限控制器
-         */
+        # 判断是否有设置权限控制器
         if(isset($Route->baseAuth[0]) && isset($Route->baseAuth[1]) && $Route->baseAuth[1] !='public')
         {
-            $className = 'authority\\'.$this->app->__APP__.'\\controller\\'.$Route->baseAuth[0];
-            $functionName = $Route->baseAuth[1];
-            $class = new $className('common',$this->app);
-            $authResult = $class->init($Route->baseAuth[1]);
-            $this->authExtend = $class->authExtend;
-            $this->Payload = $class->Payload;
-            //var_dump($this->Payload);
+            $className = $Route->baseAuth[0];
+            $Authority = $this->app->Authority()->$className('common',$this->app);
+            $authResult = $Authority->start($Route->baseAuth[1]);
+            $this->authExtend = $Authority->authExtend;
+            $this->Payload = $Authority->Payload;
         }
-        /**
-         * 路由
-         */
-
-
-        /**
-         * 包含
-         */
-
     }
-
     /**
      * 获取Extend
      * @param string $key

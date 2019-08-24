@@ -411,7 +411,6 @@ class Route
             $this->app->Request()->PATH = $PathArray??[]; # 设置匹配到的路径参数
             return $controller->$function($this->app->Request());
         }
-
     }
     public function yieldForeach($data)
     {

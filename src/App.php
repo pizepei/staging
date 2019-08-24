@@ -131,10 +131,10 @@ class App extends Container
         }else{
             $this->__DEPLOY_CONFIG_PATH__ = $deployPath;
         }
-        # 启动Helper容器  C:\Users\84873\Desktop\refactor\normative\container\app\AppContainer.php
-        $this->Helper();
+        # 启动Helper容器
+//        $this->Helper();
 
-        $this->Helper('\\container\\'.$this->__APP__.'\HelperClass');
+        $this->Helper('\\container\\'.$this->__APP__.'\HelperContainer');
         if ($this->Helper()->is_empty($app_path)){
             throw new \Exception('应用路径不能为空'.PHP_VERSION);
         }
@@ -427,6 +427,7 @@ class App extends Container
             $this->__CLI__SQL_LOG__ = $getopt['sqllog']??'false';
         }
         $this->Route($this);    #路由类
+        $this->Authority('\\container\\'.$this->__APP__.'\AuthorityContainer');
         $this->Request($this);  #请求类
         $this->__REQUEST_ID__ = $this->Request()->RequestId;    #获取请求类初始化设置的请求id
         # 全局响应配置 ：设置 Header
