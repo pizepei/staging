@@ -189,9 +189,10 @@ class Route
          * s 为路由
          */
         $_SERVER['QUERY_STRING'];
+
         # 生成 使用 注解路由
         $this->annotation();
-            //$this->noteRoute();
+        //$this->noteRoute();
     }
     public function __isset($name)
     {
@@ -212,84 +213,84 @@ class Route
     {
         switch ($_SERVER['REQUEST_METHOD']){
             case 'GET':
-                $RouteData = isset(\RouteInfo::GET['Rule'][$this->atRoute])?\RouteInfo::GET['Rule'][$this->atRoute]:\RouteInfo::GET['Path'];
+                $RouteData = isset(\RouteInfo::GET['Rule'][$this->atRoute])?\RouteInfo::GET['Rule'][$this->atRoute]:\RouteInfo::GET['Path']??[];
                 break;
             case 'POST':
                 $Rule = \RouteInfo::POST;
-                $RouteData = isset(\RouteInfo::POST['Rule'][$this->atRoute])?\RouteInfo::POST['Rule'][$this->atRoute]:\RouteInfo::POST['Path'];
+                $RouteData = isset(\RouteInfo::POST['Rule'][$this->atRoute])?\RouteInfo::POST['Rule'][$this->atRoute]:\RouteInfo::POST['Path']??[];
 
                 break;
             case 'PUT':
                 $Rule = \RouteInfo::PUT;
-                $RouteData = isset(\RouteInfo::PUT['Rule'][$this->atRoute])?\RouteInfo::PUT['Rule'][$this->atRoute]:\RouteInfo::PUT['Path'];
+                $RouteData = isset(\RouteInfo::PUT['Rule'][$this->atRoute])?\RouteInfo::PUT['Rule'][$this->atRoute]:\RouteInfo::PUT['Path']??[];
                 break;
             case 'PATCH';
                 $Rule = \RouteInfo::PATCH;
-                $RouteData = isset(\RouteInfo::PATCH['Rule'][$this->atRoute])?\RouteInfo::PATCH['Rule'][$this->atRoute]:\RouteInfo::PATCH['Path'];
+                $RouteData = isset(\RouteInfo::PATCH['Rule'][$this->atRoute])?\RouteInfo::PATCH['Rule'][$this->atRoute]:\RouteInfo::PATCH['Path']??[];
                 break;
             case 'DELETE';
                 $Rule = \RouteInfo::DELETE;
-                $RouteData = isset(\RouteInfo::DELETE['Rule'][$this->atRoute])?\RouteInfo::DELETE['Rule'][$this->atRoute]:\RouteInfo::DELETE['Path'];
+                $RouteData = isset(\RouteInfo::DELETE['Rule'][$this->atRoute])?\RouteInfo::DELETE['Rule'][$this->atRoute]:\RouteInfo::DELETE['Path']??[];
 
                 break;
             case 'COPY';
                 $Rule = \RouteInfo::COPY;
-                $RouteData = isset(\RouteInfo::COPY['Rule'][$this->atRoute])?\RouteInfo::COPY['Rule'][$this->atRoute]:\RouteInfo::COPY['Path'];
+                $RouteData = isset(\RouteInfo::COPY['Rule'][$this->atRoute])?\RouteInfo::COPY['Rule'][$this->atRoute]:\RouteInfo::COPY['Path']??[];
 
                 break;
             case 'HEAD';
                 $Rule = \RouteInfo::HEAD;
-                $RouteData = isset(\RouteInfo::HEAD['Rule'][$this->atRoute])?\RouteInfo::HEAD['Rule'][$this->atRoute]:\RouteInfo::HEAD['Path'];
+                $RouteData = isset(\RouteInfo::HEAD['Rule'][$this->atRoute])?\RouteInfo::HEAD['Rule'][$this->atRoute]:\RouteInfo::HEAD['Path']??[];
 
                 break;
             case 'OPTIONS';
                 $Rule = \RouteInfo::OPTIONS;
-                $RouteData = isset(\RouteInfo::OPTIONS['Rule'][$this->atRoute])?\RouteInfo::OPTIONS['Rule'][$this->atRoute]:\RouteInfo::OPTIONS['Path'];
+                $RouteData = isset(\RouteInfo::OPTIONS['Rule'][$this->atRoute])?\RouteInfo::OPTIONS['Rule'][$this->atRoute]:\RouteInfo::OPTIONS['Path']??[];
 
                 break;
             case 'LINK';
                 $Rule = \RouteInfo::LINK;
-                $RouteData = isset(\RouteInfo::LINK['Rule'][$this->atRoute])?\RouteInfo::LINK['Rule'][$this->atRoute]:\RouteInfo::LINK['Path'];
+                $RouteData = isset(\RouteInfo::LINK['Rule'][$this->atRoute])?\RouteInfo::LINK['Rule'][$this->atRoute]:\RouteInfo::LINK['Path']??[];
 
                 break;
             case 'UNLINK';
                 $Rule = \RouteInfo::UNLINK;
-                $RouteData = isset(\RouteInfo::UNLINK['Rule'][$this->atRoute])?\RouteInfo::UNLINK['Rule'][$this->atRoute]:\RouteInfo::UNLINK['Path'];
+                $RouteData = isset(\RouteInfo::UNLINK['Rule'][$this->atRoute])?\RouteInfo::UNLINK['Rule'][$this->atRoute]:\RouteInfo::UNLINK['Path']??[];
 
                 break;
             case 'PURGE';
                 $Rule = \RouteInfo::PURGE;
-                $RouteData = isset(\RouteInfo::PURGE['Rule'][$this->atRoute])?\RouteInfo::PURGE['Rule'][$this->atRoute]:\RouteInfo::PURGE['Path'];
+                $RouteData = isset(\RouteInfo::PURGE['Rule'][$this->atRoute])?\RouteInfo::PURGE['Rule'][$this->atRoute]:\RouteInfo::PURGE['Path']??[];
 
                 break;
             case 'LOCK';
                 $Rule = \RouteInfo::LOCK;
-                $RouteData = isset(\RouteInfo::LOCK['Rule'][$this->atRoute])?\RouteInfo::LOCK['Rule'][$this->atRoute]:\RouteInfo::LOCK['Path'];
+                $RouteData = isset(\RouteInfo::LOCK['Rule'][$this->atRoute])?\RouteInfo::LOCK['Rule'][$this->atRoute]:\RouteInfo::LOCK['Path']??[];
 
                 break;
             case 'UNLOCK';
                 $Rule = \RouteInfo::UNLOCK;
-                $RouteData = isset(\RouteInfo::UNLOCK['Rule'][$this->atRoute])?\RouteInfo::UNLOCK['Rule'][$this->atRoute]:\RouteInfo::UNLOCK['Path'];
+                $RouteData = isset(\RouteInfo::UNLOCK['Rule'][$this->atRoute])?\RouteInfo::UNLOCK['Rule'][$this->atRoute]:\RouteInfo::UNLOCK['Path']??[];
 
                 break;
             case 'PROPFIND';
                 $Rule = \RouteInfo::PROPFIND;
-                $RouteData = isset(\RouteInfo::PROPFIND['Rule'][$this->atRoute])?\RouteInfo::PROPFIND['Rule'][$this->atRoute]:\RouteInfo::PROPFIND['Path'];
+                $RouteData = isset(\RouteInfo::PROPFIND['Rule'][$this->atRoute])?\RouteInfo::PROPFIND['Rule'][$this->atRoute]:\RouteInfo::PROPFIND['Path']??[];
 
                 break;
             case 'VIEW';
                 $Rule = \RouteInfo::VIEW;
-                $RouteData = isset(\RouteInfo::VIEW['Rule'][$this->atRoute])?\RouteInfo::VIEW['Rule'][$this->atRoute]:\RouteInfo::VIEW['Path'];
+                $RouteData = isset(\RouteInfo::VIEW['Rule'][$this->atRoute])?\RouteInfo::VIEW['Rule'][$this->atRoute]:\RouteInfo::VIEW['Path']??[];
 
                 break;
             case 'CLI';
                 $Rule = \RouteInfo::CLI;
-                $RouteData = isset(\RouteInfo::CLI['Rule'][$this->atRoute])?\RouteInfo::CLI['Rule'][$this->atRoute]:\RouteInfo::CLI['Path'];
+                $RouteData = isset(\RouteInfo::CLI['Rule'][$this->atRoute])?\RouteInfo::CLI['Rule'][$this->atRoute]:\RouteInfo::CLI['Path']??[];
 
                 break;
             case 'All';
                 $Rule = \RouteInfo::All;
-                $RouteData = isset(\RouteInfo::All['Rule'][$this->atRoute])?\RouteInfo::All['Rule'][$this->atRoute]:\RouteInfo::All['Path'];
+                $RouteData = isset(\RouteInfo::All['Rule'][$this->atRoute])?\RouteInfo::All['Rule'][$this->atRoute]:\RouteInfo::All['Path']??[];
 
                 break;
             default:
@@ -353,12 +354,11 @@ class Route
                 $RouteData = current($PathNote[$length]);
 
                 preg_match($RouteData['MatchStr'],$this->atRoute,$PathData);# 使用正则表达式匹配
-
             }
             array_shift($PathData);
             if( !isset($RouteData['PathParam']) || (count($RouteData['PathParam']) != count($PathData))){
                 # 严格匹配参数（如果对应的:name位置没有使用参数 或者为字符串空  认为是路由不存在 或者提示参数不存在）
-                throw new \Exception(($RouteData['router']??'').':路由不存在');
+                throw new \Exception(($RouteData['router']??'').':路由不存在,请检查路由参数是否使用了特殊字符串（-_@）');
             }
             # 对参数进行强制过滤（根据路由上的规则：name[int]）
             $i=0;
@@ -458,11 +458,9 @@ class Route
      */
     public function annotation()
     {
-
         $fileData =array();
         # 判断应用模式  如果是开发模式  或者其中一个配置文件不存在 都会重新生成权限与路由配置文件
-        if($this->app->__EXPLOIT__ == 1 || !file_exists($this->app->__DEPLOY_CONFIG_PATH__.'Route.php') || !file_exists($this->app->__DEPLOY_CONFIG_PATH__.'Permissions.php')){
-
+        if($this->app->__EXPLOIT__ == 1 || !file_exists($this->app->__DEPLOY_CONFIG_PATH__.'RouteInfo.php') || !file_exists($this->app->__DEPLOY_CONFIG_PATH__.'PermissionsInfo.php')){
             # 获取应用目录下所有文件路径
             $this->getFilePathData(dirname(getcwd()).DIRECTORY_SEPARATOR.$this->app->__APP__,$fileData);
             $this->filePathData = $fileData;
@@ -652,7 +650,10 @@ class Route
                     $routerType = 'Path';
                     # 获取简单路径路由用来快速匹配
                     preg_match('/(.*?):/s',$routerStr,$PathNote);
-                    $PathNote = $PathNote[1]??'';
+                    if (!isset($PathNote[1])){
+                        throw new \Exception('路由是否忘记写：了？->'.$routerStr);
+                    }
+                    $PathNote = $PathNote[1];
 
                     # 准备正则表达式
                     $routerStrReplace = preg_replace('/\:[A-Za-z\[]+\]/','(.*?)',$routerStr);

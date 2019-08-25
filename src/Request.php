@@ -201,7 +201,6 @@ class Request
         /**
          * 判断是否定义数据类型
          */
-
         if(isset($this->app->Route()->atRouteData['Param']['raw']['fieldRestrain'][0]) && $_SERVER['HTTP_CONTENT_TYPE'] !== 'application/xml' && $_SERVER['HTTP_CONTENT_TYPE'] !== 'text/xml'){
 
             if($this->app->Route()->atRouteData['Param']['raw']['fieldRestrain'][0] == 'xml'){
@@ -209,7 +208,7 @@ class Request
 
             }else if($this->app->Route()->atRouteData['Param']['raw']['fieldRestrain'][0] == 'json'){
                 $this->RAW = json_decode(file_get_contents("php://input",true),true);
-            }else if($this->app->Route()->atRouteData['Param']['raw']['fieldRestrain'][0] == 'url'){
+            }else if($this->app->Route()->atRouteData['Param']['raw']['fieldRestrain'][0] == 'urlencoded'){
                 /**
                  * application/x-www-form-urlencoded方式是Jquery的Ajax请求默认方式
                  * 在请求发送过程中会对数据进行序列化处理，以键值对形式？key1=value1&key2=value2的方式发送到服务器
@@ -218,26 +217,13 @@ class Request
             }else{
                 $this->RAW = json_decode(file_get_contents("php://input",true),true);
             }
-        }else{
-
-            if(!isset($_SERVER['HTTP_CONTENT_TYPE'])){
-                $this->RAW = json_decode(file_get_contents("php://input",true),true);
-                if(!$this->RAW){
-                    parse_str(file_get_contents("php://input"),$this->RAW);
-                }
-            }
-            /**
-             * 没有定义
-             */
-            if(file_get_contents("php://input") == ''){
-                $this->RAW = null;
-            }
+        }
+        if (empty($this->RAW) && isset($_SERVER['HTTP_CONTENT_TYPE']) ){
+            # json
             if($_SERVER['HTTP_CONTENT_TYPE'] == 'application/json'){
                 $this->RAW = json_decode(file_get_contents("php://input",true),true);
             }
-            /**
-             * xml
-             */
+            # xml
             if($_SERVER['HTTP_CONTENT_TYPE'] == 'application/xml' || $_SERVER['HTTP_CONTENT_TYPE'] == 'text/xml'){
                 $this->RAW = $this->xmlToArray(file_get_contents("php://input",true));
             }
@@ -245,7 +231,7 @@ class Request
              * application/x-www-form-urlencoded方式是Jquery的Ajax请求默认方式
              * 在请求发送过程中会对数据进行序列化处理，以键值对形式？key1=value1&key2=value2的方式发送到服务器
              */
-            if($_SERVER['HTTP_CONTENT_TYPE'] == 'text/plain'|| !isset($_SERVER['HTTP_CONTENT_TYPE']) || $_SERVER['HTTP_CONTENT_TYPE'] == 'application/x-www-form-urlencoded'){
+            if($_SERVER['HTTP_CONTENT_TYPE'] == 'text/plain'|| $_SERVER['HTTP_CONTENT_TYPE'] == 'application/x-www-form-urlencoded' || $_SERVER['HTTP_CONTENT_TYPE'] == 'application/x-www-form-urlencoded; charset=UTF-8'){
                 $this->RAW = json_decode(file_get_contents("php://input",true),true);
                 if(!$this->RAW){
                     parse_str(file_get_contents("php://input"),$this->RAW);
