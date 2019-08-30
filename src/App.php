@@ -14,6 +14,7 @@ use pizepei\config\InitializeConfig;
 use pizepei\container\Container;
 use pizepei\deploy\LocalDeployServic;
 use pizepei\helper\Helper;
+use pizepei\model\db\Db;
 use pizepei\model\db\TableAlterLogModel;
 use pizepei\model\redis\Redis;
 use pizepei\terminalInfo\TerminalInfo;
@@ -569,7 +570,7 @@ class App extends Container
             $data['route'] = $this->Route()->atRoute;#解释路由
         }
         if (in_array('sql',$this->__INIT__['SYSTEMSTATUS'])){
-            $data['sql'] = isset($GLOBALS['DBTABASE']['sqlLog'])?$GLOBALS['DBTABASE']['sqlLog']:'';#历史slq
+            $data['sql'] = isset(Db::$DBTABASE['sqlLog'])?Db::$DBTABASE['sqlLog']:'';#历史slq
         }
         if (in_array('clientInfo',$this->__INIT__['SYSTEMSTATUS'])){ # clientInfo 客户端信息
             if ($this->__INIT__['clientInfo']){
