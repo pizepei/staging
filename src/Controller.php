@@ -52,22 +52,12 @@ class Controller
      */
     public function view(string $name = '',array$data = [],string $path='',string $type='html'):string
     {
-
-        if ($path ==''){
-            $path = $this->app->__TEMPLATE__;
-        }
-        /**
-         * 默认路径
-         */
-        if($name == '')
-        {
-            /**
-             * 自动拼接地址
-             * __TEMPLATE__命名空间
-             */
-        }else{
-
-        }
+        $path = $path==''?
+            $this->app->__TEMPLATE__.str_replace('\\',DIRECTORY_SEPARATOR,ltrim($this->app->Route()->controller, $this->app->__APP__.'\\')):
+            $this->app->__TEMPLATE__.$path.DIRECTORY_SEPARATOR;
+        $name = $name==''?
+            $this->app->Route()->method:
+            $name;
         $file = file_get_contents($path.$name.'.'.$type);
         if(!empty($data))
         {
