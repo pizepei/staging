@@ -53,7 +53,7 @@ class Controller
     public function view(string $name = '',array$data = [],string $path='',string $type='html'):string
     {
         $path = $path==''?
-            $this->app->__TEMPLATE__.str_replace('\\',DIRECTORY_SEPARATOR,ltrim($this->app->Route()->controller, $this->app->__APP__.'\\')):
+            $this->app->__TEMPLATE__.str_replace('\\',DIRECTORY_SEPARATOR,ltrim($this->app->Route()->controller, $this->app->__APP__.'\\')).DIRECTORY_SEPARATOR:
             $this->app->__TEMPLATE__.$path.DIRECTORY_SEPARATOR;
         $name = $name==''?
             $this->app->Route()->method:
