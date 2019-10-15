@@ -81,7 +81,7 @@ class App extends Container
      * 项目根目录  默认是上级目录层
      * @var int|string
      */
-    protected $DOCUMENT_ROOT = 1;
+    protected $DOCUMENT_ROOT = 2;
     /**
      * 应用配置
      * @var string
@@ -109,9 +109,10 @@ class App extends Container
      * Container constructor.
      * @param string $deployPath
      */
-    public function __construct(bool $exploit = false,$app_path='app',$pattern = 'ORIGINAL',$path='',$deployPath='')
+    public function __construct(bool $exploit = true,$app_path='app',$pattern = 'ORIGINAL',$path='',$deployPath='')
     {
-        $this->DOCUMENT_ROOT = dirname($_SERVER['DOCUMENT_ROOT'],$this->DOCUMENT_ROOT).DIRECTORY_SEPARATOR;#定义项目根目录
+        $this->DOCUMENT_ROOT = dirname($_SERVER['SCRIPT_FILENAME'],$this->DOCUMENT_ROOT).DIRECTORY_SEPARATOR;#定义项目根目录
+
         $this->__APP__ =  $app_path;            #应用路径
         $this->__EXPLOIT__ = $exploit;          #是否开发调试模式  (使用应用级别的因为在项目级别可能会地址SAAS模式下所有的租户都开启了调试模式)
         $this->__USE_PATTERN__ = $pattern;      #应用模式 ORIGINAL       SAAS
@@ -143,6 +144,7 @@ class App extends Container
         if(PHP_VERSION <= 7){
             throw new \Exception('PHP版本必须<=7,当前版本'.PHP_VERSION);
         }
+
         # 判断是否为开发调试模式
         if($this->__EXPLOIT__){
             $this->MyException($path,null,[],$this);
@@ -153,6 +155,7 @@ class App extends Container
             //error_reporting(0);
             //set_exception_handler(['MyException','production']);
         }
+
         # 设置初始化配置   服务器版本php_uname('s').php_uname('r');
         $path = $this->setDefine($pattern,$path,$deployPath); #关于配置：先读取deploy配置确定当前项目配置是从配置中心获取还是使用本地配置
 
@@ -179,12 +182,15 @@ class App extends Container
     protected function getInitDefine($path,$namespace,$deployPath)
     {
         $this->InitializeConfig($this); # 初始化配置类
+
         /**
          * 部署配置
          * 判断本地目录是否有配置，没有初始化
          *      有根据配置确定获取基础配置的途径
          */
+
         if(!file_exists($deployPath.'Deploy.php')){
+
             $Deploy = $this->InitializeConfig()->get_deploy_const();
             if(!file_exists($deployPath.'SetDeploy.php')){
                 $this->InitializeConfig()->set_config('SetDeploy',$Deploy,$deployPath,'config\\SetDeploy');
@@ -198,11 +204,14 @@ class App extends Container
          * 读取配置文件的路径暂时确定为项目标识项目标识定义在index入口文件
          */
         require($deployPath.'Deploy.php');
+
         $this->__EXPLOIT__ = \Deploy::__EXPLOIT__;//设置模式
+
         # 判断获取配置方式
         if(\Deploy::toLoadConfig == 'ConfigCenter')
         {
             if($this->__EXPLOIT__){
+
                 # 远程配置中心获取
                 $LocalDeployServic = new LocalDeployServic();
                 $data=[
@@ -339,7 +348,9 @@ class App extends Container
         $this->__RUN_PATTERN__ = $pattern;//运行模式  SAAS    ORIGINAL
 
         $namespace = 'config\\'.$this->__APP__; # 命名空间
+
         if($this->__RUN_PATTERN__ == 'ORIGINAL'){ # 传统模式
+
             $this->getInitDefine($this->__CONFIG_PATH__,$namespace,$this->__DEPLOY_CONFIG_PATH__);
         }else if($this->__RUN_PATTERN__ == 'SAAS'){
             if(empty($path)){
@@ -348,10 +359,12 @@ class App extends Container
             /**
              * 自定义路径
              */
+
             $path .= DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'].DIRECTORY_SEPARATOR.$this->__APP__.DIRECTORY_SEPARATOR;
             $namespace = 'config\\'.$this->__APP__;
             $this->getInitDefine($path,$namespace,$deployPath);
         }
+
         /**
          * 包含配置
          */
