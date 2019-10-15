@@ -476,6 +476,11 @@ class App extends Container
             case 'gif':
 
                 break;
+
+            case 'js':
+                $result = $data;
+                break;
+
             default:
                 echo $result = $this->returnJson($data,$debug);
         }

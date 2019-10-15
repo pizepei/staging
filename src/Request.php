@@ -655,7 +655,7 @@ class Request
         'json'=>['Content-Type'=>'application/json;charset=UTF-8'],
         'gif'=>['Content-Type'=>'image/gif'],
         'xml'=>['Content-Type'=>'text/xml'],
-
+        'js'=>['Content-Type'=>'application/javascript'],
     ];
 
 }
