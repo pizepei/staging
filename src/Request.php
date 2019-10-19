@@ -56,7 +56,13 @@ class Request
         $this->POST = $_POST;
         $this->PATH = [];
         $this->RAW = [];
+        $this->SERVER = $_SERVER;
 
+        # 判断请求头是否有数据  如果没有就判断是否有GET数据
+        if (!isset($this->SERVER[\Config::ACCOUNT['HEADERS_ACCESS_TOKEN_NAME']])){
+            $this->SERVER[\Config::ACCOUNT['HEADERS_ACCESS_TOKEN_NAME']] = $this->GET[\Config::ACCOUNT['GET_ACCESS_TOKEN_NAME']]??'';
+//            var_dump($this->SERVER[\Config::ACCOUNT['HEADERS_ACCESS_TOKEN_NAME']] ,\Config::ACCOUNT['HEADERS_ACCESS_TOKEN_NAME']);
+        }
         /**
          * 生成请求id
          */
@@ -69,7 +75,7 @@ class Request
          */
         if($app->__INIT__['pattern'] != 'exploit'){
             $_POST = null;
-            //$_GET = null;
+            $_GET = null;
             //$_COOKIE = null;
             //$this->FILES = $_FILES;
         }
