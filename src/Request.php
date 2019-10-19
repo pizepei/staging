@@ -314,13 +314,9 @@ class Request
         //var_dump($noteData);
         if($this->app->__INIT__['requestParam']){$this->unsetParam($data,$noteData,$type);}
         foreach($noteData as $k=>$v){
-            /**
-             * 判断类型
-             */
+            # 判断类型(普通数据类型)
             if(in_array($v['fieldRestrain'][0],($this->app->Route())::RequestParamDataType)  ){
-                /**
-                 * 参数过滤（约束）
-                 */
+                # 参数过滤（约束）
                 $this->eturnSubjoin($data,$k,$v,$type);
             }else if((in_array($v['fieldRestrain'][0],$this->app->Route()::ReturnFormat) && $type =='objectList') ){
                 if($v['fieldRestrain'][0] == 'object'){
@@ -357,7 +353,7 @@ class Request
                             /**
                              * 判断json_decode 后依然不是array 就不是规范的参数
                              */
-                            if(!is_array($data[$k])){$data[$k]=[[]];}
+                            if(!is_array($data[$k])){$data[$k]=[[]];return ;}
                         }
                         $this->paramFiltrationRecursive($data[$k],$noteData[$k]['substratum'],'objectList');
                     }
@@ -394,16 +390,15 @@ class Request
                     if($noteData['fieldRestrain'][0] == 'objectList'){
 
                         foreach($noteData['substratum'] as $kkk=>&$vvv){
+
                                 if(in_array($vvv['fieldRestrain'][0],$this->app->Route()::ReturnFormat)){
-                                    /**
-                                     *
-                                     */
+                                    #
                                     $return = $this->paramFiltrationRecursive($vv[$key],$noteData['substratum'],'objectList');
                                     //if($return){
                                         //$vv[$key][] = '';
                                     //}
                                 }else{
-                                    if(!isset($vv[$key])){$vv[$key] =[[]];}
+                                    if(!isset($vv[$key])){$vv[$key] =[];}# 如果内容是口 就返回 []
                                     foreach($vv[$key] as $kkkk=>&$vvvv){
                                         if(isset($vvvv[$kkk])) {settype($vvvv[$kkk],$vvv['fieldRestrain'][0]);}
                                     }
