@@ -339,7 +339,7 @@ class Request
                  */
                 if(isset($v['substratum'])){
                     if($v['fieldRestrain'][0] == 'object'){
-                        $data[$k] = $data[$k]??'';
+                        $data[$k] = $data[$k]??[];
 
                         if (!is_array($data[$k]))
                         {
