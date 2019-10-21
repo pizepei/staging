@@ -28,7 +28,11 @@ class BasicsDocument extends Controller
     {
 
         $type = $Request->path('type')==='index'?'document':$Request->path('type');
-        return $this->view($type);
+        $data = [
+            'VIEW_RESOURCE_PREFIX'=>\Deploy::VIEW_RESOURCE_PREFIX,
+            'MODULE_PREFIX'=>\Deploy::MODULE_PREFIX,
+        ];
+        return $this->view($type,$data);
     }
     /**
      * @return array [json]
@@ -91,11 +95,12 @@ class BasicsDocument extends Controller
      *          index [string required] 当前路径
      *          type [string required] 参数类型
      * @return array [json]
-     *      data [objectList] 数据
-     *          field [string] 参数名字
-     *          type [string] 参数数据类型
-     *          fieldExplain [string] 参数说明
-     *          fieldRestrain [string] 参数约束
+     *      data [object] 数据
+     *          item [objectList]
+     *              field [string] 参数名字
+     *              type [string] 参数数据类型
+     *              fieldExplain [string] 参数说明
+     *              fieldRestrain [string] 参数约束
      * @title  获取API的请求参数信息
      * @explain  根据点击侧边导航获取对应的获取API文档信息
      * @router get request-param
@@ -109,7 +114,9 @@ class BasicsDocument extends Controller
         if(!empty($info)){
             $info['index'] = $input['index'];
         }
+
         if(isset($info['Param']) && !empty($info['Param'])){
+
             $info = $info['Param'][$input['type']]['substratum']??[];
             if(!empty($info)){
 
@@ -119,7 +126,7 @@ class BasicsDocument extends Controller
         }else{
             $info = [];
         }
-        return $this->succeed($infoData??[],'获取'.$input['index'].'成功',0);
+        return $this->succeed(['item'=>$infoData??[]],'获取'.$input['index'].'成功',0);
     }
 
 
@@ -162,7 +169,7 @@ class BasicsDocument extends Controller
         }else{
             $info = [];
         }
-        return $this->succeed($infoData??[],'获取'.$input['index'].'成功',0);
+        return $this->succeed(['item'=>$infoData??[]],'获取'.$input['index'].'成功',0);
     }
 
 
