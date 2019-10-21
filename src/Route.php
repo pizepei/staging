@@ -47,6 +47,11 @@ class Route
      * debug 调试模式    auth  权限
      */
     const ReturnAddition =  ['debug','auth'];
+    /**
+     * 路由资源类型  api 为默认传统类型    microservice为微服务类型（在进入控制器到控制器的权限判断时继续请求数据的单独处理 在文档中进行特殊显示）
+     */
+    const resourceType = ['api','microservice'];
+
 
     /**
      * 路由参数附加参数
@@ -506,6 +511,7 @@ class Route
         preg_match('/@authGroup[\s]{1,6}(.*?)[\r\n]/s',$result[1],$authGroup);
         preg_match('/@baseAuth[\s]{1,6}(.*?)[\r\n]/s',$result[1],$baseAuth);
 
+
         # 处理权限
         if(isset($baseAuth[1]))
         {
@@ -709,18 +715,21 @@ class Route
                     /**
                      * 切割详细信息
                      */
-                    preg_match('/@explain[\s]{1,4}(.*?)[*][\s]{1,4}@/s',$v,$routeExplain);//路由解释说明（备注）
-                    preg_match('/@title[\s]{1,4}(.*?)@/s',$v,$routeTitle);//获取路由名称
-                    preg_match('/@param[\s]{1,4}(.*?)@/s',$v,$routeParam);//请求参数
-                    preg_match('/@return[\s]{1,4}(.*?)@/s',$v,$routeReturn);//获取返回参数
+                    preg_match('/@explain[\s]+(.*?)[*][\s]+@/s',$v,$routeExplain);//路由解释说明（备注）
+                    preg_match('/@title[\s]+(.*?)@/s',$v,$routeTitle);//获取路由名称
+                    preg_match('/@param[\s]+(.*?)@/s',$v,$routeParam);//请求参数
+                    preg_match('/@return[\s]+(.*?)@/s',$v,$routeReturn);//获取返回参数
 
 
-                    preg_match('/@Author[\s]{1,4}(.*?)[\s\n]{1,8}[*]{1}[\s\n]{1,8}@{0,1}/s',$v,$Author);//方法创建人
-                    preg_match('/@Created[\s]{1,4}(.*?)[\s\n]{1,8}[*]{1}[\s\n]{1,8}@{0,1}/s',$v,$Created);//方法创建时间
+                    preg_match('/@Author[\s]+(.*?)[\s\n]{1,8}[*]{1}[\s\n]{1,8}@{0,1}/s',$v,$Author);//方法创建人
+                    preg_match('/@Created[\s]+(.*?)[\s\n]{1,8}[*]{1}[\s\n]{1,8}@{0,1}/s',$v,$Created);//方法创建时间
 
-                    preg_match('/@authGroup[\s]{1,4}(.*?)[\r\n]/s',$v,$routeAuthGroup);//路由的权限分组
-                    preg_match('/@authExtend[\s]{1,4}(.*?)[\r\n]/s',$v,$routeAuthExtend);//权限扩展信息
-                    preg_match('/@baseAuth[\s]{1,6}(.*?)[\r\n]/s',$v,$routeBaseAuth);//路由上定义的权限控制器
+                    preg_match('/@resourceType[\s]+(.*?)[\r\n]/s',$v,$resourceType);# 路由注意类型 如果默认是API资源  microservice为微服务应用API资源
+                    if (isset($resourceType[1]) && !in_array($resourceType[1],self::resourceType)){ throw new \Exception('resourceType 类型错误['.$baseErrorNamespace.']');}
+
+                    preg_match('/@authGroup[\s]+(.*?)[\r\n]/s',$v,$routeAuthGroup);//路由的权限分组
+                    preg_match('/@authExtend[\s]+(.*?)[\r\n]/s',$v,$routeAuthExtend);//权限扩展信息
+                    preg_match('/@baseAuth[\s]+(.*?)[\r\n]/s',$v,$routeBaseAuth);//路由上定义的权限控制器
 
                     $tag = md5($namespace[1].'\\'.$class[1].$function['name']);//路由标识（控制器方法级别）
 
@@ -760,7 +769,7 @@ class Route
                     if($routeParam != []){
                         preg_match('/(.*?)[ ]{0,10}[\r\n]/s',$routeParam,$routeParamObject);//请求参数
                         $routeParamObject = $routeParamObject[1]??'';
-                        if(empty($routeParamObject)){ throw new \Exception('设置了@param但是没有传入对象信息');}
+                        if(empty($routeParamObject)){ throw new \Exception('设置了@param但是没有传入对象信息['.$baseErrorNamespace.']');}
                         /**
                          * 判断对象信息
                          * 默认常规array
@@ -850,7 +859,7 @@ class Route
                      * 准备路由数据
                      */
                     $noteRouter = [
-
+                        'resourceType'=>$resourceType[1]??'api',
                         'router'=>$routerStr,//路由
                         'tag'=>$tag,//tag路由标识
                         'PathNote'=>$PathNote??'',//简单路径路由用来快速匹配
@@ -873,9 +882,9 @@ class Route
 
                     ];
                     if($routerType == 'Rule'){
-                        $this->noteRouter[$routerData[0]][$routerType][$routerStr] = $noteRouter;
+                        $this->noteRouter[$routerData[0]][$routerType][$routerStr] = $noteRouter;# 传统路由
                     }else{
-                        $this->noteRouter[$routerData[0]][$routerType][$matchStr] = $noteRouter;
+                        $this->noteRouter[$routerData[0]][$routerType][$matchStr] = $noteRouter;#路径路由
                     }
 
 
@@ -884,6 +893,7 @@ class Route
                      * 【请求方法#路由路径】=【请求参数，请求返回数据，控制器方法】
                      */
                     $routerDocumentData[$routerData[0].'#'.$routerStr] =[
+
                         'requestType'=>$routerData[0],//请求类型  get  post等等
                         'routerType'=>$routerType,//路由类型
                         'matchStr'=>$matchStr??'',//请求参数
