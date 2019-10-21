@@ -25,18 +25,7 @@ class  Authority extends Container
     protected $bind = [
 
     ];
-    public function __construct(string $son = '')
-    {
-        if ($son !==''){
-            # 判断是否存在
-            if($son::bind !== [])
-            {
-                #合并
-                $this->bind = array_merge($son::bind ,$this->bind);
-            }
-        }
-        self::$containerInstance[static::CONTAINER_NAME] = $this;
-    }
+
 //    /**
 //     * Authority constructor.
 //     * @param $pattern
