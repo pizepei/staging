@@ -313,6 +313,10 @@ class Request
          */
         //var_dump($noteData);
         if($this->app->__INIT__['requestParam']){$this->unsetParam($data,$noteData,$type);}
+        if (empty($noteData)){
+            $data = [];
+            return [];
+        }
         foreach($noteData as $k=>$v){
             # 判断类型(普通数据类型)
             if(in_array($v['fieldRestrain'][0],($this->app->Route())::RequestParamDataType)  ){
