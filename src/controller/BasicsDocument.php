@@ -26,13 +26,13 @@ class BasicsDocument extends Controller
      */
     public function index(Request $Request)
     {
-
-        $type = $Request->path('type')==='index'?'document':$Request->path('type');
+        $name = $Request->path('type')==='index'?'document':$Request->path('type');
         $data = [
             'VIEW_RESOURCE_PREFIX'=>\Deploy::VIEW_RESOURCE_PREFIX,
             'MODULE_PREFIX'=>\Deploy::MODULE_PREFIX,
         ];
-        return $this->view($type,$data);
+        $path = dirname(__DIR__).DIRECTORY_SEPARATOR.'template'.DIRECTORY_SEPARATOR.'Document'.DIRECTORY_SEPARATOR;
+        return $this->view($name,$data,$path,'html',false);
     }
     /**
      * @return array [json]
@@ -46,7 +46,6 @@ class BasicsDocument extends Controller
     {
         return $this->app->Route()->noteBlock;
     }
-
     /**
      * @Author pizepei
      * @Created 2019/2/12 23:01
