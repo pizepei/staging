@@ -893,7 +893,7 @@ class Route
                      * 【请求方法#路由路径】=【请求参数，请求返回数据，控制器方法】
                      */
                     $routerDocumentData[$routerData[0].'#'.$routerStr] =[
-
+                        'resourceType'=>$resourceType[1]??'api',
                         'requestType'=>$routerData[0],//请求类型  get  post等等
                         'routerType'=>$routerType,//路由类型
                         'matchStr'=>$matchStr??'',//请求参数

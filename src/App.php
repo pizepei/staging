@@ -6,6 +6,8 @@
  * Time: 16:30
  * @title 框架容器类
  */
+declare(strict_types=1);
+
 namespace pizepei\staging;
 
 

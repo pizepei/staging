@@ -6,6 +6,7 @@
  * Time: 17:25
  * @title 异常处理类配合set_exception_handler
  */
+declare(strict_types=1);
 
 namespace pizepei\staging;
 

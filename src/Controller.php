@@ -24,12 +24,18 @@ class Controller
     {
         $this->app = $app;
         $Route = $this->app->Route();
-        # 判断是否有设置权限控制器
+        # 判断是否有设置权限资源器
+        #  baseAuth[0] 是权限资源类   baseAuth[1] 类的方法
         if(isset($Route->baseAuth[0]) && isset($Route->baseAuth[1]) && $Route->baseAuth[1] !='public')
         {
             $className = $Route->baseAuth[0];
+            # 从Authority子容器中实例化一个权限资源对象   实例化时传入的参数有等 思考确定
             $Authority = $this->app->Authority()->$className('common',$this->app);
+            # 实例化对象后 调用start方法启动权限处理
             $authResult = $Authority->start($Route->baseAuth[1]);
+            # 权限控资源对象中获取必要的数据到控制器中
+                # 思考：是否一些时间不需要放到控制器中？
+                # 思考：是否直接访问权限资源对象就可以？
             $this->authExtend = $Authority->authExtend;
             $this->Payload = $Authority->Payload;
         }

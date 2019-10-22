@@ -28,6 +28,10 @@ class BasicsDocument extends Controller
     {
         $name = $Request->path('type')==='index'?'document':$Request->path('type');
         $data = [
+            'layui.css'=>'https://www.layuicdn.com/layui-v2.5.5/css/layui.css',
+            'layui.js'=>'https://www.layuicdn.com/layui-v2.5.5/layui.js',
+            'local.layui.css'=>\Deploy::VIEW_RESOURCE_PREFIX.'/start/layui/css/layui.css',
+            'local.layui.js'=>\Deploy::VIEW_RESOURCE_PREFIX.'/start/layui/layui.js',
             'VIEW_RESOURCE_PREFIX'=>\Deploy::VIEW_RESOURCE_PREFIX,
             'MODULE_PREFIX'=>\Deploy::MODULE_PREFIX,
         ];
