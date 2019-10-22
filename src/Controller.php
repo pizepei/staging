@@ -45,16 +45,23 @@ class Controller
     }
 
     /**
-     * 视图
-     * @param string $name
-     * @param array  $data
-     * @return string|array
+     * @Author 皮泽培
+     * @Created 2019/10/22 10:53
+     * @param string $name 文件名称
+     * @param array $data  需要替换的数据
+     * @param string $path  文件路径
+     * @param string $type  文件扩展名
+     * @param bool $safe    加载文件路径时是否使用安全模式
+     * @return string
+     * @title  视图
+     * @explain 视图加载
+     * @throws \Exception
      */
-    public function view(string $name = '',array$data = [],string $path='',string $type='html'):string
+    public function view(string $name = '',array$data = [],string $path='',string $type='html',bool $safe=true):string
     {
         $path = $path==''?
             $this->app->__TEMPLATE__.str_replace('\\',DIRECTORY_SEPARATOR,ltrim($this->app->Route()->controller, $this->app->__APP__.'\\')).DIRECTORY_SEPARATOR:
-            $this->app->__TEMPLATE__.$path.DIRECTORY_SEPARATOR;
+            ($safe?$this->app->__TEMPLATE__:'').$path.DIRECTORY_SEPARATOR;
         $name = $name==''?
             $this->app->Route()->method:
             $name;
