@@ -414,6 +414,7 @@ class Route
             return $controller->$function();
         }else{
             $this->app->Request()->PATH = $PathArray??[]; # 设置匹配到的路径参数
+            #var_dump($this->app->Request()->PATH);
             return $controller->$function($this->app->Request());
         }
     }

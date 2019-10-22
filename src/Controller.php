@@ -30,9 +30,9 @@ class Controller
         {
             $className = $Route->baseAuth[0];
             # 从Authority子容器中实例化一个权限资源对象   实例化时传入的参数有等 思考确定
-            $Authority = $this->app->Authority()->$className('common',$this->app);
+            $Authority = $this->app->Authority()->$className($this->app,'common');
             # 实例化对象后 调用start方法启动权限处理
-            $authResult = $Authority->start($Route->baseAuth[1]);
+            $authResult = $Authority->start($Route->baseAuth[1],[],[]);
             # 权限控资源对象中获取必要的数据到控制器中
                 # 思考：是否一些时间不需要放到控制器中？
                 # 思考：是否直接访问权限资源对象就可以？
