@@ -231,25 +231,26 @@
                 ,dataName: 'data' //规定数据列表的字段名称，默认：data
             };
             var eachData = {
-                "get":"GET请求参数",
-                "raw":"RAW请求参数",
-                "path":"PATH请求参数",
-                "json":"返回参数JSON",
-                "xml":"返回参数XML",
+                "get":{'name':"GET请求参数",'id':'request-table-','url':"request-param.json"},
+                "raw":{'name':"RAW请求参数",'id':'request-table-','url':"request-param.json"},
+                "post":{'name':"POST请求参数",'id':'request-table-','url':"request-param.json"},
+                "path":{'name':"PATH请求参数",'id':'request-table-','url':"request-param.json"},
+                "json":{'name':"返回参数JSON",'id':'return-table-','url':"return-param.json"},
+                "xml":{'name':"返回参数XML",'id':'return-table-','url':"return-param.json"},
             };
             layui.each(eachData, function(index, item){
-
+                console.log('#'+item.name+index);
                 //这里获取到数据执行显示
                 table.render({
-                    elem: '#request-table-get'
-                    ,url:'/{{MODULE_PREFIX}}/document/request-param.json'
+                    elem: '#'+item.id+index
+                    ,url:'/{{MODULE_PREFIX}}/document/'+item.url
                     ,where:{father:elem.context.rel,index:elem.context.name,type:index}
                     ,response: response
                     // ,toolbar: '#toolbarDemo-get'
                     ,title: elem.context.rel+'-'+elem.context.name+'-'+'get'
                     ,cols: [
                         [ //标题栏
-                            {align: 'center', title: '<span class="layui-badge layui-bg-green">item</span>',width:'100%', colspan: 4}
+                            {align: 'center', title: '<span class="layui-badge layui-bg-green">'+item.name+'</span>',width:'100%', colspan: 4}
                         ],
                         [
                             {field: 'field', title: '字段', width:'32%',style:'color:#009688;'}
