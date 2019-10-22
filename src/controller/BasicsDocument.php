@@ -58,6 +58,7 @@ class BasicsDocument extends Controller
      * @return array [json]
      *      data [object] 控制器数据
      *          fatherInfo [object] 控制器数据
+     *              index [string] 命名空间
      *              title [string] 控制器标题
      *              class [string] 控制器名
      *              User [string] 创建者
@@ -65,7 +66,7 @@ class BasicsDocument extends Controller
      *              authGroup [string] 控制器权限分组
      *              baseAuth [string] 控制器根权限
      *          info [raw] 详细数据
-     * @title  获取API文档信息
+     * @title  控制器文档信息
      * @explain  根据点击侧边导航获取对应的获取API文档信息
      * @router get index-nav debug:true
      * @throws \Exception
@@ -73,7 +74,7 @@ class BasicsDocument extends Controller
     public function getNav(Request $Request)
     {
         $input = $Request->input();
-        $fatherInfo = $this->app->Route()->noteBlock[$input['father']];
+        $fatherInfo = $this->app->Route()->noteBlock[$input['father']]??[];
         $fatherInfo['index'] = $input['father'];
         $info = $this->app->Route()->noteBlock[$input['father']]['route'][$input['index']]??null;
         if(!empty($info)){
@@ -95,8 +96,7 @@ class BasicsDocument extends Controller
      *          index [string required] 当前路径
      *          type [string required] 参数类型
      * @return array [json]
-     *      data [object] 数据
-     *          item [objectList]
+     *      data [objectList] 数据
      *              field [string] 参数名字
      *              type [string] 参数数据类型
      *              fieldExplain [string] 参数说明
@@ -124,9 +124,9 @@ class BasicsDocument extends Controller
                 $infoData = $Document ->getParamInit($info);
             }
         }else{
-            $info = [];
+            $infoData = [];
         }
-        return $this->succeed(['item'=>$infoData??[]],'获取'.$input['index'].'成功',0);
+        return $this->succeed($infoData??[],'获取'.$input['index'].'成功',0);
     }
 
 
@@ -169,7 +169,7 @@ class BasicsDocument extends Controller
         }else{
             $info = [];
         }
-        return $this->succeed(['item'=>$infoData??[]],'获取'.$input['index'].'成功',0);
+        return $this->succeed($infoData??[],'获取'.$input['index'].'成功',0);
     }
 
 
