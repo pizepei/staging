@@ -476,15 +476,16 @@ class App extends Container
                 $result = $this->returnHtml($data,$debug);
                 break;
             case 'gif':
-
+                $result = $data;
                 break;
             case 'js':
+                $result = $data;
                 break;
             case 'txt':
-
+                $result = $data;
                 break;
             case 'text':
-
+                $result = $data;
                 break;
 
             default:
