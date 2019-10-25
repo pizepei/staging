@@ -655,6 +655,8 @@ class Request
      */
     const Header = [
         'txt'=>['Content-Type'=>'text/plain'],
+        'string'=>['Content-Type'=>'text/plain'],
+        'text'=>['Content-Type'=>'text/plain'],
         'png'=>['Content-Type'=>'image/png'],
         'html'=>['Content-Type'=>'text/html; charset=UTF-8'],
         'json'=>['Content-Type'=>'application/json;charset=UTF-8'],

@@ -470,7 +470,7 @@ class App extends Container
                 $result = $this->returnJson($data,$debug);
                 break;
             case 'xml':
-
+                $result = $data;
                 break;
             case 'html':
                 $result = $this->returnHtml($data,$debug);
@@ -478,13 +478,17 @@ class App extends Container
             case 'gif':
 
                 break;
-
             case 'js':
-                $result = $data;
+                break;
+            case 'txt':
+
+                break;
+            case 'text':
+
                 break;
 
             default:
-                echo $result = $this->returnJson($data,$debug);
+                $result = $data;
         }
         if (isset($result)){
             echo $result??'';
