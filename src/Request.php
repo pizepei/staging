@@ -319,7 +319,7 @@ class Request
         }
         foreach($noteData as $k=>$v){
             # 判断类型(普通数据类型)
-            if(in_array($v['fieldRestrain'][0],($this->app->Route())::RequestParamDataType)  ){
+            if(in_array($v['fieldRestrain'][0],($this->app->Route())::RequestParamDataType) ||array_key_exists($v['fieldRestrain'][0],($this->app->Route())->ReturnSubjoin)   ){
                 # 参数过滤（约束）
                 $this->eturnSubjoin($data,$k,$v,$type);
             }else if((in_array($v['fieldRestrain'][0],$this->app->Route()::ReturnFormat) && $type =='objectList') ){
@@ -441,22 +441,18 @@ class Request
             }
         }else if($type =='object'){//非索引array
             /**
-             * 判断是否存在多的
-             */
-            //if(count($noteData['fieldRestrain']) <= 1){
-            /**
              * 进行数据类型转换 $data = null;isset($data);返回false
              */
             if(isset($data[$key]) && $noteData['fieldRestrain'][0] !=='object' && $noteData['fieldRestrain'][0] !=='objectList' && $data[$key] === null)
             {
+
                 if(is_array($data[$key]))
                 {
                     $data[$key] = json_encode($data[$key],LIBXML_NOCDATA);
                 }
                 settype($data[$key],$noteData['fieldRestrain'][0]);
             }
-            //}
-            unset($noteData['fieldRestrain'][0]);
+            # unset($noteData['fieldRestrain'][0]);
             foreach($noteData['fieldRestrain'] as $k=>$v){
                 if(isset($this->app->Route()->ReturnSubjoin[$v])){
                     if(!isset($data[$key]) || $data[$key] ==''){
