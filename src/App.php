@@ -195,7 +195,7 @@ class App extends Container
 
             $Deploy = $this->InitializeConfig()->get_deploy_const();
             if(!file_exists($deployPath.'SetDeploy.php')){
-                $this->InitializeConfig()->set_config('SetDeploy',$Deploy,$deployPath,'config\\SetDeploy');
+                $this->InitializeConfig()->set_config('SetDeploy',$Deploy,$deployPath,'config');
             }
             # 合并写入
             $Deploy = array_merge($Deploy,$this->InitializeConfig()->get_const('config\\SetDeploy'));
