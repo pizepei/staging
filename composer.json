@@ -17,8 +17,7 @@
         "pizepei/service": "dev-master",
         "pizepei/deploy": "dev-master",
         "pizepei/random-information": "dev-master",
-        "pizepei/container": "dev-master",
-        "monolog/monolog": "^1.23"
+        "pizepei/container": "dev-master"
     },
     "autoload": {
         "psr-4": {
