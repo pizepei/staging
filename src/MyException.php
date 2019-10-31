@@ -330,8 +330,9 @@ class MyException
     private function createLog($result,string $Logger='')
     {
         // 创建日志频道
-        $log = new Logger('name');
-        $log->pushHandler(new StreamHandler($this->path.'/your.log', Logger::WARNING));
+        #  "monolog/monolog": "^1.23"
+//        $log = new Logger('name');
+//        $log->pushHandler(new StreamHandler($this->path.'/your.log', Logger::WARNING));
         // 添加日志记录
         //$log->addWarning('Foo',$this->exploitData());
         //$log->addError('Bar',$result);

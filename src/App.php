@@ -108,6 +108,13 @@ class App extends Container
      */
     protected $__OS__ = 'linux';
     /**
+     * 客户端IP
+     * @var array|false|mixed|string
+     */
+    protected $__CLIENT_IP__ = '';
+
+
+    /**
      * Container constructor.
      * @param string $deployPath
      */
@@ -121,6 +128,8 @@ class App extends Container
         if (DIRECTORY_SEPARATOR ==='\\'){
             $this->__OS__ = 'widnows';
         }
+
+        $this->__CLIENT_IP__ = terminalInfo::get_ip();  # 客户端 IP
         #应用级别配置
         $pathFof = '';
         if ($this->__USE_PATTERN__ == 'SAAS'){
@@ -603,7 +612,7 @@ class App extends Container
                 $data['clientInfo'] = terminalInfo::agentInfoCache(true);
 
             }else{
-                $data['clientInfo'] = terminalInfo::get_ip();
+                $data['clientInfo'] = $this->__CLIENT_IP__;
             }
         }
         if (in_array('system',$this->__INIT__['SYSTEMSTATUS'])){ # 系统运行状态

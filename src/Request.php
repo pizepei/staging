@@ -116,12 +116,13 @@ class Request
         }
         return $this->PATH[$name]??null;
     }
-    protected $inputType = ['post','get','raw'];
+    protected $inputType = ['post','get','raw','xml'];
     protected $status = [
         'GET'=>false,
         'POST'=>false,
         'PATH'=>false,
         'RAW'=>false,
+        'XML'=>false,
     ];
 
     /**
@@ -176,6 +177,10 @@ class Request
             if($TypeS == 'RAW'){
                 $this->getRaw();
             }
+            if($TypeS == 'XML'){
+                $this->XML = $this->xmlToArray(file_get_contents("php://input",true));
+            }
+
             if(isset($this->app->Route()->atRouteData['Param']['raw']['fieldRestrain'][1])){
                 if(isset($this->app->Route()->atRouteData['Param']['raw']['fieldRestrain'][1]) == 'raw'){
                     /**
@@ -183,8 +188,8 @@ class Request
                      */
                 }
             }else{
-
                 $this->paramFiltration($this->$TypeS,$type);
+
             }
             /**
              * 处理完成修改状态
@@ -251,6 +256,7 @@ class Request
      */
     protected function paramFiltration(&$data,$type)
     {
+        if ($type =='xml'){$type = 'raw';}
         if(!isset($this->app->Route()->atRouteData['Param'])){
             $data = null;
             return false;
@@ -264,6 +270,7 @@ class Request
          * 获取数据格式
          */
         $format = $Param['fieldRestrain'][0];
+        if ($format === 'xml' ){$format = 'object';}
         $noteData = &$Param['substratum'];
         $this->paramFiltrationRecursive($data,$noteData,$format);
     }
