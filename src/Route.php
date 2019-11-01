@@ -51,7 +51,11 @@ class Route
      * 路由资源类型  api 为默认传统类型    microservice为微服务类型（在进入控制器到控制器的权限判断时继续请求数据的单独处理 在文档中进行特殊显示）
      */
     const resourceType = ['api','microservice'];
-
+    /**
+     * 当前路由的资源类型
+     * @var string
+     */
+    protected $resourceType = 'api';
 
     /**
      * 路由参数附加参数
@@ -396,6 +400,7 @@ class Route
         $this->atRoute = &$RouteData['router'];             #路由
         $this->ReturnType = &$RouteData['ReturnType'];      #路由请求类型
 
+        $this->resourceType = &$RouteData['resourceType'];    #资源类型
         $this->RouterAdded = &$RouteData['RouterAdded'];    #附加配置
         $this->atRouteData = &$RouteData;                   #路由
         $this->baseAuth = &$RouteData['baseAuth']??[];      #权限控制器

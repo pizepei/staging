@@ -17,6 +17,17 @@ class Controller
      */
     protected $app = null;
     /**
+     * 权限路由的实例
+     * @var Authority|null
+     */
+    protected $Authority = null;
+    /**
+     * 权限控制器 start()方法返回数据
+     * @var null
+     */
+    protected $authResult = null;
+
+    /**
      * Controller constructor.
      * @param App $app
      */
@@ -30,14 +41,14 @@ class Controller
         {
             $className = $Route->baseAuth[0];
             # 从Authority子容器中实例化一个权限资源对象   实例化时传入的参数有等 思考确定
-            $Authority = $this->app->Authority()->$className($this->app,'common');
+            $this->Authority = $this->app->Authority()->$className($this->app,'common');
             # 实例化对象后 调用start方法启动权限处理
-            $authResult = $Authority->start($Route->baseAuth[1],[],[]);
+            $this->authResult = $this->Authority->start($Route->baseAuth[1],[],[]);
             # 权限控资源对象中获取必要的数据到控制器中
                 # 思考：是否一些时间不需要放到控制器中？
                 # 思考：是否直接访问权限资源对象就可以？
-            $this->authExtend = $Authority->authExtend;
-            $this->Payload = $Authority->Payload;
+            $this->authExtend = $this->Authority->authExtend;
+            $this->Payload = $this->Authority->Payload;
         }
     }
     /**
@@ -101,6 +112,11 @@ class Controller
      */
     public function succeed($data,$msg='',$code='',$count=0)
     {
+        # 判断是否是微服务资源路由，是就写入日志
+        if ($this->app->Route()->resourceType === 'microservice'){
+            $this->Authority->setMsAppsResponseLog($data);
+        }
+
         $result =  [
             $this->app->__INIT__['SuccessReturnJsonMsg']['name']=>$msg==''?$this->app->__INIT__['SuccessReturnJsonMsg']['value']:$msg,
             $this->app->__INIT__['SuccessReturnJsonCode']['name']=>$code==''?$this->app->__INIT__['SuccessReturnJsonCode']['value']:$code,
@@ -126,6 +142,9 @@ class Controller
      */
     public function error($data,$msg='',$code='')
     {
+        if ($this->app->Route()->resourceType === 'microservice'){
+            $this->Authority->setMsAppsResponseLog($data);
+        }
         $result =  [
             $this->app->__INIT__['ErrorReturnJsonMsg']['name']=>$msg==''?$this->app->__INIT__['ErrorReturnJsonMsg']['value']:$msg,
             $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$code==''?$this->app->__INIT__['ErrorReturnJsonCode']['value']:$code,
