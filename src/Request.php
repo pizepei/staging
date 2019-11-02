@@ -640,32 +640,5 @@ class Request
         }
         return $http.$_SERVER['HTTP_HOST'].$route;
     }
-    /**
-     * 自定义响应header
-     */
-    public function setHeader($header)
-    {
-        if($this->app->__PATTERN__ === 'WEB'){
-            foreach ($header as $k=>$v){
-                @header("{$k}: {$v}");
-            }
-        }
-    }
-
-    /**
-     * Content-Type
-     * http://tool.oschina.net/commons/
-     */
-    const Header = [
-        'txt'=>['Content-Type'=>'text/plain'],
-        'string'=>['Content-Type'=>'text/plain'],
-        'text'=>['Content-Type'=>'text/plain'],
-        'png'=>['Content-Type'=>'image/png'],
-        'html'=>['Content-Type'=>'text/html; charset=UTF-8'],
-        'json'=>['Content-Type'=>'application/json;charset=UTF-8'],
-        'gif'=>['Content-Type'=>'image/gif'],
-        'xml'=>['Content-Type'=>'text/xml'],
-        'js'=>['Content-Type'=>'application/javascript'],
-    ];
 
 }

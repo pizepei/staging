@@ -51,6 +51,7 @@ class MyException
         if($exception){
             $this->PDO_exception_handler($exception);
         }
+
         @set_exception_handler(array($this, 'exception_handler'));
         @set_error_handler(array($this, 'error_handler'));
         //throw new Exception('DOH!!');error_get_last
@@ -116,20 +117,21 @@ class MyException
     public function exception_handler($exception) {
         header("Content-Type:application/json;charset=UTF-8");
         $this->exception = $exception;
-        /**
-         * 判断是否是开发模式
-         */
-        if($this->app->__EXPLOIT__){
-            /**
-             * 开发模式
-             */
-            $this->exploit($exception);
-        }else{
-            /**
-             * 生产模式
-             */
-            $this->production($exception);
+        if (!empty($this->app->Response()->ResponseData)){
+            echo $this->app->Response()->ResponseData;
         }
+
+
+//        /**
+//         * 判断是否是开发模式
+//         */
+//        if($this->app->__EXPLOIT__){
+//            # 开发模式
+//            $this->exploit($exception);
+//        }else{
+//            # 生产模式
+//            $this->production($exception);
+//        }
     }
     /**
      * PDO
@@ -144,6 +146,7 @@ class MyException
          * 判断是否是开发模式
          */
         if($this->app->__EXPLOIT__){
+
             /**
              * 开发模式
              */

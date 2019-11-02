@@ -411,7 +411,7 @@ class Route
         }
 
         # 避免在控制器中有输出导致Cannot modify header information - headers already sent by错误=>因此在控制器实例化前设置头部
-        $this->app->Request()->setHeader($this->app->Request()::Header[$this->ReturnType]);
+        $this->app->Response()->setHeader($this->ReturnType);
         $this->app->Request()->PATH = $PathArray??[]; # 设置匹配到的路径参数
         # 实例化控制器
         $controller = new $RouteData['Namespace']($this->app);

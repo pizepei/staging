@@ -1,0 +1,350 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: pizepei
+ * Date: 2019/11/02
+ * Time: 16:30
+ * @title 框架统一响应输出类
+ */
+declare(strict_types=1);
+
+namespace pizepei\staging;
+
+use GuzzleHttp\Exception\BadResponseException;
+use pizepei\model\db\Db;
+use pizepei\model\redis\Redis;
+use pizepei\terminalInfo\TerminalInfo;
+
+/**
+ * 为了框架的安全性和便捷性 在生产环境框架内业务代码（包括异常处理）不允许直接echo 或者var_dump  所有的响应信息通用使用本类处理
+ * 在业务代码中可以直接使用本类结束业务流程直接输出响应(控制器结束)
+ * Class Response
+ * @package pizepei\staging
+ */
+class Response
+{
+    /**
+     * app容器
+     * @var App | null
+     */
+    private $app = null;
+
+    /**
+     * 提示
+     * @var string| null
+     */
+    private $message = null;
+    /**
+     * 记录
+     * @var array
+     */
+    private $record = [];
+
+    /**
+     * 是否是错误或者异常
+     * @var bool
+     */
+    private $error = true;
+
+    private $Exception = false;
+
+    /**
+     * Response constructor.
+     * @param App $app
+     */
+    public function __construct(App $app)
+    {
+        $this->app = $app;
+    }
+
+    public function __get($name)
+    {
+        // TODO: Implement __get() method.
+        if (isset($this->$name)){return $this->$name;}
+        return null;
+
+    }
+
+    /**
+     * @Author 皮泽培
+     * @Created 2019/11/2 16:02
+     * @param string $message
+     * @return array [json] 定义输出返回数据
+     * @title  设置message提示
+     * @explain 重复实现会被覆盖
+     * @throws \Exception
+     */
+    public function message(string $message)
+    {
+        $this->message = $message;
+    }
+    /**
+     * @Author 皮泽培
+     * @Created 2019/11/2 17:00
+     * @param $data
+     * @title  运行记录 一般是对业务进行说明 方便理解业务处理异常
+     * @explain 记录可以是array 或者string 会被按照先后顺序记录
+     * @throws \Exception
+     */
+    public function record($data){
+        $this->record[] = $data;
+    }
+
+
+
+
+
+    # 有控制器错误输出  有异常处理  有控制器正常输出   有资源输出
+
+    # 可以先把需要响应的数据放入当前对象
+    # 当前对象有统一的数据规格
+    # 在生产时,不再直接拿异常数据显示 选择优先收集的信息
+
+    # 业务错误 或者处理结束
+
+    # 系统异常  系统异常使用Exception
+
+
+
+    /**
+     * @Author pizepei
+     * @Created 2019/2/15 23:14
+     * @Author pizepei
+     * @Created 2019/2/15 23:02
+     * @param     $data
+     * @param     $msg 状态说明
+     * @param     $code 状态码
+     * @param int $count
+     * @return array
+     * @title  控制器成功返回
+     */
+    public function succeed($data,$msg='',$code='',$count=0)
+    {
+        # 判断是否是微服务资源路由，是就写入日志
+        if ($this->app->Route()->resourceType === 'microservice'){
+            $this->Authority->setMsAppsResponseLog($data);
+        }
+        $result =  [
+            $this->app->__INIT__['SuccessReturnJsonMsg']['name']=>$msg==''?$this->app->__INIT__['SuccessReturnJsonMsg']['value']:$msg,
+            $this->app->__INIT__['SuccessReturnJsonCode']['name']=>$code==''?$this->app->__INIT__['SuccessReturnJsonCode']['value']:$code,
+            $this->app->__INIT__['ReturnJsonData']=>$data,
+        ];
+        if($count>0){
+            $result[$this->app->__INIT__['ReturnJsonCount']] = $count;
+        }else{
+            $result[$this->app->__INIT__['ReturnJsonCount']] = is_array($data)?count($data):0;
+        }
+        $this->error = false;
+        $this->output($result);
+    }
+
+    /**
+     * @Author pizepei
+     * @Created 2019/2/15 23:09
+     *
+     * @param $data 错误详细信息
+     * @param $msg  错误说明
+     * @param $code  错误代码
+     * @return array
+     * @title  控制器错误返回
+     */
+    public function error($data,$msg='',$code='')
+    {
+        if ($this->app->Route()->resourceType === 'microservice'){
+            $this->Authority->setMsAppsResponseLog($data);
+        }
+        $result =  [
+            $this->app->__INIT__['ErrorReturnJsonMsg']['name']=>$msg==''?$this->app->__INIT__['ErrorReturnJsonMsg']['value']:$msg,
+            $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$code==''?$this->app->__INIT__['ErrorReturnJsonCode']['value']:$code,
+            $this->app->__INIT__['ReturnJsonData']=>$data,
+        ];
+        $this->error = true;
+        $this->output($result);
+    }
+    public function output($data)
+    {
+        # 获取调试debug数据
+        $debug = $this->app->Route()->atRouteData['RouterAdded']['debug']??'default';
+        //http://tool.oschina.net/commons/
+        switch ($this->app->Route()->ReturnType) {
+            case 'json':
+                $result = $this->returnJson($data,$debug);
+                break;
+            case 'xml':
+                $result = $data;
+                break;
+            case 'html':
+                $result = $this->returnHtml($data,$debug);
+                break;
+            case 'gif':
+                $result = $data;
+                break;
+            case 'js':
+                $result = $data;
+                break;
+            case 'txt':
+                $result = $data;
+                break;
+            case 'text':
+                $result = $data;
+                break;
+
+            default:
+                $result = $data;
+        }
+        $this->ResponseData = $result??'';
+        throw new \Exception();
+    }
+
+    /**
+     * @Author pizepei
+     * @Created 2019/6/12 21:54
+     * @param $data
+     * @param $debug
+     * @throws \Exception
+     * @title  返回json
+     */
+    protected function returnJson($data,$debug)
+    {
+        if($data != null){
+            if(is_array($data)){
+                # 判断是否是开发模式 不是 判断是否路由单独开启 调试模式    如果是开发模式 路由单独关闭debug 也会关闭调试模式
+                if( ($this->app->__EXPLOIT__ || $debug ==='true') && $debug !=='false' ){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
+
+                if(isset($data[$this->app->__INIT__['ReturnJsonData']]) && isset($data[$this->app->__INIT__['SuccessReturnJsonCode']['name']]) && isset($this->app->__INIT__['SuccessReturnJsonMsg']['name']))
+                {
+                    $data[$this->app->__INIT__['ReturnJsonData']] = $this->app->Request()->returnParamFiltration($data[$this->app->__INIT__['ReturnJsonData']]);
+                }else{
+                    $this->app->Request()->returnParamFiltration($data);
+                }
+                return json_encode($data,\Config::UNIVERSAL['init']['json_encode']);
+            }else{
+                /**
+                 * 控制器returnd 的是字符串
+                 */
+                if( ($this->app->__EXPLOIT__ || $debug==='true') && $debug !=='false'){
+                    return json_encode(['data'=>$data,'SYSTEMSTATUS'=>$this->app->getSystemStatus()],\Config::UNIVERSAL['init']['json_encode']);
+                }else{
+                    return json_encode(['data'=>$data],\Config::UNIVERSAL['init']['json_encode']);
+                }
+            }
+        }else{
+            /**
+             * 控制器没有return;
+             */
+            if(( $this->app->__EXPLOIT__ || $debug==='true') && $debug !=='false'){
+                return json_encode(['SYSTEMSTATUS'=>$this->getSystemStatus()],\Config::UNIVERSAL['init']['json_encode'] );
+            }
+        }
+    }
+
+
+    /**
+     * @Author pizepei
+     * @Created 2019/6/12 21:55
+     * @param $data
+     * @return mixed
+     * @title  返回html
+     */
+    protected function returnHtml($data,$debug)
+    {
+        # 如果依然是一个数组 就序列化为json
+        if (is_array($data)){
+            $this->setHeader('json');
+            return $this->app->returnJson($data,$debug);
+        }
+        return $data;
+    }
+
+    /**
+     * @Author pizepei
+     * @Created 2019/6/12 21:55
+     * @param $data
+     * @return mixed
+     * @title  返回字符串
+     * @explain 一般是方法功能说明、逻辑说明、注意事项等。
+     */
+    protected function returnString($data)
+    {
+        return $data;
+    }
+
+    /**
+     * @Author 皮泽培
+     * @Created 2019/11/2 17:28
+     * @param $header
+     * @title  设置响应头部
+     */
+    public function setHeader($header)
+    {
+        if($this->app->__PATTERN__ === 'WEB'){
+            if (!is_array($header)){
+                $header = self::Header[$header];
+            }
+            foreach ($header as $k=>$v){
+                @header("{$k}: {$v}");
+            }
+        }
+    }
+    /**
+     * Content-Type
+     * http://tool.oschina.net/commons/
+     */
+    const Header = [
+        'txt'=>['Content-Type'=>'text/plain'],
+        'string'=>['Content-Type'=>'text/plain'],
+        'text'=>['Content-Type'=>'text/plain'],
+        'png'=>['Content-Type'=>'image/png'],
+        'html'=>['Content-Type'=>'text/html; charset=UTF-8'],
+        'json'=>['Content-Type'=>'application/json;charset=UTF-8'],
+        'gif'=>['Content-Type'=>'image/gif'],
+        'xml'=>['Content-Type'=>'text/xml'],
+        'js'=>['Content-Type'=>'application/javascript'],
+    ];
+
+    /**
+     * @Author 皮泽培
+     * @Created 2019/8/14 16:42
+     * @return array
+     * @title  获取系统状态
+     * @throws \Exception
+     */
+    protected function getSystemStatus():array
+    {
+        $data['requestId'] = $this->app->__REQUEST_ID__;
+        if (in_array('controller',$this->app->__INIT__['SYSTEMSTATUS'])){
+            $data['controller'] = $this->app->Route()->controller;#路由控制器
+        }
+        if (in_array('function_method',$this->app->__INIT__['SYSTEMSTATUS'])){
+            $data['function_method'] = $this->app->Route()->method;#控制器方法
+        }
+        if (in_array('request_method',$this->app->__INIT__['SYSTEMSTATUS'])){
+            $data['request_method'] =$_SERVER['REQUEST_METHOD'];#请求方法 get post
+        }
+        if (in_array('request_url',$this->app->__INIT__['SYSTEMSTATUS'])){
+            $data['request_url'] = $_SERVER['REQUEST_URI'];#完整路由（去除域名的url地址）
+        }
+        if (in_array('route',$this->app->__INIT__['SYSTEMSTATUS'])){
+            $data['route'] = $this->app->Route()->atRoute;#解释路由
+        }
+        if (in_array('sql',$this->app->__INIT__['SYSTEMSTATUS'])){
+            $data['sql'] = isset(Db::$DBTABASE['sqlLog'])?Db::$DBTABASE['sqlLog']:'';#历史slq
+        }
+        if (in_array('clientInfo',$this->app->__INIT__['SYSTEMSTATUS'])){ # clientInfo 客户端信息
+            if ($this->app->__INIT__['clientInfo']){
+                terminalInfo::$redis = Redis::init();
+                $data['clientInfo'] = terminalInfo::agentInfoCache(true);
+
+            }else{
+                $data['clientInfo'] = $this->app->__CLIENT_IP__;
+            }
+        }
+        if (in_array('system',$this->app->__INIT__['SYSTEMSTATUS'])){ # 系统运行状态
+            $data ['OS'] = php_uname('s').' '.php_uname('r');
+            $data ['PHP_VERSION'] = PHP_VERSION;#系统版本
+        }
+        $data ['Perform time (S)'] = round(microtime(true)-($_SERVER['REQUEST_TIME_FLOAT']),4);#执行耗时(S)
+        return $data;
+    }
+
+}

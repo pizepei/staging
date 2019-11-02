@@ -31,7 +31,7 @@ class Controller
      * Controller constructor.
      * @param App $app
      */
-    public function __construct(App $app)
+    public function __construct(App &$app)
     {
         $this->app = $app;
         $Route = $this->app->Route();
@@ -51,6 +51,7 @@ class Controller
             $this->Payload = $this->Authority->Payload;
         }
     }
+
     /**
      * 获取Extend
      * @param string $key
@@ -91,7 +92,6 @@ class Controller
                     $file = str_replace("{{{$key}}}",$vuleu,$file);
                 }
         }
-        //require();
         return $file;
     }
 
@@ -112,28 +112,12 @@ class Controller
      */
     public function succeed($data,$msg='',$code='',$count=0)
     {
-        # 判断是否是微服务资源路由，是就写入日志
-        if ($this->app->Route()->resourceType === 'microservice'){
-            $this->Authority->setMsAppsResponseLog($data);
-        }
-
-        $result =  [
-            $this->app->__INIT__['SuccessReturnJsonMsg']['name']=>$msg==''?$this->app->__INIT__['SuccessReturnJsonMsg']['value']:$msg,
-            $this->app->__INIT__['SuccessReturnJsonCode']['name']=>$code==''?$this->app->__INIT__['SuccessReturnJsonCode']['value']:$code,
-            $this->app->__INIT__['ReturnJsonData']=>$data,
-        ];
-        if($count>0){
-            $result[$this->app->__INIT__['ReturnJsonCount']] = $count;
-        }else{
-            $result[$this->app->__INIT__['ReturnJsonCount']] = is_array($data)?count($data):0;
-        }
-        return $result;
+        return $this->app->Response()->succeed($data,$msg,$code,$count);
     }
 
     /**
      * @Author pizepei
      * @Created 2019/2/15 23:09
-     *
      * @param $data 错误详细信息
      * @param $msg  错误说明
      * @param $code  错误代码
@@ -142,18 +126,8 @@ class Controller
      */
     public function error($data,$msg='',$code='')
     {
-        if ($this->app->Route()->resourceType === 'microservice'){
-            $this->Authority->setMsAppsResponseLog($data);
-        }
-        $result =  [
-            $this->app->__INIT__['ErrorReturnJsonMsg']['name']=>$msg==''?$this->app->__INIT__['ErrorReturnJsonMsg']['value']:$msg,
-            $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$code==''?$this->app->__INIT__['ErrorReturnJsonCode']['value']:$code,
-            $this->app->__INIT__['ReturnJsonData']=>$data,
-        ];
-        return $result;
+        return $this->app->Response()->error($data,$msg,$code);
     }
-
-
 
 
 }

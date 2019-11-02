@@ -32,6 +32,7 @@ use pizepei\terminalInfo\TerminalInfo;
  * @method  Route                   Route(App $app = App) 路由类
  * @method  InitializeConfig        InitializeConfig(App $app) 初始化配置类
  * @method  Helper                  Helper(string $son = '') 助手类
+ * @method  Response                Response(App $app = App) 框架响应类
  */
 class App extends Container
 {
@@ -77,7 +78,8 @@ class App extends Container
         'Request'               =>Request::class,
         'Route'                 =>Route::class,
         'InitializeConfig'      =>InitializeConfig::class,
-        'Helper'                =>Helper::class
+        'Helper'                =>Helper::class,
+        'Response'              =>Response::class,
     ];
     /**
      * 项目根目录  默认是上级目录层
@@ -172,6 +174,15 @@ class App extends Container
 
         self::$containerInstance[static::CONTAINER_NAME] = $this;
     }
+
+    /**
+     *
+     */
+    public function __destruct()
+    {
+
+    }
+
     /**
      * 获取一个不能访问或者不存在的属性时
      * @param $name
@@ -451,176 +462,15 @@ class App extends Container
         }else{
             $this->__CLI__SQL_LOG__ = $getopt['sqllog']??'false';
         }
+        $this->Response($this);  #响应控制类
         $this->Route($this);    #路由类
         $this->Authority('\\container\\'.$this->__APP__.'\AuthorityContainer');
         $this->Request($this);  #请求类
         $this->__REQUEST_ID__ = $this->Request()->RequestId;    #获取请求类初始化设置的请求id
         # 全局响应配置 ：设置 Header
-        $this->Request()->setHeader($this->__INIT__['header']);
+        $this->Response()->setHeader($this->__INIT__['header']);
         #控制器return  ：实例化控制器
-        $this->output($this->Route()->begin());
-    }
-    /**
-     *
-     * @Author pizepei
-     * @Created 2019/6/12 21:56
-     * @param $data
-     * @throws \Exception
-     * @title  控制器输出
-     * @explain 一般是方法功能说明、逻辑说明、注意事项等。
-     */
-    protected function output($data)
-    {
-        # 获取调试debug数据
-        $debug = $this->Route()->atRouteData['RouterAdded']['debug']??'default';
-        //http://tool.oschina.net/commons/
-        switch ($this->Route()->ReturnType) {
-            case 'json':
-                $result = $this->returnJson($data,$debug);
-                break;
-            case 'xml':
-                $result = $data;
-                break;
-            case 'html':
-                $result = $this->returnHtml($data,$debug);
-                break;
-            case 'gif':
-                $result = $data;
-                break;
-            case 'js':
-                $result = $data;
-                break;
-            case 'txt':
-                $result = $data;
-                break;
-            case 'text':
-                $result = $data;
-                break;
-
-            default:
-                $result = $data;
-        }
-        if (isset($result)){
-            echo $result??'';
-        }
-    }
-
-    /**
-     * @Author pizepei
-     * @Created 2019/6/12 21:55
-     * @param $data
-     * @return mixed
-     * @title  返回字符串
-     * @explain 一般是方法功能说明、逻辑说明、注意事项等。
-     */
-    protected function returnString($data)
-    {
-        return $data;
-    }
-
-    /**
-     * @Author pizepei
-     * @Created 2019/6/12 21:55
-     * @param $data
-     * @return mixed
-     * @title  返回html
-     */
-    protected function returnHtml($data,$debug)
-    {
-        # 如果依然是一个数组 就序列化为json
-        if (is_array($data)){
-            $this->Request()->setHeader($this->Request()::Header['json']);
-            return $this->returnJson($data,$debug);
-        }
-        return $data;
-    }
-
-    /**
-     * @Author pizepei
-     * @Created 2019/6/12 21:54
-     * @param $data
-     * @param $debug
-     * @throws \Exception
-     * @title  返回json
-     */
-    protected function returnJson($data,$debug)
-    {
-        if($data != null){
-            if(is_array($data)){
-                # 判断是否是开发模式 不是 判断是否路由单独开启 调试模式    如果是开发模式 路由单独关闭debug 也会关闭调试模式
-                if( ($this->__EXPLOIT__ || $debug ==='true') && $debug !=='false' ){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
-
-                if(isset($data[$this->__INIT__['ReturnJsonData']]) && isset($data[$this->__INIT__['SuccessReturnJsonCode']['name']]) && isset($this->__INIT__['SuccessReturnJsonMsg']['name']))
-                {
-                    $data[$this->__INIT__['ReturnJsonData']] = $this->Request()->returnParamFiltration($data[$this->__INIT__['ReturnJsonData']]);
-                }else{
-                    $this->Request()->returnParamFiltration($data);
-                }
-                echo json_encode($data,\Config::UNIVERSAL['init']['json_encode']);
-            }else{
-                /**
-                 * 控制器returnd 的是字符串
-                 */
-                if( ($this->__EXPLOIT__ || $debug==='true') && $debug !=='false'){
-                    echo json_encode(['data'=>$data,'SYSTEMSTATUS'=>$this->getSystemStatus()],\Config::UNIVERSAL['init']['json_encode']);
-                }else{
-                    echo json_encode(['data'=>$data],\Config::UNIVERSAL['init']['json_encode']);
-                }
-            }
-        }else{
-            /**
-             * 控制器没有return;
-             */
-            if(( $this->__EXPLOIT__ || $debug==='true') && $debug !=='false'){
-                echo json_encode(['SYSTEMSTATUS'=>$this->getSystemStatus()],\Config::UNIVERSAL['init']['json_encode'] );
-            }
-        }
-    }
-
-
-    /**
-     * @Author 皮泽培
-     * @Created 2019/8/14 16:42
-     * @return array
-     * @title  获取系统状态
-     * @throws \Exception
-     */
-    protected function getSystemStatus():array
-    {
-        $data['requestId'] = &$this->__REQUEST_ID__;
-        if (in_array('controller',$this->__INIT__['SYSTEMSTATUS'])){
-            $data['controller'] = $this->Route()->controller;#路由控制器
-        }
-        if (in_array('function_method',$this->__INIT__['SYSTEMSTATUS'])){
-            $data['function_method'] = $this->Route()->method;#控制器方法
-        }
-        if (in_array('request_method',$this->__INIT__['SYSTEMSTATUS'])){
-            $data['request_method'] =$_SERVER['REQUEST_METHOD'];#请求方法 get post
-        }
-        if (in_array('request_url',$this->__INIT__['SYSTEMSTATUS'])){
-            $data['request_url'] = $_SERVER['REQUEST_URI'];#完整路由（去除域名的url地址）
-        }
-        if (in_array('route',$this->__INIT__['SYSTEMSTATUS'])){
-            $data['route'] = $this->Route()->atRoute;#解释路由
-        }
-        if (in_array('sql',$this->__INIT__['SYSTEMSTATUS'])){
-            $data['sql'] = isset(Db::$DBTABASE['sqlLog'])?Db::$DBTABASE['sqlLog']:'';#历史slq
-        }
-        if (in_array('clientInfo',$this->__INIT__['SYSTEMSTATUS'])){ # clientInfo 客户端信息
-            if ($this->__INIT__['clientInfo']){
-                terminalInfo::$redis = Redis::init();
-                $data['clientInfo'] = terminalInfo::agentInfoCache(true);
-
-            }else{
-                $data['clientInfo'] = $this->__CLIENT_IP__;
-            }
-        }
-        if (in_array('system',$this->__INIT__['SYSTEMSTATUS'])){ # 系统运行状态
-            $data ['OS'] = php_uname('s').' '.php_uname('r');
-            $data ['PHP_VERSION'] = PHP_VERSION;#系统版本
-        }
-        $data ['Perform time (S)'] = round(microtime(true)-($_SERVER['REQUEST_TIME_FLOAT']),4);#执行耗时(S)
-        return $data;
+        $this->Response()->output($this->Route()->begin());
     }
 
 }
