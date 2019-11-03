@@ -118,15 +118,15 @@ class Controller
     /**
      * @Author pizepei
      * @Created 2019/2/15 23:09
-     * @param $data 错误详细信息
      * @param $msg  错误说明
      * @param $code  错误代码
+     * @param $data 错误详细信息
      * @return array
      * @title  控制器错误返回
      */
-    public function error($data,$msg='',$code='')
+    public function error($msg='',$code='',$data=[])
     {
-        return $this->app->Response()->error($data,$msg,$code);
+        return $this->app->Response()->error($msg,$code,$data);
     }
 
 

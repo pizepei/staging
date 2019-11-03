@@ -47,6 +47,11 @@ class Response
     private $error = true;
 
     private $Exception = false;
+    /**
+     * 缓冲区信息
+     * @var string
+     */
+    private $ResponseData = '';
 
     /**
      * Response constructor.
@@ -64,7 +69,6 @@ class Response
         return null;
 
     }
-
     /**
      * @Author 皮泽培
      * @Created 2019/11/2 16:02
@@ -90,8 +94,10 @@ class Response
         $this->record[] = $data;
     }
 
+    # 所有的输出都在output_ob_start方法中
+    # 使用 succeed 和error 方法输出的为业务提示输出
 
-
+    # 1、修改在使用 error 方法时 返回数据为debug 字段  同时所有输出都统一添加字段  statusCode  succeed 100  异常、错误和error 为 200
 
 
     # 有控制器错误输出  有异常处理  有控制器正常输出   有资源输出
@@ -141,14 +147,13 @@ class Response
     /**
      * @Author pizepei
      * @Created 2019/2/15 23:09
-     *
-     * @param $data 错误详细信息
-     * @param $msg  错误说明
-     * @param $code  错误代码
+     * @param $msg      错误说明
+     * @param $code     错误代码
+     * @param $data     错误详细信息
      * @return array
      * @title  控制器错误返回
      */
-    public function error($data,$msg='',$code='')
+    public function error($msg='',$code='',$data)
     {
         if ($this->app->Route()->resourceType === 'microservice'){
             $this->Authority->setMsAppsResponseLog($data);
@@ -163,6 +168,7 @@ class Response
     }
     public function output($data)
     {
+
         # 获取调试debug数据
         $debug = $this->app->Route()->atRouteData['RouterAdded']['debug']??'default';
         //http://tool.oschina.net/commons/
@@ -193,6 +199,7 @@ class Response
                 $result = $data;
         }
         $this->ResponseData = $result??'';
+        # 使用异常结束当前业务
         throw new \Exception();
     }
 
@@ -206,38 +213,35 @@ class Response
      */
     protected function returnJson($data,$debug)
     {
-        if($data != null){
-            if(is_array($data)){
-                # 判断是否是开发模式 不是 判断是否路由单独开启 调试模式    如果是开发模式 路由单独关闭debug 也会关闭调试模式
-                if( ($this->app->__EXPLOIT__ || $debug ==='true') && $debug !=='false' ){$data['SYSTEMSTATUS'] = $this->getSystemStatus();}
 
+        # 判断是否有数据
+        if ($data !==null || $data !=='' ||$data !==[])
+        {   # 有数据  对数据进行处理
+
+            # 判断是否是array
+            if (is_array($data)){
+                # 是array
                 if(isset($data[$this->app->__INIT__['ReturnJsonData']]) && isset($data[$this->app->__INIT__['SuccessReturnJsonCode']['name']]) && isset($this->app->__INIT__['SuccessReturnJsonMsg']['name']))
                 {
-                    $data[$this->app->__INIT__['ReturnJsonData']] = $this->app->Request()->returnParamFiltration($data[$this->app->__INIT__['ReturnJsonData']]);
+                    # 正常使用方法返回的格式化数据  在过滤后 强制把数据写入ReturnJsonData中
+                    $this->app->Request()->returnParamFiltration($data[$this->app->__INIT__['ReturnJsonData']]);
                 }else{
+                    # 控制器直接return的数据
                     $this->app->Request()->returnParamFiltration($data);
                 }
-                return json_encode($data,\Config::UNIVERSAL['init']['json_encode']);
             }else{
-                /**
-                 * 控制器returnd 的是字符串
-                 */
-                if( ($this->app->__EXPLOIT__ || $debug==='true') && $debug !=='false'){
-                    return json_encode(['data'=>$data,'SYSTEMSTATUS'=>$this->app->getSystemStatus()],\Config::UNIVERSAL['init']['json_encode']);
-                }else{
-                    return json_encode(['data'=>$data],\Config::UNIVERSAL['init']['json_encode']);
-                }
-            }
-        }else{
-            /**
-             * 控制器没有return;
-             */
-            if(( $this->app->__EXPLOIT__ || $debug==='true') && $debug !=='false'){
-                return json_encode(['SYSTEMSTATUS'=>$this->getSystemStatus()],\Config::UNIVERSAL['init']['json_encode'] );
+                # 不是array 是控制器return的是字符串 （使用异常或者succeed方法等的$data都是array   但是进入此方法的都是控制器路由定义为返回json的资源)
+                $data = [
+                    $this->app->__INIT__['ReturnJsonData'] =>$data,
+                ];
             }
         }
+        # 判断是否是开发模式 不是 判断是否路由单独开启 调试模式    如果是开发模式 路由单独关闭debug 也会关闭调试模式
+        if (($this->app->__EXPLOIT__ || $debug ==='true' ) && $debug !=='false' ){
+            $data['SYSTEMSTATUS'] = $this->getSystemStatus();
+        }
+        return Helper()->json_encode($data);
     }
-
 
     /**
      * @Author pizepei
@@ -267,6 +271,21 @@ class Response
     protected function returnString($data)
     {
         return $data;
+    }
+
+    public function output_ob_start($data='')
+    {
+        # 判断是否是开发调试模式   开发调试模式下 不清除项目内的echo 等输出信息
+        if(!$this->app->__EXPLOIT__){
+            # 非开发调试模式  屏蔽所有之前的输出缓存
+            ob_end_clean();
+        }
+        ob_start(array($this, 'ob_start'));
+        echo $data===''?$this->ResponseData:$data;
+        ob_end_flush();
+    }
+    public function ob_start($string){
+        return  $string;
     }
 
     /**

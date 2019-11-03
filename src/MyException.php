@@ -66,7 +66,6 @@ class MyException
      */
     public function error_handler($errno, $errstr, $errfile, $errline)
     {
-
         header("Content-Type:application/json;charset=UTF-8");
         # 错误代码方便查日志
         $str_rand = $this->app->Helper()->str()->str_rand(20);
@@ -115,23 +114,21 @@ class MyException
      * @param $exception
      */
     public function exception_handler($exception) {
-        header("Content-Type:application/json;charset=UTF-8");
+
         $this->exception = $exception;
-        if (!empty($this->app->Response()->ResponseData)){
-            echo $this->app->Response()->ResponseData;
+        if ($this->app->Response()->ResponseData !==''){
+            $this->app->Response()->output_ob_start();
+        }else{
+            # 判断是否是开发模式
+            if($this->app->__EXPLOIT__){
+                # 开发模式
+                $this->app->Response()->output_ob_start($this->exploit($exception));
+            }else{
+                # 生产模式
+                $this->app->Response()->output_ob_start($this->production($exception));
+            }
         }
 
-
-//        /**
-//         * 判断是否是开发模式
-//         */
-//        if($this->app->__EXPLOIT__){
-//            # 开发模式
-//            $this->exploit($exception);
-//        }else{
-//            # 生产模式
-//            $this->production($exception);
-//        }
     }
     /**
      * PDO
@@ -159,13 +156,24 @@ class MyException
         }
     }
 
+    /**
+     * 生产环境下
+     * @param $exception
+     * @return false|string
+     */
     private function production($exception)
     {
-        echo json_encode($this->setCodeCipher(),$this->json_encode);
+        return json_encode($this->setCodeCipher(),$this->json_encode);
     }
+
+    /**
+     * 开发调试环境下
+     * @param $exception
+     * @return false|string
+     */
     private function exploit($exception)
     {
-        echo(json_encode($this->resultData($this->exception->getMessage(),$this->exception->getCode(),$this->exploitData()),$this->json_encode));
+        return json_encode($this->resultData($this->exception->getMessage(),$this->exception->getCode(),$this->exploitData()));
     }
 
     /**
@@ -179,7 +187,8 @@ class MyException
         $result =  [
             $this->app->__INIT__['ErrorReturnJsonMsg']['name']??'msg'=>$msg,
             $this->app->__INIT__['ErrorReturnJsonCode']['name']??'code'=>$code==0?$this->app->__INIT__['ErrorReturnJsonCode']['value']??100:$this->exception->getCode(),
-            $this->app->__INIT__['ReturnJsonData']??'data'=>$data,
+            $this->app->__INIT__['ReturnJsonData']??'data'=>$this->app->Response()->ResponseData,
+            'debug'=>$data,
         ];
         return $result;
     }
