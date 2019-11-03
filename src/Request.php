@@ -429,7 +429,7 @@ class Request
                                     throw new \Exception($noteData['fieldExplain'].'['.$key.']:'.'格式错误');
                                 }
                             }
-                        }else if (isset($this->app->Route()::RequestParamDataType[$noteData['fieldRestrain'][0]])){
+                        }else if (in_array($noteData['fieldRestrain'][0],$this->app->Route()::RequestParamDataType)){
                             # 正常 int sring 等数据类型
                             if(isset($vv[$key])) {settype($vv[$key],$noteData['fieldRestrain'][0]);}
                         }else{
@@ -495,7 +495,7 @@ class Request
                     }
                 }else{
                     if(isset($data[$key])) {
-                        if (isset($this->app->Route()::RequestParamDataType[$v])){
+                        if (in_array($v,$this->app->Route()::RequestParamDataType)){
                             settype($data[$key],$v);
                         }else{
                             unset($data[$key]);
