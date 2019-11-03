@@ -409,14 +409,35 @@ class Request
                                         //$vv[$key][] = '';
                                     //}
                                 }else{
-                                    if(!isset($vv[$key])){$vv[$key] =[];}# 如果内容是口 就返回 []
+                                    if(!isset($vv[$key])){$vv[$key] =[];}# 如果内容是空 就返回 []
                                     foreach($vv[$key] as $kkkk=>&$vvvv){
                                         if(isset($vvvv[$kkk])) {settype($vvvv[$kkk],$vvv['fieldRestrain'][0]);}
                                     }
                                 }
                         }
                     }else{
-                        if(isset($vv[$key])) {settype($vv[$key],$noteData['fieldRestrain'][0]);}
+                        # 上级是objectList 本级别是 正常数据类型
+                        # 自定义数据留下  如 uuid email 等等    必须的不能为空  如果是return 数据又不希望是必须的可设置为int 或者string
+                        if(isset($this->app->Route()->ReturnSubjoin[$noteData['fieldRestrain'][0]])){
+                            if(!isset($vv[$key]) || $vv[$key] ==''){
+                                throw new \Exception($noteData['fieldExplain'].'['.$noteData['fieldRestrain'][0].']是必须的');
+                            }
+                            # 如果是 empty 就不判断 ： 本身设置为这些数据类型就是必须不能为空
+                            if($noteData['fieldRestrain'][0] != 'empty'){
+                                preg_match($this->app->Route()->ReturnSubjoin[$noteData['fieldRestrain'][0]][1],$vv[$key],$result);
+                                if(empty($result) || $result ==null){
+                                    throw new \Exception($noteData['fieldExplain'].'['.$key.']:'.'格式错误');
+                                }
+                            }
+                        }else if (isset($this->app->Route()::RequestParamDataType[$noteData['fieldRestrain'][0]])){
+                            # 正常 int sring 等数据类型
+                            if(isset($vv[$key])) {settype($vv[$key],$noteData['fieldRestrain'][0]);}
+                        }else{
+                            # 如果没有对应的数据类型  删除数据
+                            if(!isset($vv[$key]) || $vv[$key] ==''){
+                                unset($vv[$key]);
+                            }
+                        }
                     }
                 }
             }
@@ -447,18 +468,19 @@ class Request
                 }
             }
         }else if($type =='object'){//非索引array
+
             /**
              * 进行数据类型转换 $data = null;isset($data);返回false
              */
             if(isset($data[$key]) && $noteData['fieldRestrain'][0] !=='object' && $noteData['fieldRestrain'][0] !=='objectList' && $data[$key] === null)
             {
-
                 if(is_array($data[$key]))
                 {
                     $data[$key] = json_encode($data[$key],LIBXML_NOCDATA);
                 }
                 settype($data[$key],$noteData['fieldRestrain'][0]);
             }
+
             # unset($noteData['fieldRestrain'][0]);
             foreach($noteData['fieldRestrain'] as $k=>$v){
                 if(isset($this->app->Route()->ReturnSubjoin[$v])){
@@ -471,6 +493,15 @@ class Request
                             throw new \Exception($noteData['fieldExplain'].'['.$key.']:'.'格式错误');
                         }
                     }
+                }else{
+                    if(isset($data[$key])) {
+                        if (isset($this->app->Route()::RequestParamDataType[$v])){
+                            settype($data[$key],$v);
+                        }else{
+                            unset($data[$key]);
+                        }
+                    }
+
                 }
             }
 
