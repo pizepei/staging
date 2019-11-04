@@ -128,7 +128,7 @@ class Response
     {
         # 判断是否是微服务资源路由，是就写入日志
         if ($this->app->Route()->resourceType === 'microservice'){
-            $this->Authority->setMsAppsResponseLog($data);
+            $this->app->Authority->setMsAppsResponseLog($data);
         }
         $result =  [
             $this->app->__INIT__['SuccessReturnJsonMsg']['name']=>$msg==''?$this->app->__INIT__['SuccessReturnJsonMsg']['value']:$msg,
@@ -158,7 +158,7 @@ class Response
     public function error($msg='',$code='',$data)
     {
         if ($this->app->Route()->resourceType === 'microservice'){
-            $this->Authority->setMsAppsResponseLog($data);
+            $this->app->Authority->setMsAppsResponseLog($data);
         }
         $result =  [
             $this->app->__INIT__['ErrorReturnJsonMsg']['name']=>$msg==''?$this->app->__INIT__['ErrorReturnJsonMsg']['value']:$msg,

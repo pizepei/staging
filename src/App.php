@@ -24,7 +24,7 @@ use pizepei\terminalInfo\TerminalInfo;
 /**
  * Class App
  * @package pizepei\staging
- * @property Authority              $Authority  权限基础类属性
+ * @property BasicsAuthority              $Authority  权限基础类属性
  * @method  Authority               Authority(string $pattern,App $app  = App) 权限基础类
  * @method  Request                 Request(App $app  = App) 请求类
  * @method  Controller              Controller(App $app  = App) 控制器类

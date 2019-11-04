@@ -42,6 +42,8 @@ class Controller
             $className = $Route->baseAuth[0];
             # 从Authority子容器中实例化一个权限资源对象   实例化时传入的参数有等 思考确定
             $this->Authority = $this->app->Authority()->$className($this->app,'common');
+
+            $app->Authority = $this->Authority;
             # 实例化对象后 调用start方法启动权限处理
             $this->authResult = $this->Authority->start($Route->baseAuth[1],[],[]);
             # 权限控资源对象中获取必要的数据到控制器中
