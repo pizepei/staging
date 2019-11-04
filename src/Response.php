@@ -140,6 +140,8 @@ class Response
         }else{
             $result[$this->app->__INIT__['ReturnJsonCount']] = is_array($data)?count($data):0;
         }
+        # statusCode 成功 200  错误失败  100   主要用来统一请求需要状态 是框架固定的 代表是succeed 还是 error或者异常
+        $result['statusCode'] = 200;
         $this->error = false;
         $this->output($result);
     }
@@ -163,12 +165,21 @@ class Response
             $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$code==''?$this->app->__INIT__['ErrorReturnJsonCode']['value']:$code,
             $this->app->__INIT__['ReturnJsonData']=>$data,
         ];
+        # statusCode 成功 200  错误失败  100   主要用来统一请求需要状态 是框架固定的 代表是succeed 还是 error 或者异常
+        $result['statusCode'] = 100;
         $this->error = true;
         $this->output($result);
     }
+
+    /**
+     * @Author 皮泽培
+     * @Created 2019/11/4 11:01
+     * @param $data
+     * @title  构造返回数据（内置方法会根据环境加入系统环境信息）
+     * @throws \Exception
+     */
     public function output($data)
     {
-
         # 获取调试debug数据
         $debug = $this->app->Route()->atRouteData['RouterAdded']['debug']??'default';
         //http://tool.oschina.net/commons/

@@ -281,24 +281,15 @@ class App extends Container
             }
 
         }else if(\Deploy::toLoadConfig == 'Local'){
-            /**
-             * 本地获取
-             */
-            /**
-             * 判断是否是开发调试模式
-             * 调试模式
-             */
+            # 本地获取
+            
+            # 判断是否是开发调试模式
             if($this->__EXPLOIT__){
-                /**
-                 * 开发模式始终获取最新基础配置
-                 */
-
+                # 开发模式始终获取最新基础配置
                 $Config = $this->InitializeConfig()->get_config_const($path);
                 $dbtabase = $this->InitializeConfig()->get_dbtabase_const($path);
                 $get_error_log = $this->InitializeConfig()->get_error_log_const($path);
-                /**
-                 * 判断是否存在配置
-                 */
+                # 判断是否存在配置
                 if(!file_exists($path.'SetConfig.php')){
                     $this->InitializeConfig()->set_config('SetConfig',$Config,$path,$namespace);
                 }
@@ -308,49 +299,33 @@ class App extends Container
                 if(!file_exists($path.'SetErrorOrLog.php')){
                     $this->InitializeConfig()->set_config('SetErrorOrLog',$get_error_log,$path,$namespace);
                 }
-                /**
-                 * 合并(只能合并一层)
-                 */
+                # 合并(只能合并一层)
                 $Config = array_merge($Config,$this->InitializeConfig()->get_const($namespace.'\\SetConfig'));
                 $dbtabase = array_merge($dbtabase,$this->InitializeConfig()->get_const($namespace.'\\SetDbtabase'));
                 $get_error_log = array_merge($get_error_log,$this->InitializeConfig()->get_const($namespace.'\\SetErrorOrLog'));
-                /**
-                 * 写入
-                 */
+                # 写入
                 $this->InitializeConfig()->set_config('Config',$Config,$path);
                 $this->InitializeConfig()->set_config('Dbtabase',$dbtabase,$path);
                 $this->InitializeConfig()->set_config('ErrorOrLog',$get_error_log,$path);
 
             }else{
-                /**
-                 * 判断是否存在配置
-                 */
+                # 判断是否存在配置
                 if(!file_exists($path.'Config.php')){
-
                     $Config = $this->InitializeConfig()->get_config_const();
-                    $Config = array_merge($Config,$this->InitializeConfig()->get_const($namespace.'\\SetConfig'));
-                    /**
-                     * 合并
-                     */
+                    # 合并
                     $this->InitializeConfig()->set_config('Config',$Config,$path);
                 }
                 if(!file_exists($path.'Dbtabase.php')){
 
                     $dbtabase = $this->InitializeConfig()->get_dbtabase_const();
                     $dbtabase = array_merge($dbtabase,$this->InitializeConfig()->get_const($namespace.'\\SetDbtabase'));
-                    /**
-                     * 合并
-                     */
+                    # 合并
                     $this->InitializeConfig()->set_config('Dbtabase',$dbtabase,$path);
                 }
                 if(!file_exists($path.'ErrorOrLog.php')){
-
                     $dbtabase = $this->InitializeConfig()->get_error_log_const();
-
                     $dbtabase = array_merge($dbtabase,$this->InitializeConfig()->get_const($namespace.'\\SetErrorOrLog'));
-                    /**
-                     * 合并
-                     */
+                    # 合并
                     $this->InitializeConfig()->set_config('ErrorOrLog',$dbtabase,$path);
                 }
             }
@@ -378,38 +353,28 @@ class App extends Container
             if(empty($path)){
                 throw new \Exception('SAAS配置路径必须',10003);
             }
-            /**
-             * 自定义路径
-             */
-
+            # 自定义路径
             $path .= DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'].DIRECTORY_SEPARATOR.$this->__APP__.DIRECTORY_SEPARATOR;
             $namespace = 'config\\'.$this->__APP__;
             $this->getInitDefine($path,$namespace,$deployPath);
         }
-
-        /**
-         * 包含配置
-         */
+        # 包含配置
         require ($this->__CONFIG_PATH__.'Config.php');
         require($this->__CONFIG_PATH__.'Dbtabase.php');
         require($this->__CONFIG_PATH__.'ErrorOrLog.php');
         require ('..'.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'pizepei'.DIRECTORY_SEPARATOR.'helper'.DIRECTORY_SEPARATOR.'src'.DIRECTORY_SEPARATOR. 'function.php');
-        /**
-         * 获取配置到define;
-         */
+        # 获取配置到define
         $this->__INIT__ = \Config::UNIVERSAL['init'];//初始化配置
         $this->__ROUTE__ = \Config::UNIVERSAL['route'];//路由配置
         $this->__DS__ = DIRECTORY_SEPARATOR;//系统路径符
         $this->__TEMPLATE__ = $this->DOCUMENT_ROOT.$this->__APP__.DIRECTORY_SEPARATOR.'template'.DIRECTORY_SEPARATOR;//模板路径
         return $path;
     }
-
     /**
      * 模板路径
      * @var string
      */
     private $__TEMPLATE__ = '';
-
     /**
      * 系统路径符
      * @var string
@@ -446,7 +411,6 @@ class App extends Container
     {
         if($this->__PATTERN__ === 'CLI'){
             # 命令行模式
-
             $getopt = getopt('',self::GETOPT);
             $this->__CLI__SQL_LOG__ = $getopt['sqllog']??'false';
             $_SERVER['HTTP_HOST']       = 'localhost';

@@ -51,7 +51,6 @@ class MyException
         if($exception){
             $this->PDO_exception_handler($exception);
         }
-
         @set_exception_handler(array($this, 'exception_handler'));
         @set_error_handler(array($this, 'error_handler'));
         //throw new Exception('DOH!!');error_get_last
@@ -108,17 +107,21 @@ class MyException
      * @var null
      */
     private $exception = null;
-
+    /**
+     * 错误代码（用来排查异常处理，error和succeed方法为业务逻辑，不自动生成排查代码，一般在生产环境时异常都统一调试系统错误这个时候会有错误比较短的代码提供显示方便用户反馈）
+     * @var string
+     */
+    private $errorCode = '';
     /**
      * 常规
      * @param $exception
      */
     public function exception_handler($exception) {
-
         $this->exception = $exception;
         if ($this->app->Response()->ResponseData !==''){
             $this->app->Response()->output_ob_start();
         }else{
+            $this->errorCode = $this->app->Helper()->str()->str_rand(15);
             # 判断是否是开发模式
             if($this->app->__EXPLOIT__){
                 # 开发模式
@@ -128,7 +131,6 @@ class MyException
                 $this->app->Response()->output_ob_start($this->production($exception));
             }
         }
-
     }
     /**
      * PDO
@@ -185,10 +187,12 @@ class MyException
     private  function resultData($msg,$code,$data=[])
     {
         $result =  [
-            $this->app->__INIT__['ErrorReturnJsonMsg']['name']??'msg'=>$msg,
-            $this->app->__INIT__['ErrorReturnJsonCode']['name']??'code'=>$code==0?$this->app->__INIT__['ErrorReturnJsonCode']['value']??100:$this->exception->getCode(),
-            $this->app->__INIT__['ReturnJsonData']??'data'=>$this->app->Response()->ResponseData,
-            'debug'=>$data,
+            $this->app->__INIT__['ErrorReturnJsonMsg']['name']??'msg'   =>$msg,
+            $this->app->__INIT__['ErrorReturnJsonCode']['name']??'code' =>$code==0?$this->app->__INIT__['ErrorReturnJsonCode']['value']??100:$this->exception->getCode(),
+            $this->app->__INIT__['ReturnJsonData']??'data'              =>$this->app->Response()->ResponseData,
+            'statusCode'                => 100,# statusCode 成功 200  错误失败  100   主要用来统一请求需要状态 是框架固定的 代表是succeed 还是 error或者异常
+            'errorCode'                 =>$this->errorCode,
+            'debug'                     =>$data, # 异常调试
         ];
         return $result;
     }
@@ -200,6 +204,7 @@ class MyException
      */
     private function exploitData()
     {
+        # 判断路由是否初始化
         if(!$this->app->has('Route')){
             $route = [
                 'controller'=>'system',
@@ -247,56 +252,52 @@ class MyException
      */
     protected function setCodeCipher()
     {
-
-        $str_rand = $this->app->Helper()->str()->str_rand(20);
-        /**
-         * 判断是否是权限和登录
-         */
+        # 判断是否是权限问题和登录问题(前端需要统一判断)
         if(\ErrorOrLog::NOT_LOGGOD_IN_CODE == $this->exception->getCode()   || \ErrorOrLog::JURISDICTION_CODE == $this->exception->getCode() ){
             $result =  [
-                $this->app->__INIT__['ErrorReturnJsonMsg']['name']=>$this->exception->getMessage(),
-                $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
-                'error'=>$str_rand,
+                $this->app->__INIT__['ErrorReturnJsonMsg']['name']  =>$this->exception->getMessage(),
+                $this->app->__INIT__['ErrorReturnJsonCode']['name'] =>$this->exception->getCode(),
+                'errorCode'                                         =>$this->errorCode,
+                'statusCode'                                        => 100,
             ];
         }
 
+        # 这里暂时没有发现是做什么的
         if($this->info){
             if(isset($this->info[$this->exception->getCode()])){
                 $result =  [
-                    $this->app->__INIT__['ErrorReturnJsonMsg']['name']=>$this->info[$this->exception->getCode()][0].'['.$str_rand.']',
-                    $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode()==0?$this->app->__INIT__['ErrorReturnJsonCode']['value']:$this->exception->getCode(),
-                    'error'=>$str_rand,
+                    $this->app->__INIT__['ErrorReturnJsonMsg']['name']  =>$this->info[$this->exception->getCode()][0].'['.$this->errorCode.']',
+                    $this->app->__INIT__['ErrorReturnJsonCode']['name'] =>$this->exception->getCode()==0?$this->app->__INIT__['ErrorReturnJsonCode']['value']:$this->exception->getCode(),
+                    'errorCode'                                         =>$this->errorCode,
+                    'statusCode'                                        => 100,
                 ];
             }else{
                 $result =  [
-                    $this->app->__INIT__['ErrorReturnJsonMsg']['name']=>'系统繁忙['.$str_rand.']',
-                    $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode()==0?$this->app->__INIT__['ErrorReturnJsonCode']['value']:$this->exception->getCode(),
+                    $this->app->__INIT__['ErrorReturnJsonMsg']['name']      =>'系统繁忙['.$this->errorCode.']',
+                    $this->app->__INIT__['ErrorReturnJsonCode']['name']     =>$this->exception->getCode()==0?$this->app->__INIT__['ErrorReturnJsonCode']['value']:$this->exception->getCode(),
                 ];
             }
-            $result['error'] = $str_rand;
+            $result['errorCode']    = $this->errorCode;
+            $result['statusCode']   = 100;
+
             return $result;
         }
-        //确定错误代码
-        /**
-         *  0  默认
-         */
+        # 确定错误代码：在生产模式下
+
+        # 异常错误默认code为0
         if($this->exception->getCode() === 0)
         {
             $result =  [
-                $this->app->__INIT__['ErrorReturnJsonMsg']['name']=>'系统繁忙['.$str_rand.']',
-                $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode()==0?$this->app->__INIT__['ErrorReturnJsonCode']['value']:$this->exception->getCode(),
-                'error'=>$str_rand,
+                $this->app->__INIT__['ErrorReturnJsonMsg']['name']  =>'系统繁忙['.$this->errorCode.']',
+                $this->app->__INIT__['ErrorReturnJsonCode']['name'] =>$this->app->__INIT__['ErrorReturnJsonCode']['value'],
+                'errorCode'                                         => $this->errorCode,
+                'statusCode'                                        => 100,
             ];
         }
-        /**
-         * 判断区间
-         */
+        # 判断错误代码错误区间（在抛异常时定义了code时 检测是系统级别的区间还是开发者定义的错误代码区间）
         foreach(\ErrorOrLog::CODE_SECTION as $key=>$value)
         {
-
-            /**
-             * 判断范围
-             */
+            # 判断范围
             if($value[0] < $this->exception->getCode() &&  $this->exception->getCode()<$value[1])
             {
                 if($key === 'SYSTEM_CODE')
@@ -307,9 +308,10 @@ class MyException
                             $this->app->__INIT__['ErrorReturnJsonMsg']['name']=>
                                 is_int(\ErrorOrLog::SYSTEM_CODE[$this->exception->getCode()][0])?
                                     \ErrorOrLog::HINT_MSG[\ErrorOrLog::SYSTEM_CODE[$this->exception->getCode()][0]]:
-                                    \ErrorOrLog::SYSTEM_CODE[$this->exception->getCode()][0].'['.$str_rand.']',
+                                    \ErrorOrLog::SYSTEM_CODE[$this->exception->getCode()][0].'['.$this->errorCode.']',
                             $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
-                            'error'=>$str_rand,
+                            'errorCode'     =>$this->errorCode,
+                            'statusCode'    => 100,
                         ];
                     }
 
@@ -320,15 +322,17 @@ class MyException
                         $result =  [
                             $this->app->__INIT__['ErrorReturnJsonMsg']['name']=>
                                 is_int(\ErrorOrLog::USE_CODE[$this->exception->getCode()][0])?
-                                    \ErrorOrLog::HINT_MSG[\ErrorOrLog::USE_CODE[$this->exception->getCode()][0]].'['.$str_rand.']':
-                                    \ErrorOrLog::USE_CODE[$this->exception->getCode()][0].'['.$str_rand.']',
+                                    \ErrorOrLog::HINT_MSG[\ErrorOrLog::USE_CODE[$this->exception->getCode()][0]].'['.$this->errorCode.']':
+                                    \ErrorOrLog::USE_CODE[$this->exception->getCode()][0].'['.$this->errorCode.']',
                             $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
-                            'error'=>$str_rand,
+                            'errorCode'         =>$this->errorCode,
+                            'statusCode'        => 100,
                         ];
                     }
                 }
             }
         }
+        # 写入错误日志
         $this->createLog($result);
         return $result;
     }

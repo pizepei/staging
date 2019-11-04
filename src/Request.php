@@ -488,9 +488,13 @@ class Request
                         throw new \Exception($noteData['fieldExplain'].'['.$key.']是必须的');
                     }
                     if($this->app->Route()->ReturnSubjoin[$v][1] != 'empty'){
-                        preg_match($this->app->Route()->ReturnSubjoin[$v][1],$data[$key],$result);
+                        preg_match($this->app->Route()->ReturnSubjoin[$v][1],(string)$data[$key],$result);
                         if(empty($result) || $result ==null){
                             throw new \Exception($noteData['fieldExplain'].'['.$key.']:'.'格式错误');
+                        }
+                        # 默认结果是字符串：判断是否需要转换数据类型
+                        if ($this->app->Route()->ReturnSubjoin[$v][2] !== 'string' || $this->app->Route()->ReturnSubjoin[$v][2] !== ''){
+                            settype($data[$key],$this->app->Route()->ReturnSubjoin[$v][2]);
                         }
                     }
                 }else{
@@ -501,13 +505,9 @@ class Request
                             unset($data[$key]);
                         }
                     }
-
                 }
             }
-
         }
-
-
     }
 
     /**
