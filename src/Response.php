@@ -225,6 +225,7 @@ class Response
     protected function returnJson($data,$debug)
     {
 
+        if ($data['statusCode'] !== 100)
         # 判断是否有数据
         if ($data !==null || $data !=='' ||$data !==[])
         {   # 有数据  对数据进行处理
@@ -235,10 +236,12 @@ class Response
                 if(isset($data[$this->app->__INIT__['ReturnJsonData']]) && isset($data[$this->app->__INIT__['SuccessReturnJsonCode']['name']]) && isset($this->app->__INIT__['SuccessReturnJsonMsg']['name']))
                 {
                     # 正常使用方法返回的格式化数据  在过滤后 强制把数据写入ReturnJsonData中
-                    $this->app->Request()->returnParamFiltration($data[$this->app->__INIT__['ReturnJsonData']]);
+                    # 如果不是error 100 方法的异常   就进行数据过滤
+                    if ($data['statusCode'] !== 100){  $this->app->Request()->returnParamFiltration($data[$this->app->__INIT__['ReturnJsonData']]); }
                 }else{
                     # 控制器直接return的数据
-                    $this->app->Request()->returnParamFiltration($data);
+                    # 如果不是error 100 方法的异常   就进行数据过滤
+                    if ($data['statusCode'] !== 100){ $this->app->Request()->returnParamFiltration($data);}
                 }
             }else{
                 # 不是array 是控制器return的是字符串 （使用异常或者succeed方法等的$data都是array   但是进入此方法的都是控制器路由定义为返回json的资源)

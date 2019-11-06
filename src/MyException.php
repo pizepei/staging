@@ -100,7 +100,7 @@ class MyException
         $result['error'] = $str_rand;
         $result['statusCode'] = 100;
         $this->createLog($result);
-        exit(json_encode($result,JSON_UNESCAPED_UNICODE));
+        $this->app->Response()->output_ob_start(json_encode($result,JSON_UNESCAPED_UNICODE));
     }
 
     /**
