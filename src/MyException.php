@@ -98,6 +98,7 @@ class MyException
             $result[ $this->app->__INIT__['ErrorReturnJsonMsg']['name']??'msg'] = '系统繁忙['.$str_rand.']';
         }
         $result['error'] = $str_rand;
+        $result['statusCode'] = 100;
         $this->createLog($result);
         exit(json_encode($result,JSON_UNESCAPED_UNICODE));
     }
