@@ -225,7 +225,6 @@ class Response
     protected function returnJson($data,$debug)
     {
 
-        if ($data['statusCode'] !== 100)
         # 判断是否有数据
         if ($data !==null || $data !=='' ||$data !==[])
         {   # 有数据  对数据进行处理
