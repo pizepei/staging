@@ -90,7 +90,6 @@ class MyException
                 ],
                 'File'=>str_replace(getcwd(), "", $errfile).'['.$errline.']',
             ];
-
         }else{
             /**
              * 生产模式
@@ -141,21 +140,14 @@ class MyException
 
         header("Content-Type:application/json;charset=UTF-8");
         $this->exception = $exception;
-        //var_dump($exception);
-        /**
-         * 判断是否是开发模式
-         */
+        $this->errorCode = $this->app->Helper()->str()->str_rand(15);
+        # 判断是否是开发模式
         if($this->app->__EXPLOIT__){
-
-            /**
-             * 开发模式
-             */
-            $this->exploit($exception);
+            # 开发模式
+            $this->app->Response()->output_ob_start($this->exploit($exception));
         }else{
-            /**
-             * 生产模式
-             */
-            $this->production($exception);
+            # 生产模式
+            $this->app->Response()->output_ob_start($this->production($exception));
         }
     }
 
