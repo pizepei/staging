@@ -209,6 +209,8 @@ class Response
             default:
                 $result = $data;
         }
+        $result = is_array($result)?Helper()->json_encode($result):$result;
+
         $this->ResponseData = $result??'';
         # 使用异常结束当前业务
         throw new \Exception();
