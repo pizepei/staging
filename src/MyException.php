@@ -118,7 +118,7 @@ class MyException
      */
     public function exception_handler($exception) {
         $this->exception = $exception;
-        if ($this->app->Response()->ResponseData !==''){
+        if ($this->app->Response()->ResponseData !==false){
             $this->app->Response()->output_ob_start();
         }else{
             $this->errorCode = $this->app->Helper()->str()->str_rand(15);

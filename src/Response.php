@@ -51,7 +51,7 @@ class Response
      * 缓冲区信息
      * @var string
      */
-    private $ResponseData = '';
+    private $ResponseData = false;
 
     /**
      * Response constructor.
