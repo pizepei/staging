@@ -122,6 +122,8 @@ class MyException
             $this->app->Response()->output_ob_start();
         }else{
             $this->errorCode = $this->app->Helper()->str()->str_rand(15);
+            header("Content-Type:application/json;charset=UTF-8");
+
             # 判断是否是开发模式
             if($this->app->__EXPLOIT__){
                 # 开发模式

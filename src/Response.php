@@ -270,7 +270,7 @@ class Response
         # 如果依然是一个数组 就序列化为json
         if (is_array($data)){
             $this->setHeader('json');
-            return $this->app->returnJson($data,$debug);
+            return $this->returnJson($data,$debug);
         }
         return $data;
     }
