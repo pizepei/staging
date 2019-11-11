@@ -32,6 +32,60 @@ class MyException
      * @var int
      */
     protected $json_encode = 320;
+
+    /**
+     * 无权限权限状态码
+     */
+    const JURISDICTION_CODE = 40003;
+    /**
+     * 没有登录状态码
+     */
+    const NOT_LOGGOD_IN_CODE = 10001;
+
+    /**
+     * 错误区间s
+     */
+    const CODE_SECTION = [
+        'SYSTEM_CODE'=>[
+            10000,49999//系统 错误代码  10000-49999
+        ],
+        'USE_CODE'=>[
+            50000,99999//应用 错误代码  50000-99999
+        ]
+    ];
+    /**
+     * 系统框架10000-49999
+     *
+     * 友善提示【错误代码】
+     */
+    const SYSTEM_CODE =[
+        //代码  友善提示，联系方式[开发负责人]，开发提示
+        10000=>[5,'错误说明','功能模块','联系方式[开发负责人]'],
+        10001=>[5,'项目部署时获取远处配置中心配置时构建加密时出现错误','项目部署获取配置','联系方式[pizepei]'],
+        10002=>[5,'项目部署时获取远处配置中心配置时构建签名时出现错误','项目部署获取配置','联系方式[pizepei]'],
+        10003=>[5,'SAAS配置路径必须','SAAS配置','联系方式[pizepei]'],
+        10004=>[5,'SAAS配置路径必须','请求配置中心成功就行body失败','联系方式[pizepei]'],
+        10005=>[5,'初始化配置失败：请求配置中心失败','SAAS配置','联系方式[pizepei]'],
+        10006=>[5,'初始化配置失败：非法请求,服务不存在不存在','SAAS配置','联系方式[pizepei]'],
+        10007=>[5,'初始化配置失败：非法的请求源','SAAS配置','联系方式[pizepei]'],
+        10008=>[5,'初始化配置失败：签名验证失败','SAAS配置','联系方式[pizepei]'],
+        10009=>[5,'初始化配置失败：解密错误','SAAS配置','联系方式[pizepei]'],
+        10010=>[5,'初始化配置失败：appid or domain 不匹配','SAAS配置','联系方式[pizepei]'],
+        10011=>[5,'初始化配置失败：构造配置时 signature','SAAS配置','联系方式[pizepei]'],
+        10012=>[5,'初始化配置失败：数据过期','SAAS配置','联系方式[pizepei]'],
+        10013=>[5,'初始化配置失败：得到构造配置时 signature','SAAS配置','联系方式[pizepei]'],
+    ];
+
+    /**
+     * 系统异常是的默认错误
+     * @var string
+     */
+    private $ErrorReturnJsonMsgName ='msg';
+    private $ErrorReturnJsonCodeName = 'code';
+    private $ErrorReturnJsonDataName = 'data';
+    private $ErrorReturnJsonCodeValue = 100;
+    private $ErrorReturnJsonMsgValue= 'error';
+
     /**
      * MyException constructor.
      * @param string $path
@@ -45,6 +99,13 @@ class MyException
         #判断是否已经加载配置文件
         if (class_exists('\Config')){
             $this->json_encode = \Config::UNIVERSAL['init']['json_encode'];
+            $this->ErrorReturnJsonMsgName =$this->app->__INIT__['ErrorReturnJsonMsg']['name'];
+            $this->ErrorReturnJsonMsgValue= $this->app->__INIT__['ErrorReturnJsonMsg']['value'];
+
+            $this->ErrorReturnJsonCodeName = $this->app->__INIT__['ErrorReturnJsonCode']['name'];
+            $this->ErrorReturnJsonCodeValue = $this->app->__INIT__['ErrorReturnJsonCode']['value'];
+
+            $this->ErrorReturnJsonDataName = $this->app->__INIT__['ReturnJsonData'];
         }
 
         $this->exception = $exception;
@@ -65,25 +126,27 @@ class MyException
      */
     public function error_handler($errno, $errstr, $errfile, $errline)
     {
-        header("Content-Type:application/json;charset=UTF-8");
+        if($this->app->__PATTERN__ === 'WEB'){
+            header("Content-Type:application/json;charset=UTF-8");
+        }
         # 错误代码方便查日志
         $str_rand = $this->app->Helper()->str()->str_rand(20);
 
         if(!$this->app->has('Route')){
             $route = [
                 'controller'=>'system',
-                'router'=>$_SERVER['PATH_INFO'],
+                'router'=>$_SERVER['PATH_INFO']??'',
             ];
         }
         # 系统错误统一 50000
         $result = [
-            $this->app->__INIT__['ErrorReturnJsonCode']['name']??'code'=>50000,
+            $this->ErrorReturnJsonCodeName =>50000,
         ];
         #判断是否是开发模式
         if($this->app->__EXPLOIT__){
             # 开发模式
-            $result[$this->app->__INIT__['ErrorReturnJsonMsg']['name']??'code'] = $errstr.'['.$errno.']';
-            $result[$this->app->__INIT__['ReturnJsonData']??'data'] = [
+            $result[$this->ErrorReturnJsonMsgName] = $errstr.'['.$errno.']';
+            $result[$this->ErrorReturnJsonDataName] = [
                 'route'=>$route??[
                     'controller'=>$this->app->Route()->controller.'->'.$this->app->Route()->method,
                     'router'=>$this->app->Route()->atRoute,
@@ -94,7 +157,7 @@ class MyException
             /**
              * 生产模式
              */
-            $result[ $this->app->__INIT__['ErrorReturnJsonMsg']['name']??'msg'] = '系统繁忙['.$str_rand.']';
+            $result[ $this->ErrorReturnJsonMsgName] = '系统繁忙['.$str_rand.']';
         }
         $result['error'] = $str_rand;
         $result['statusCode'] = 100;
@@ -118,12 +181,13 @@ class MyException
      */
     public function exception_handler($exception) {
         $this->exception = $exception;
-        if ($this->app->Response()->ResponseData !==false){
+        if ($this->app->Response($this->app)->ResponseData !==false){
             $this->app->Response()->output_ob_start();
         }else{
             $this->errorCode = $this->app->Helper()->str()->str_rand(15);
-            header("Content-Type:application/json;charset=UTF-8");
-
+            if($this->app->__PATTERN__ === 'WEB') {
+                header("Content-Type:application/json;charset=UTF-8");
+            }
             # 判断是否是开发模式
             if($this->app->__EXPLOIT__){
                 # 开发模式
@@ -140,7 +204,9 @@ class MyException
      */
     public function PDO_exception_handler($exception) {
 
-        header("Content-Type:application/json;charset=UTF-8");
+        if($this->app->__PATTERN__ === 'WEB') {
+            header("Content-Type:application/json;charset=UTF-8");
+        }
         $this->exception = $exception;
         $this->errorCode = $this->app->Helper()->str()->str_rand(15);
         # 判断是否是开发模式
@@ -182,9 +248,9 @@ class MyException
     private  function resultData($msg,$code,$data=[])
     {
         $result =  [
-            $this->app->__INIT__['ErrorReturnJsonMsg']['name']??'msg'   =>$msg,
-            $this->app->__INIT__['ErrorReturnJsonCode']['name']??'code' =>$code==0?$this->app->__INIT__['ErrorReturnJsonCode']['value']??100:$this->exception->getCode(),
-            $this->app->__INIT__['ReturnJsonData']??'data'              =>$this->app->Response()->ResponseData,
+            $this->ErrorReturnJsonMsgName   =>$msg,
+            $this->ErrorReturnJsonCodeName =>$code==0?$this->ErrorReturnJsonCodeValue:$this->exception->getCode(),
+            $this->ErrorReturnJsonDataName              =>$this->app->Response()->ResponseData,
             'statusCode'                => 100,# statusCode 成功 200  错误失败  100   主要用来统一请求需要状态 是框架固定的 代表是succeed 还是 error或者异常
             'errorCode'                 =>$this->errorCode,
             'debug'                     =>$data, # 异常调试
@@ -247,11 +313,12 @@ class MyException
      */
     protected function setCodeCipher()
     {
+
         # 判断是否是权限问题和登录问题(前端需要统一判断)
-        if(\ErrorOrLog::NOT_LOGGOD_IN_CODE == $this->exception->getCode()   || \ErrorOrLog::JURISDICTION_CODE == $this->exception->getCode() ){
+        if(self::NOT_LOGGOD_IN_CODE??100 == $this->exception->getCode()   || self::JURISDICTION_CODE??100  == $this->exception->getCode() ){
             $result =  [
-                $this->app->__INIT__['ErrorReturnJsonMsg']['name']  =>$this->exception->getMessage(),
-                $this->app->__INIT__['ErrorReturnJsonCode']['name'] =>$this->exception->getCode(),
+                $this->ErrorReturnJsonMsgName  =>$this->exception->getMessage(),
+                $this->ErrorReturnJsonCodeName =>$this->exception->getCode(),
                 'errorCode'                                         =>$this->errorCode,
                 'statusCode'                                        => 100,
             ];
@@ -261,15 +328,15 @@ class MyException
         if($this->info){
             if(isset($this->info[$this->exception->getCode()])){
                 $result =  [
-                    $this->app->__INIT__['ErrorReturnJsonMsg']['name']  =>$this->info[$this->exception->getCode()][0].'['.$this->errorCode.']',
-                    $this->app->__INIT__['ErrorReturnJsonCode']['name'] =>$this->exception->getCode()==0?$this->app->__INIT__['ErrorReturnJsonCode']['value']:$this->exception->getCode(),
+                    $this->ErrorReturnJsonMsgName  =>$this->info[$this->exception->getCode()][0].'['.$this->errorCode.']',
+                    $this->ErrorReturnJsonCodeName =>$this->exception->getCode()==0?$this->ErrorReturnJsonCodeValue:$this->exception->getCode(),
                     'errorCode'                                         =>$this->errorCode,
                     'statusCode'                                        => 100,
                 ];
             }else{
                 $result =  [
-                    $this->app->__INIT__['ErrorReturnJsonMsg']['name']      =>'系统繁忙['.$this->errorCode.']',
-                    $this->app->__INIT__['ErrorReturnJsonCode']['name']     =>$this->exception->getCode()==0?$this->app->__INIT__['ErrorReturnJsonCode']['value']:$this->exception->getCode(),
+                    $this->ErrorReturnJsonMsgName      =>'系统繁忙['.$this->errorCode.']',
+                    $this->ErrorReturnJsonCodeName    =>$this->exception->getCode()==0?($this->ErrorReturnJsonCodeValue):$this->exception->getCode(),
                 ];
             }
             $result['errorCode']    = $this->errorCode;
@@ -283,28 +350,29 @@ class MyException
         if($this->exception->getCode() === 0)
         {
             $result =  [
-                $this->app->__INIT__['ErrorReturnJsonMsg']['name']  =>'系统繁忙['.$this->errorCode.']',
-                $this->app->__INIT__['ErrorReturnJsonCode']['name'] =>$this->app->__INIT__['ErrorReturnJsonCode']['value'],
+                $this->ErrorReturnJsonMsgName  =>'系统繁忙['.$this->errorCode.']',
+                $this->ErrorReturnJsonCodeName =>$this->ErrorReturnJsonCodeValue,
                 'errorCode'                                         => $this->errorCode,
                 'statusCode'                                        => 100,
             ];
         }
         # 判断错误代码错误区间（在抛异常时定义了code时 检测是系统级别的区间还是开发者定义的错误代码区间）
-        foreach(\ErrorOrLog::CODE_SECTION as $key=>$value)
+        foreach(self::CODE_SECTION as $key=>$value)
         {
             # 判断范围
             if($value[0] < $this->exception->getCode() &&  $this->exception->getCode()<$value[1])
             {
                 if($key === 'SYSTEM_CODE')
                 {
-                    if(isset(\ErrorOrLog::SYSTEM_CODE[$this->exception->getCode()]))
+
+                    if(isset(self::SYSTEM_CODE[$this->exception->getCode()]))
                     {
                         $result =  [
-                            $this->app->__INIT__['ErrorReturnJsonMsg']['name']=>
-                                is_int(\ErrorOrLog::SYSTEM_CODE[$this->exception->getCode()][0])?
-                                    \ErrorOrLog::HINT_MSG[\ErrorOrLog::SYSTEM_CODE[$this->exception->getCode()][0]]:
-                                    \ErrorOrLog::SYSTEM_CODE[$this->exception->getCode()][0].'['.$this->errorCode.']',
-                            $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
+                            $this->ErrorReturnJsonMsgName=>
+                                is_int(self::SYSTEM_CODE[$this->exception->getCode()][0])?
+                                    self::HINT_MSG[self::SYSTEM_CODE[$this->exception->getCode()][0]]:
+                                    self::SYSTEM_CODE[$this->exception->getCode()][0].'['.$this->errorCode.']',
+                            $this->ErrorReturnJsonCodeName =>$this->exception->getCode(),
                             'errorCode'     =>$this->errorCode,
                             'statusCode'    => 100,
                         ];
@@ -315,11 +383,11 @@ class MyException
                     if(isset(\ErrorOrLog::USE_CODE[$this->exception->getCode()]))
                     {
                         $result =  [
-                            $this->app->__INIT__['ErrorReturnJsonMsg']['name']=>
+                            $this->ErrorReturnJsonMsgName=>
                                 is_int(\ErrorOrLog::USE_CODE[$this->exception->getCode()][0])?
                                     \ErrorOrLog::HINT_MSG[\ErrorOrLog::USE_CODE[$this->exception->getCode()][0]].'['.$this->errorCode.']':
                                     \ErrorOrLog::USE_CODE[$this->exception->getCode()][0].'['.$this->errorCode.']',
-                            $this->app->__INIT__['ErrorReturnJsonCode']['name']=>$this->exception->getCode(),
+                            $this->ErrorReturnJsonCodeName=>$this->exception->getCode(),
                             'errorCode'         =>$this->errorCode,
                             'statusCode'        => 100,
                         ];

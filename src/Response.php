@@ -290,14 +290,19 @@ class Response
 
     public function output_ob_start($data='')
     {
-        # 判断是否是开发调试模式   开发调试模式下 不清除项目内的echo 等输出信息
-        if(!$this->app->__EXPLOIT__){
-            # 非开发调试模式  屏蔽所有之前的输出缓存
-            ob_end_clean();
+        if ($this->app->__PATTERN__ == 'WEB'){
+            # 判断是否是开发调试模式   开发调试模式下 不清除项目内的echo 等输出信息
+            if(!$this->app->__EXPLOIT__){
+                # 非开发调试模式  屏蔽所有之前的输出缓存
+                ob_end_clean();
+            }
+            ob_start(array($this, 'ob_start'));
+            echo $data===''?$this->ResponseData:$data;
+            ob_end_flush();
+        }else{
+            echo $data;
         }
-        ob_start(array($this, 'ob_start'));
-        echo $data===''?$this->ResponseData:$data;
-        ob_end_flush();
+
     }
     public function ob_start($string){
         return  $string;

@@ -120,9 +120,17 @@ class App extends Container
      * Container constructor.
      * @param string $deployPath
      */
-    public function __construct(bool $exploit = true,$app_path='app',$pattern = 'ORIGINAL',$path='',$deployPath='')
+    public function __construct(bool $exploit = true,$app_path='app',$pattern = 'ORIGINAL',$path='',$deployPath='',$renPattern='WEB')
     {
-        $this->DOCUMENT_ROOT = dirname($_SERVER['SCRIPT_FILENAME'],$this->DOCUMENT_ROOT).DIRECTORY_SEPARATOR;#定义项目根目录
+        # 运行模式
+        $this->__PATTERN__ = $renPattern;
+        if ($this->__PATTERN__ =='CLI'){
+            $this->__CLIENT_IP__ = '192.168.1.1';  # 客户端 IP
+            $this->DOCUMENT_ROOT = dirname(getcwd(),$this->DOCUMENT_ROOT).DIRECTORY_SEPARATOR;#定义项目根目录
+        }else{
+            $this->__CLIENT_IP__ = terminalInfo::get_ip();  # 客户端 IP
+            $this->DOCUMENT_ROOT = dirname($_SERVER['SCRIPT_FILENAME'],$this->DOCUMENT_ROOT).DIRECTORY_SEPARATOR;#定义项目根目录
+        }
 
         $this->__APP__ =  $app_path;            #应用路径
         $this->__EXPLOIT__ = $exploit;          #是否开发调试模式  (使用应用级别的因为在项目级别可能会地址SAAS模式下所有的租户都开启了调试模式)
@@ -131,7 +139,6 @@ class App extends Container
             $this->__OS__ = 'widnows';
         }
 
-        $this->__CLIENT_IP__ = terminalInfo::get_ip();  # 客户端 IP
         #应用级别配置
         $pathFof = '';
         if ($this->__USE_PATTERN__ == 'SAAS'){
@@ -407,7 +414,7 @@ class App extends Container
      * @title  开始web模式驱动
      * @explain 一般是方法功能说明、逻辑说明、注意事项等。
      */
-    public function start($pattern = 'WEB')
+    public function start()
     {
         if($this->__PATTERN__ === 'CLI'){
             # 命令行模式
