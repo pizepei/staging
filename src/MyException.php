@@ -107,11 +107,11 @@ class MyException
 
             $this->ErrorReturnJsonDataName = $this->app->__INIT__['ReturnJsonData'];
         }
-
         $this->exception = $exception;
         if($exception){
             $this->PDO_exception_handler($exception);
         }
+
         @set_exception_handler(array($this, 'exception_handler'));
         @set_error_handler(array($this, 'error_handler'));
         //throw new Exception('DOH!!');error_get_last
@@ -157,12 +157,12 @@ class MyException
             /**
              * 生产模式
              */
-            $result[ $this->ErrorReturnJsonMsgName] = '系统繁忙['.$str_rand.']';
+            $result[$this->ErrorReturnJsonMsgName] = '系统繁忙['.$str_rand.']';
         }
         $result['error'] = $str_rand;
         $result['statusCode'] = 100;
         $this->createLog($result);
-        $this->app->Response()->output_ob_start(json_encode($result,JSON_UNESCAPED_UNICODE));
+        $this->app->Response($this->app)->output_ob_start(json_encode($result,JSON_UNESCAPED_UNICODE));
     }
 
     /**
@@ -180,6 +180,7 @@ class MyException
      * @param $exception
      */
     public function exception_handler($exception) {
+
         $this->exception = $exception;
         if ($this->app->Response($this->app)->ResponseData !==false){
             $this->app->Response()->output_ob_start();
@@ -189,7 +190,7 @@ class MyException
                 header("Content-Type:application/json;charset=UTF-8");
             }
             # 判断是否是开发模式
-            if($this->app->__EXPLOIT__){
+            if(!$this->app->__EXPLOIT__){
                 # 开发模式
                 $this->app->Response()->output_ob_start($this->exploit($exception));
             }else{

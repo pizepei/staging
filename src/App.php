@@ -114,7 +114,35 @@ class App extends Container
      * @var array|false|mixed|string
      */
     protected $__CLIENT_IP__ = '';
+    /**
+     * 模板路径
+     * @var string
+     */
+    private $__TEMPLATE__ = '';
+    /**
+     * 系统路径符
+     * @var string
+     */
+    private $__DS__ = DIRECTORY_SEPARATOR;
+    /**
+     * 路由配置
+     * @var array
+     */
+    private $__ROUTE__ = null;
 
+    /**
+     * 初始化配置
+     * @var array
+     */
+    private $__INIT__ = [];
+    /**
+     * CLI 参数
+     */
+    const  GETOPT =[
+        'route:',//路由
+        'sqllog:',//是否启用dbslq日志
+        'domain:',//域名
+    ];
 
     /**
      * Container constructor.
@@ -125,12 +153,41 @@ class App extends Container
         # 运行模式
         $this->__PATTERN__ = $renPattern;
         if ($this->__PATTERN__ =='CLI'){
-            $this->__CLIENT_IP__ = '192.168.1.1';  # 客户端 IP
-            $this->DOCUMENT_ROOT = dirname(getcwd(),$this->DOCUMENT_ROOT).DIRECTORY_SEPARATOR;#定义项目根目录
+
+            # 命令行模式
+            # 比如>php index_cli.php --route gdhsg  --domain oauth.heil.top
+            $getopt = getopt('',self::GETOPT);
+
+            $this->__CLI__SQL_LOG__ = $getopt['sqllog']??'false';
+            $_SERVER['HTTP_HOST']       = $getopt['domain']??'localhost';
+            $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
+            $_SERVER['REQUEST_METHOD']  = 'CLI';
+            $_SERVER['SERVER_PORT']     = '--';
+            $_SERVER['REQUEST_URI']     = $getopt['route'];
+            $_SERVER['SCRIPT_NAME']     =  $getopt['route'];
+            $_SERVER['PATH_INFO'] = $getopt['route'];
+            $_SERVER['HTTP_COOKIE']     = '';
+            $_SERVER['QUERY_STRING']    = '';
+            $_SERVER['HTTP_USER_AGENT']    = '';
+
+//            $this->DOCUMENT_ROOT = dirname(getcwd(),$this->DOCUMENT_ROOT).DIRECTORY_SEPARATOR;#定义项目根目录
         }else{
-            $this->__CLIENT_IP__ = terminalInfo::get_ip();  # 客户端 IP
             $this->DOCUMENT_ROOT = dirname($_SERVER['SCRIPT_FILENAME'],$this->DOCUMENT_ROOT).DIRECTORY_SEPARATOR;#定义项目根目录
         }
+        $this->__CLIENT_IP__ = terminalInfo::get_ip();  # 客户端 IP
+
+
+
+
+
+        if($this->__PATTERN__ === 'CLI'){
+
+        }else{
+            $this->__CLI__SQL_LOG__ = $getopt['sqllog']??'false';
+        }
+
+        
+
 
         $this->__APP__ =  $app_path;            #应用路径
         $this->__EXPLOIT__ = $exploit;          #是否开发调试模式  (使用应用级别的因为在项目级别可能会地址SAAS模式下所有的租户都开启了调试模式)
@@ -377,35 +434,7 @@ class App extends Container
         $this->__TEMPLATE__ = $this->DOCUMENT_ROOT.$this->__APP__.DIRECTORY_SEPARATOR.'template'.DIRECTORY_SEPARATOR;//模板路径
         return $path;
     }
-    /**
-     * 模板路径
-     * @var string
-     */
-    private $__TEMPLATE__ = '';
-    /**
-     * 系统路径符
-     * @var string
-     */
-    private $__DS__ = DIRECTORY_SEPARATOR;
-    /**
-     * 路由配置
-     * @var array
-     */
-    private $__ROUTE__ = null;
 
-    /**
-     * 初始化配置
-     * @var array
-     */
-    private $__INIT__ = [];
-    /**
-     * CLI 参数
-     */
-    const  GETOPT =[
-        'route:',//路由
-        'sqllog:',//是否启用dbslq日志
-        'domain:',//域名
-    ];
 
     /**
      * @Author pizepei
@@ -416,23 +445,7 @@ class App extends Container
      */
     public function start()
     {
-        if($this->__PATTERN__ === 'CLI'){
-            # 命令行模式
-            $getopt = getopt('',self::GETOPT);
-            $this->__CLI__SQL_LOG__ = $getopt['sqllog']??'false';
-            $_SERVER['HTTP_HOST']       = 'localhost';
-            $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
-            $_SERVER['REQUEST_METHOD']  = 'CLI';
-            $_SERVER['SERVER_PORT']     = '--';
-            $_SERVER['REQUEST_URI']     = $getopt['route'];
-            $_SERVER['SCRIPT_NAME']     =  $getopt['route'];
-            $_GET['s'] =  $getopt['route'];
-            $_SERVER['HTTP_COOKIE']     = '';
-            $_SERVER['QUERY_STRING']    = '';
-            $_SERVER['HTTP_USER_AGENT']    = '';
-        }else{
-            $this->__CLI__SQL_LOG__ = $getopt['sqllog']??'false';
-        }
+
         $this->Response($this);  #响应控制类
         $this->Route($this);    #路由类
         $this->Authority('\\container\\'.$this->__APP__.'\AuthorityContainer');
