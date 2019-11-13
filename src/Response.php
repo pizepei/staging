@@ -182,6 +182,7 @@ class Response
     {
         # 获取调试debug数据
         $debug = $this->app->Route()->atRouteData['RouterAdded']['debug']??'default';
+
         //http://tool.oschina.net/commons/
         switch ($this->app->Route()->ReturnType) {
             case 'json':
@@ -209,9 +210,12 @@ class Response
             default:
                 $result = $data;
         }
+
         $result = is_array($result)?Helper()->json_encode($result):$result;
 
         $this->ResponseData = $result??'';
+
+
         # 使用异常结束当前业务
         throw new \Exception();
     }
@@ -236,6 +240,7 @@ class Response
                 # 是array
                 if(isset($data[$this->app->__INIT__['ReturnJsonData']]) && isset($data[$this->app->__INIT__['SuccessReturnJsonCode']['name']]) && isset($this->app->__INIT__['SuccessReturnJsonMsg']['name']))
                 {
+
                     # 正常使用方法返回的格式化数据  在过滤后 强制把数据写入ReturnJsonData中
                     # 如果不是error 100 方法的异常   就进行数据过滤
                     if ($data['statusCode'] !== 100){  $this->app->Request()->returnParamFiltration($data[$this->app->__INIT__['ReturnJsonData']]); }
@@ -290,7 +295,9 @@ class Response
 
     public function output_ob_start($data='')
     {
+
         if ($this->app->__PATTERN__ == 'WEB'){
+
             # 判断是否是开发调试模式   开发调试模式下 不清除项目内的echo 等输出信息
             if(!$this->app->__EXPLOIT__){
                 # 非开发调试模式  屏蔽所有之前的输出缓存
@@ -300,7 +307,8 @@ class Response
             echo $data===''?$this->ResponseData:$data;
             ob_end_flush();
         }else{
-            echo $data;
+
+            echo $data===''?$this->ResponseData:$data;
         }
 
     }
@@ -370,10 +378,9 @@ class Response
             $data['sql'] = isset(Db::$DBTABASE['sqlLog'])?Db::$DBTABASE['sqlLog']:'';#历史slq
         }
         if (in_array('clientInfo',$this->app->__INIT__['SYSTEMSTATUS'])){ # clientInfo 客户端信息
-            if ($this->app->__INIT__['clientInfo']){
+            if ($this->app->__INIT__['clientInfo'] && $this->app->__PATTERN__ !== 'CLI'){
                 terminalInfo::$redis = Redis::init();
                 $data['clientInfo'] = terminalInfo::agentInfoCache(true);
-
             }else{
                 $data['clientInfo'] = $this->app->__CLIENT_IP__;
             }

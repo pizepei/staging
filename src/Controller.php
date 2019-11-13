@@ -11,6 +11,20 @@ declare(strict_types=1);
 namespace pizepei\staging;
 class Controller
 {
+    protected static $__FILE__ = __FILE__;
+    /**
+     * 基础控制器信息
+     */
+    const CONTROLLER_INFO = [
+        'User'=>'',
+        'title'=>'',//控制器标题
+        'namespace'=>'',//门面控制器命名空间
+        'baseControl'=>'',//基础控制器路径
+        'baseAuth'=>'',//基础权限继承（加命名空间的类名称）
+        'authGroup'=>'',//[user:用户相关,admin:管理员相关] 权限组列表
+        'basePath'=>'',//基础路由
+        'baseParam'=>'',//依赖注入对象
+    ];
     /**
      * 应用容器
      * @var App|null
@@ -39,6 +53,7 @@ class Controller
         #  baseAuth[0] 是权限资源类   baseAuth[1] 类的方法
         if(isset($Route->baseAuth[0]) && isset($Route->baseAuth[1]) && $Route->baseAuth[1] !='public')
         {
+
             $className = $Route->baseAuth[0];
             # 从Authority子容器中实例化一个权限资源对象   实例化时传入的参数有等 思考确定
             $this->Authority = $this->app->Authority()->$className($this->app,'common');
@@ -51,6 +66,7 @@ class Controller
                 # 思考：是否直接访问权限资源对象就可以？
             $this->authExtend = $this->Authority->authExtend;
             $this->Payload = $this->Authority->Payload;
+
         }
     }
 
@@ -64,6 +80,17 @@ class Controller
         return $this->jurisdictionExtend[$key]??null;
     }
 
+    /**
+     * @Author 皮泽培
+     * @Created 2019/11/13 16:29
+     * @return string
+     * @title  获取基础控制器路径
+     * @throws \Exception
+     */
+    public static function getBasicsPath():string
+    {
+        return isset(static::$__FILE__)?static::$__FILE__:'';
+    }
     /**
      * @Author 皮泽培
      * @Created 2019/10/22 10:53

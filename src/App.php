@@ -157,7 +157,7 @@ class App extends Container
             # 命令行模式
             # 比如>php index_cli.php --route gdhsg  --domain oauth.heil.top
             $getopt = getopt('',self::GETOPT);
-
+            if (!isset($getopt['route'])){ throw new Exception('route domain 是必须的！');}
             $this->__CLI__SQL_LOG__ = $getopt['sqllog']??'false';
             $_SERVER['HTTP_HOST']       = $getopt['domain']??'localhost';
             $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
@@ -165,20 +165,16 @@ class App extends Container
             $_SERVER['SERVER_PORT']     = '--';
             $_SERVER['REQUEST_URI']     = $getopt['route'];
             $_SERVER['SCRIPT_NAME']     =  $getopt['route'];
-            $_SERVER['PATH_INFO'] = $getopt['route'];
+            $_SERVER['PATH_INFO']       =   $getopt['route'];
             $_SERVER['HTTP_COOKIE']     = '';
             $_SERVER['QUERY_STRING']    = '';
             $_SERVER['HTTP_USER_AGENT']    = '';
 
-//            $this->DOCUMENT_ROOT = dirname(getcwd(),$this->DOCUMENT_ROOT).DIRECTORY_SEPARATOR;#定义项目根目录
+            $this->DOCUMENT_ROOT = dirname(getcwd()).DIRECTORY_SEPARATOR;#定义项目根目录
         }else{
             $this->DOCUMENT_ROOT = dirname($_SERVER['SCRIPT_FILENAME'],$this->DOCUMENT_ROOT).DIRECTORY_SEPARATOR;#定义项目根目录
         }
         $this->__CLIENT_IP__ = terminalInfo::get_ip();  # 客户端 IP
-
-
-
-
 
         if($this->__PATTERN__ === 'CLI'){
 
@@ -186,16 +182,12 @@ class App extends Container
             $this->__CLI__SQL_LOG__ = $getopt['sqllog']??'false';
         }
 
-        
-
-
         $this->__APP__ =  $app_path;            #应用路径
         $this->__EXPLOIT__ = $exploit;          #是否开发调试模式  (使用应用级别的因为在项目级别可能会地址SAAS模式下所有的租户都开启了调试模式)
         $this->__USE_PATTERN__ = $pattern;      #应用模式 ORIGINAL       SAAS
         if (DIRECTORY_SEPARATOR ==='\\'){
             $this->__OS__ = 'widnows';
         }
-
         #应用级别配置
         $pathFof = '';
         if ($this->__USE_PATTERN__ == 'SAAS'){
@@ -290,7 +282,6 @@ class App extends Container
          * 读取配置文件的路径暂时确定为项目标识项目标识定义在index入口文件
          */
         require($deployPath.'Deploy.php');
-
         $this->__EXPLOIT__ = \Deploy::__EXPLOIT__;//设置模式
 
         # 判断获取配置方式
@@ -411,7 +402,6 @@ class App extends Container
         $namespace = 'config\\'.$this->__APP__; # 命名空间
 
         if($this->__RUN_PATTERN__ == 'ORIGINAL'){ # 传统模式
-
             $this->getInitDefine($this->__CONFIG_PATH__,$namespace,$this->__DEPLOY_CONFIG_PATH__);
         }else if($this->__RUN_PATTERN__ == 'SAAS'){
             if(empty($path)){
@@ -422,6 +412,7 @@ class App extends Container
             $namespace = 'config\\'.$this->__APP__;
             $this->getInitDefine($path,$namespace,$deployPath);
         }
+
         # 包含配置
         require ($this->__CONFIG_PATH__.'Config.php');
         require($this->__CONFIG_PATH__.'Dbtabase.php');

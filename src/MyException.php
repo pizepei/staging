@@ -162,7 +162,7 @@ class MyException
         $result['error'] = $str_rand;
         $result['statusCode'] = 100;
         $this->createLog($result);
-        $this->app->Response($this->app)->output_ob_start(json_encode($result,JSON_UNESCAPED_UNICODE));
+        $this->app->Response($this->app)->output_ob_start(json_encode($result,$this->json_encode));
     }
 
     /**
@@ -190,7 +190,8 @@ class MyException
                 header("Content-Type:application/json;charset=UTF-8");
             }
             # 判断是否是开发模式
-            if(!$this->app->__EXPLOIT__){
+            if($this->app->__EXPLOIT__){
+                var_dump($this->exploit($exception));
                 # 开发模式
                 $this->app->Response()->output_ob_start($this->exploit($exception));
             }else{
@@ -237,7 +238,7 @@ class MyException
      */
     private function exploit($exception)
     {
-        return json_encode($this->resultData($this->exception->getMessage(),$this->exception->getCode(),$this->exploitData()));
+        return json_encode($this->resultData($this->exception->getMessage(),$this->exception->getCode(),$this->exploitData()),$this->json_encode);
     }
 
     /**
@@ -254,7 +255,7 @@ class MyException
             $this->ErrorReturnJsonDataName              =>$this->app->Response()->ResponseData,
             'statusCode'                => 100,# statusCode 成功 200  错误失败  100   主要用来统一请求需要状态 是框架固定的 代表是succeed 还是 error或者异常
             'errorCode'                 =>$this->errorCode,
-            'debug'                     =>$data, # 异常调试
+            'debug'                     =>json_encode($data,$this->json_encode)?$data:'', # 异常调试
         ];
         return $result;
     }
@@ -280,7 +281,7 @@ class MyException
             ],
             'sql'=>isset($GLOBALS['DBTABASE']['sqlLog'])?$GLOBALS['DBTABASE']['sqlLog']:'',
             'File'=>str_replace(getcwd(), "", $this->exception->getFile()).'['.$this->exception->getLine().']',
-            'Trace'=>$this->getTrace(30),
+            'Trace'=>$this->getTrace(20),
         ];
     }
     /**

@@ -294,7 +294,6 @@ class Route
             case 'CLI';
                 $Rule = \RouteInfo::CLI;
                 $RouteData = isset(\RouteInfo::CLI['Rule'][$this->atRoute])?\RouteInfo::CLI['Rule'][$this->atRoute]:\RouteInfo::CLI['Path']??[];
-
                 break;
             case 'All';
                 $Rule = \RouteInfo::All;
@@ -305,7 +304,7 @@ class Route
                 $RouteData = [];
         }
         if (isset($RouteData['router']) && is_string($RouteData['router'])){
-
+//                var_dump($RouteData['router']);exit();
             # 匹配到常规路由
         }else{
             # 使用路径路由匹配模式
@@ -394,6 +393,7 @@ class Route
          * 判断是否有对应参数（确定是先检查参数准确性、还是在控制器中获取参数时检查（可能出现参数不正确但是不提示错误））
          */
         $function = $RouteData['function']['name'];
+
         $this->controller = &$RouteData['Namespace'];
         $this->method = &$RouteData['function']['name'];
         $this->atRoute = &$RouteData['router'];             #路由
@@ -555,6 +555,7 @@ class Route
             }else{
                 $data =  file_get_contents(str_replace('\\',DIRECTORY_SEPARATOR,$this->app->DOCUMENT_ROOT.'vendor'.DIRECTORY_SEPARATOR.trim(trim($baseControl,'/'),'\\').'.php'));
             }
+            if (!$data){$data ='';}
             preg_match_all('/\/\*\*[\s](.*?){/s',$data,$basicsNoteBlock);//获取方法以及注解块
             if (isset($basicsNoteBlock[1])){
                 $noteBlock[1] = array_merge($basicsNoteBlock[1],$noteBlock[1]);
