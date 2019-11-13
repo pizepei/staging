@@ -191,7 +191,6 @@ class MyException
             }
             # 判断是否是开发模式
             if($this->app->__EXPLOIT__){
-                var_dump($this->exploit($exception));
                 # 开发模式
                 $this->app->Response()->output_ob_start($this->exploit($exception));
             }else{
