@@ -13,6 +13,16 @@ use ZipArchive;
 
 class BasicsDocument extends Controller
 {
+    /**
+     * 基础控制器信息
+     */
+    const CONTROLLER_INFO = [
+        'User'=>'pizepei',
+        'title'=>'文档控制器',//控制器标题
+        'namespace'=>'app',//门面控制器命名空间
+        'basePath'=>'/document/',//基础路由
+    ];
+
     protected $path  = '';
     /**
      * @param \pizepei\staging\Request $Request html
@@ -34,10 +44,28 @@ class BasicsDocument extends Controller
             'local.layui.js'=>\Deploy::VIEW_RESOURCE_PREFIX.'/start/layui/layui.js',
             'VIEW_RESOURCE_PREFIX'=>\Deploy::VIEW_RESOURCE_PREFIX,
             'MODULE_PREFIX'=>\Deploy::MODULE_PREFIX,
+            'jsonDataName'=>$this->app->__INIT__['ReturnJsonData']
         ];
         $path = dirname(__DIR__).DIRECTORY_SEPARATOR.'template'.DIRECTORY_SEPARATOR.'Document'.DIRECTORY_SEPARATOR;
         return $this->view($name,$data,$path,'html',false);
     }
+    /**
+     * @param \pizepei\staging\Request $Request html
+     *      path [object] 路径参数
+     *          name [string required] 扩展文件名称
+     * @return array [js]
+     * @title  文档layui Extends
+     * @explain  文档layui Extends
+     * @router get layui/extends/:name[string].js debug:true
+     * @throws \Exception
+     */
+    public function layuiExtends(Request $Request)
+    {
+        $path = dirname(__DIR__).DIRECTORY_SEPARATOR.'template'.DIRECTORY_SEPARATOR.'Document'.DIRECTORY_SEPARATOR;
+        return $this->view($Request->path('name'),[],$path,'js',false);
+
+    }
+
     /**
      * @return array [json]
      *      data [raw] 菜单数据
@@ -48,7 +76,7 @@ class BasicsDocument extends Controller
      */
     public function navList()
     {
-        return $this->app->Route()->noteBlock;
+        return $this->succeed($this->app->Route()->noteBlock);
     }
     /**
      * @Author pizepei

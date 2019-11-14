@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title>开发助手</title>
-    <link rel="stylesheet" href="/{{VIEW_RESOURCE_PREFIX}}/start/layui/css/layui.css">
+    <link rel="stylesheet" href="{{layui.css}}">
 </head>
 <body class="layui-layout-body">
 <div class="layui-layout layui-layout-admin">
@@ -138,11 +138,11 @@
         © pizepei.com - 框架
     </div>
 </div>
-<script src="/{{VIEW_RESOURCE_PREFIX}}/start/layui/layui.js"></script>
+<script src="{{layui.js}}"></script>
 <script>
 
     layui.config({
-        base: '/{{VIEW_RESOURCE_PREFIX}}/start/layui/extends/',
+        base: '/{{MODULE_PREFIX}}/document/layui/extends/',
     }).extend({
         authtree: 'authtree',
     });
@@ -171,7 +171,7 @@
 
                     var getTpl = headTabTpl.innerHTML
                         ,view = document.getElementById('headTab-id');
-                    laytpl(getTpl).render(data.data, function(html){
+                    laytpl(getTpl).render(data.{{jsonDataName}}, function(html){
                         view.innerHTML = html;
                         element.render('nav'); //重新对导航进行渲染。注：layui 2.1.6 版本新增
                     });
@@ -192,7 +192,7 @@
                 console.log(data); //得到当前点击的DOM对象
                 var getTpl = navtpl.innerHTML
                     ,view = document.getElementById('nav-id');
-                laytpl(getTpl).render(data, function(html){
+                laytpl(getTpl).render(data.{{jsonDataName}}, function(html){
                     view.innerHTML = html;
                     element.render('nav'); //重新对导航进行渲染。注：layui 2.1.6 版本新增
                 });
@@ -228,7 +228,7 @@
                 ,statusCode: 200 //规定成功的状态码，默认：0
                 ,msgName: 'msg' //规定状态信息的字段名称，默认：msg
                 ,countName: 'count' //规定数据总数的字段名称，默认：count
-                ,dataName: 'data' //规定数据列表的字段名称，默认：data
+                ,dataName: "{{jsonDataName}}" //规定数据列表的字段名称，默认：data
             };
             var eachData = {
                 "get":{'name':"GET请求参数",'id':'request-table-','url':"request-param.json"},
