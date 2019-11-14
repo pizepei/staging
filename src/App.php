@@ -142,6 +142,7 @@ class App extends Container
         'route:',//路由
         'sqllog:',//是否启用dbslq日志
         'domain:',//域名
+        'data:',//需要传输的数据 parse_str格式    处理后保存到GET中
     ];
 
     /**
@@ -158,17 +159,18 @@ class App extends Container
             # 比如>php index_cli.php --route gdhsg  --domain oauth.heil.top
             $getopt = getopt('',self::GETOPT);
             if (!isset($getopt['route'])){ throw new Exception('route domain 是必须的！');}
-            $this->__CLI__SQL_LOG__ = $getopt['sqllog']??'false';
-            $_SERVER['HTTP_HOST']       = $getopt['domain']??'localhost';
-            $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
-            $_SERVER['REQUEST_METHOD']  = 'CLI';
-            $_SERVER['SERVER_PORT']     = '--';
-            $_SERVER['REQUEST_URI']     = $getopt['route'];
-            $_SERVER['SCRIPT_NAME']     =  $getopt['route'];
-            $_SERVER['PATH_INFO']       =   $getopt['route'];
-            $_SERVER['HTTP_COOKIE']     = '';
-            $_SERVER['QUERY_STRING']    = '';
-            $_SERVER['HTTP_USER_AGENT']    = '';
+            parse_str($getopt['data']??'',$_GET);
+            $this->__CLI__SQL_LOG__         = $getopt['sqllog']??'false';
+            $_SERVER['HTTP_HOST']           = $getopt['domain']??'localhost';
+            $_SERVER['REMOTE_ADDR']         = '127.0.0.1';
+            $_SERVER['REQUEST_METHOD']      = 'CLI';
+            $_SERVER['SERVER_PORT']         = '--';
+            $_SERVER['REQUEST_URI']         =   $getopt['route'];
+            $_SERVER['SCRIPT_NAME']         =   $getopt['route'];
+            $_SERVER['PATH_INFO']           =   $getopt['route'];
+            $_SERVER['HTTP_COOKIE']         =   '';
+            $_SERVER['QUERY_STRING']        =   '';
+            $_SERVER['HTTP_USER_AGENT']     =   '';
 
             $this->DOCUMENT_ROOT = dirname(getcwd()).DIRECTORY_SEPARATOR;#定义项目根目录
         }else{

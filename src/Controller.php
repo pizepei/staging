@@ -16,9 +16,9 @@ class Controller
      * 基础控制器信息
      */
     const CONTROLLER_INFO = [
-        'User'=>'',
+        'User'=>'system',
         'title'=>'',//控制器标题
-        'namespace'=>'',//门面控制器命名空间
+        'namespace'=>'',//门面控制器命名空间：同时也是文件路径
         'baseControl'=>'',//基础控制器路径
         'baseAuth'=>'',//基础权限继承（加命名空间的类名称）
         'authGroup'=>'',//[user:用户相关,admin:管理员相关] 权限组列表
