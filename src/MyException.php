@@ -237,6 +237,7 @@ class MyException
      */
     private function exploit($exception)
     {
+        # 错误信息里面如果有无法识别的信息 会什么都没有$this->exception->getMessage()
         return json_encode($this->resultData($this->exception->getMessage(),$this->exception->getCode(),$this->exploitData()),$this->json_encode);
     }
 
@@ -256,6 +257,7 @@ class MyException
             'errorCode'                 =>$this->errorCode,
             'debug'                     =>json_encode($data,$this->json_encode)?$data:'', # 异常调试
         ];
+
         return $result;
     }
 
