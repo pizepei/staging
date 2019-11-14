@@ -19,7 +19,7 @@ class BasicsDocument extends Controller
     const CONTROLLER_INFO = [
         'User'=>'pizepei',
         'title'=>'文档控制器',//控制器标题
-        'namespace'=>'app',//门面控制器命名空间
+        'namespace'=>'',//门面控制器命名空间
         'basePath'=>'/document/',//基础路由
     ];
 
