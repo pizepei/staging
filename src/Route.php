@@ -317,7 +317,8 @@ class Route
 //            }
             foreach ($RouteData as $k=>$v){
                 # 通过长度进行匹配
-                if(strpos($this->atRoute,$v['PathNote']) === 0){
+                if(strpos($this->atRoute,$v['PathNote']) === 0 || is_string(strpos($this->atRoute,$v['PathNote'])) ){
+
                     # 使用最佳匹配长度结果（匹配长度最长的）
                     if(strlen($v['PathNote']) > $length){
                         $length = strlen($v['PathNote']); # 重新定义长度
@@ -332,7 +333,6 @@ class Route
                 //header("HTTP/1.0 404 Not Found");
                 throw new \Exception('路由不存在',404);
             }
-
             # 判断匹配到的路由数量、使用正则表达式匹配并且获取参数、$length为strlen()获取的匹配长度，使用匹配最才$length做路由匹配
             if(count($PathNote[$length])>1){
                 /**
