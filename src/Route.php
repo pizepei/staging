@@ -542,6 +542,7 @@ class Route
          * 分析提取注解块
          */
         preg_match_all('/\/\*\*[\s](.*?){/s',$data,$noteBlock);//获取方法以及注解块
+
         /**
          * 判断是否存在注解块
          */
@@ -593,10 +594,8 @@ class Route
              * 判断注解块是否为控制器方法（可访问的方法：是否设置路由r@outer）
              */
             if(empty($routerData)){continue;}
-
             if(!empty($routerData) && isset($functionData[1])){
                 /********************获取详路由细方法************/
-
                 /**
                  * 控制器方法名称
                  */
@@ -661,7 +660,7 @@ class Route
                     # 获取简单路径路由用来快速匹配
                     preg_match('/(.*?):/s',$routerStr,$PathNote);
                     if (!isset($PathNote[1])){
-                        throw new \Exception('路由是否忘记写：了？->'.$routerStr);
+                        throw new \Exception($routerStr.'路径路由是否忘记在参数前写冒号           :   ');
                     }
                     $PathNote = $PathNote[1];
 
