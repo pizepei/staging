@@ -408,10 +408,26 @@ class Request
                                     //if($return){
                                         //$vv[$key][] = '';
                                     //}
-                                }else{
+                                }else if (in_array($vvv['fieldRestrain'][0],$this->app->Route()::RequestParamDataType)){
                                     if(!isset($vv[$key])){$vv[$key] =[];}# 如果内容是空 就返回 []
                                     foreach($vv[$key] as $kkkk=>&$vvvv){
                                         if(isset($vvvv[$kkk])) {settype($vvvv[$kkk],$vvv['fieldRestrain'][0]);}
+                                    }
+                                }if(isset($this->app->Route()->ReturnSubjoin[$vvv['fieldRestrain'][0]])){
+                                    if(!isset($vvv[$kkk]) || $vvv[$kkk] ==''){
+                                        throw new \Exception($vvv['fieldExplain'].'['.$vvv['fieldRestrain'][0].']是必须的');
+                                    }
+                                    # 如果是 empty 就不判断 ： 本身设置为这些数据类型就是必须不能为空
+                                    if($vvv['fieldRestrain'][0] != 'empty'){
+                                        preg_match($this->app->Route()->ReturnSubjoin[$vvv['fieldRestrain'][0]][1],$vv[$kkk],$result);
+                                        if(empty($result) || $result ==null){
+                                            throw new \Exception($noteData['fieldExplain'].'['.$kkk.']:'.'格式错误');
+                                        }
+                                    }
+                                }else{
+                                    # 如果没有对应的数据类型  删除数据
+                                    if(!isset($vvv[$kkk]) || $vvv[$kkk] ==''){
+                                        unset($vvv[$kkk]);
                                     }
                                 }
                         }
