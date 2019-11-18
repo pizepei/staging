@@ -248,7 +248,6 @@ class BasicsDocument extends Controller
      *      name [object] 同学名字
      * @title  路由标题
      * @explain 路由功能说明
-     * @authGroup basics.menu.getMenu:权限分组1,basics.index.menu:权限分组2
      * @authExtend UserExtend.list:拓展权限
      * @baseAuth Resource:public
      * @throws \Exception
@@ -288,7 +287,6 @@ class BasicsDocument extends Controller
      * @return array [json]
      * @title  框架开发文档菜单
      * @explain 临时框架开发文档菜单
-     * @authGroup basics.index.message:控制台新信息
      * @router get normative/new
      */
     public function messageNew(Request $Request)

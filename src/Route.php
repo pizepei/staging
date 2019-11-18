@@ -10,6 +10,9 @@ declare(strict_types=1);
 
 namespace pizepei\staging;
 
+use function AlibabaCloud\Client\value;
+use config\app\BaseAuthGroup;
+
 class Route
 {
     /**
@@ -164,6 +167,12 @@ class Route
      * @var App|null
      */
     protected $app = null;
+    /**
+     * 当前工程项目的的基础权限集合分组
+     * @var array
+     */
+    protected $baseAuthGroup = [];
+
     /**
      *构造方法
      */
@@ -511,11 +520,11 @@ class Route
         preg_match('/User:[\s]{1,6}(.*?)[\r\n]/s',$result[1],$User);
         preg_match('/@basePath[\s]{1,6}(.*?)[\s]{1,4}/s',$result[1],$basePath);
         preg_match('/@baseControl[\s]{1,6}(.*?)[\s]{1,4}/s',$result[1],$baseControl);
-        preg_match('/@authGroup[\s]{1,6}(.*?)[\r\n]/s',$result[1],$authGroup);
+        preg_match('/@baseAuthGroup[\s]{1,6}(.*?)[\r\n]/s',$result[1],$baseAuthGroup);
         preg_match('/@baseAuth[\s]{1,6}(.*?)[\r\n]/s',$result[1],$baseAuth);
 
 
-        # 处理权限
+        # 处理权限(依赖容器)
         if(isset($baseAuth[1]))
         {
             $baseAuth = explode(':',$baseAuth[1]);
@@ -524,31 +533,36 @@ class Route
         }
         $basePath[1] = $basePath[1]??'';
 
-        # 如果有就删除 /
+        # 基础root路由 如果有就删除 /
         $basePath[1] = rtrim($basePath[1],'/');
         $title[1] = $title[1]??'未定义';//标题
         $User[1] = $User[1]??'未定义';//创建人
         preg_match('/namespace (.*?);/s',$data,$namespace);
         # 过滤非控制器类文件
         if(!isset($namespace[1])){return ;}
+
+        # 项目全局 各依赖包的权限空间注册
+        if (isset($baseAuthGroup[1]) && !empty($baseAuthGroup[1])){
+            $baseAuthGroup = explode(',',$baseAuthGroup[1]);
+            # 判断是否是多个
+            foreach ($baseAuthGroup as $uthValue){
+                $baseAuthGroupRes = explode(':',$uthValue);
+                if (count($baseAuthGroupRes) ===2){
+                    list($key, $name) = $baseAuthGroupRes;
+                    $this->baseAuthGroup[$key] = $name;
+                }
+            }
+            # 继续切割
+        }
+
         # 获取类名称
         preg_match('/class[\s]{1,6}(.*?)[\s]{1,6}/s',$data,$class);
-        /**
-         * 定义完整命名空间
-         */
+        # 定义完整命名空间
         $baseNamespace = $namespace[1].'\\'.$class[1];
-
-        /**
-         * 分析提取注解块
-         */
+        # 分析提取注解块
         preg_match_all('/\/\*\*[\s](.*?){/s',$data,$noteBlock);//获取方法以及注解块
-
-        /**
-         * 判断是否存在注解块
-         */
+        # 判断是否存在注解块
         if(!isset($noteBlock[1])){return ;}
-//        。
-//        throw new \Exception('CS');
         if (isset($baseControl[1])){
             $baseControl = $baseControl[1];
             if (DIRECTORY_SEPARATOR ==='\\'){
@@ -730,27 +744,18 @@ class Route
                     preg_match('/@resourceType[\s]+(.*?)[\r\n]/s',$v,$resourceType);# 路由注意类型 如果默认是API资源  microservice为微服务应用API资源
                     if (isset($resourceType[1]) && !in_array($resourceType[1],self::resourceType)){ throw new \Exception('resourceType 类型错误['.$baseErrorNamespace.']');}
 
-                    preg_match('/@authGroup[\s]+(.*?)[\r\n]/s',$v,$routeAuthGroup);//路由的权限分组
+                    preg_match('/@authGroup[\s]+(.*?)[\r\n]+/s',$v,$routeAuthGroup);//路由的权限分组
                     preg_match('/@authExtend[\s]+(.*?)[\r\n]/s',$v,$routeAuthExtend);//权限扩展信息
                     preg_match('/@baseAuth[\s]+(.*?)[\r\n]/s',$v,$routeBaseAuth);//路由上定义的权限控制器
 
                     $tag = md5($namespace[1].'\\'.$class[1].$function['name']);//路由标识（控制器方法级别）
 
+                    if(isset($routeTitle[1])){
+                        preg_match('/(.*?)[\n\r]/s',$routeTitle[1],$routeTitle);//获取路由名称
+                    }
+
+
                     //$tag = md5($namespace[1].'\\'.$class[1].$function['name'].$routerStr.$matchStr);//路由标识（路由级别）
-                    /**
-                     * 切割处理
-                     */
-                    $this->authDispose($routeAuthGroup,$routeAuthExtend,$tag);
-                    /**
-                     * 分组判断
-                     */
-                    $detectionAuthGroup = $this->detectionAuthGroup($routeAuthGroup);
-                    if(!$detectionAuthGroup[0]){
-                        throw new \Exception($detectionAuthGroup[1].' '.'  ['.$baseErrorNamespace.']');
-                    }
-                    if(!$this->detectionAuthExtend($routeAuthExtend)){
-                        throw new \Exception('AuthExtend illegality  ['.$baseErrorNamespace.']');
-                    }
                     # 处理权限控制器
                     if(isset($routeBaseAuth[1]))
                     {
@@ -759,12 +764,36 @@ class Route
                         $routeBaseAuth = [];
                     }
                     $routeBaseAuth[1] = $routeBaseAuth[1]??'';
+
+                    /**
+                     * 切割处理
+                     */
+                    $this->authDispose($routeAuthGroup,$routeAuthExtend,$tag,$routeTitle[1]??'',$routeExplain[1]??'');
+                    # 如果控制器定义为public 或者路由定义我public 就不进行权限定义
+                    if (count($routeBaseAuth) ===2){
+                            if ($routeBaseAuth[1] !=='public'){
+                                # 进行判断格式的处理
+                                $detectionAuthGroup = $this->detectionAuthGroup($routeAuthGroup);
+                            }
+                    }else if (count($baseAuth) ===2){
+                        if ($baseAuth[1] !=='public'){
+                            # 进行判断格式的处理
+                            $detectionAuthGroup = $this->detectionAuthGroup($routeAuthGroup);
+                        }
+                    }
+                    $detectionAuthGroup = $this->detectionAuthGroup($routeAuthGroup);
+                    if(!isset($detectionAuthGroup[0])){
+                        throw new \Exception($detectionAuthGroup[1].' '.'  ['.$baseErrorNamespace.']');
+                    }
+                    if(!$this->detectionAuthExtend($routeAuthExtend)){
+                        throw new \Exception('AuthExtend illegality  ['.$baseErrorNamespace.']');
+                    }
+
+
                     /*** ***********切割请求参数[url 参数  post等参数 不包括路由参数] return***************/
                     $routeParam = $routeParam[1]??[];
 
-                    if(isset($routeTitle[1])){
-                        preg_match('/(.*?)[\n\r]/s',$routeTitle[1],$routeTitle);//获取路由名称
-                    }
+
                     /**
                      * 获取依赖注入的 对象 容器下主要是为了适配IDE
                      * 目前只支持Request对象（严格区分大小写）
@@ -840,13 +869,6 @@ class Route
                             /**
                              * 判断返回数据类型有html xml 默认json（array）
                              */
-                            //if($routeReturnType == 'html'){
-                            //
-                            //}else if($routeReturnType == 'xml'){
-                            //
-                            //}else{
-                            //
-                            //}
 
                         }
                         /**
@@ -879,6 +901,8 @@ class Route
                         'ReturnType' => $routeReturnType??$this->app->__INIT__['return'],//返回类型
                         'function'=>$function,//控制器方法
                         'routeAuthGroup'=>$routeAuthGroup,//路由的权限分组
+                        'baseAuthGroup'=>$this->baseAuthGroup,//路由的权限分组
+
                         'routeAuthExtend'=>$routeAuthExtend,//权限扩展信息
                         'baseAuth'=>$baseAuth??[],//权限控制器
                         'routeBaseAuth'=>$routeBaseAuth??[],//路由上定义的权限控制器
@@ -935,6 +959,7 @@ class Route
             'User'=>$User[1],
             'basePath'=>$basePath[1]??'',
             'authGroup'=>$authGroup[1]??[],
+            'baseAuthGroup'=>$this->baseAuthGroup,//路由的权限分组
             'baseAuth'=>($baseAuth[0]??'').':'.($baseAuth[1]??''),
             'route'=>$routerDocumentData??[],
         ];
@@ -947,7 +972,7 @@ class Route
      * @title  权限相关处理
      * @explain 一般是方法功能说明、逻辑说明、注意事项等。
      */
-    protected function authDispose(&$routeAuthGroup,&$routeAuthExtend,$tag)
+    protected function authDispose(&$routeAuthGroup,&$routeAuthExtend,$tag,$title,$explain)
     {
         //* @authGroup [admin.del:user.del]删除账号操作
         //* @authExtend UserExtend:list 删除账号操作
@@ -976,9 +1001,10 @@ class Route
         foreach($routeAuthGroup as $value)
         {
              //模块资源  del  $tag
-            $this->Permissions[$value[0]][$value[1]][$value[2][0]][] = [
+            $this->Permissions[$value[0]][$value[1]][] = [
                 'tag'=>$tag,
-                'explain'=>$value[2][1],
+                'explain'=>$explain,
+                'title'=>$title,
                 'extend'=>$routeAuthExtend
             ];
         }
@@ -999,33 +1025,16 @@ class Route
     protected function detectionAuthGroup($routeAuthGroup)
     {
         if(empty($routeAuthGroup)){return [true];}
-
-        $Resource = 'authority\\'.$this->app->__APP__.'\\Resource';
-
-        $reflect = new \ReflectionClass($Resource);
-        $ConstData = $reflect->getConstants();
-        foreach($routeAuthGroup as $value)
+        foreach($routeAuthGroup  as $key=>$value)
         {
-            //if(count($value) !=3) {return [false,'formal error ：count unequal 3 ',''];}
-            /**
-             * 一级
-             */
-            if(!isset($ConstData['mainResource'][$value[0]])){
-                return [false,'main illegality',''];
+            if (count($value) !==2){
+                return [false,'路由权限组格式错误'];
             }
-            /**
-             * 二级
-             */
-            if(!isset($ConstData[$value[0]][$value[1]])){
-                return [false,'second illegality',''];
+            if (!isset(BaseAuthGroup::DATA[$value[0]])){
+                return [false,'不存在：'.$value[0],''];
             }
-            //list
-
-            /**
-             * 判断三级
-             */
-            if(!isset($ConstData[$value[0]][$value[1]]['list'][$value[2][0]])){
-                return [false,'lesser inexistence',''];
+            if (!isset(BaseAuthGroup::DATA[$value[0]]['list'][$value[1]])){
+                return [false,''.$value[0].'下的 '.$value[1].' 不存在',''];
             }
 
             return [true];

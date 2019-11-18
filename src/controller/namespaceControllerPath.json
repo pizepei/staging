@@ -1,8 +1,14 @@
 {
   "name":"框架应用",
   "author": "pizepei",
-  "permissions": {
-    "staging": "框架应用",
-    "document": "项目文档"
+  "baseAuthGroup": {
+    "staging": {
+      "name":"应用项目",
+      "explain": ""
+    },
+    "document":{
+      "name":"项目文档",
+      "explain": ""
+    }
   }
 }
