@@ -207,18 +207,12 @@ class BasicsDocument extends Controller
     /**
      * @Author pizepei
      * @Created 2019/4/25 14:01
-     *
      * @param \pizepei\staging\Request $Request
      *      get [object] get参数
-     *          projectId [string required] 项目id
+     *          projectId [string] 项目id
      * @return array [json]
-     *      list [objectList] 数据
-     *          id [string] 权限id
-     *          name [string] 权限名
-     *          pid [string] 父id
-     *          value [string] 参数
-     *          checked [string] 选中
-     *      checkedId [raw] 被选中的id
+     *      data [raw]
+     *          title [string] 标题
      * @title  获取权限树
      * @explain  根据点击侧边导航获取对应的获取API文档信息
      * @router get jurisdiction-list debug:true
@@ -226,12 +220,9 @@ class BasicsDocument extends Controller
      */
     public function jurisdictionList(Request $Request)
     {
-        return $this->succeed([
-            'list'=>Resource::initJurisdictionList($this->app->Route()->Permissions,$this->app),
-            'checkedId'=>['getMenu','409bfd433e7dd7af7d7530ad5fb7bc46'],
-        ]);
-
-
+        return $this->succeed(
+            \PermissionsInfo::children
+        ,'获取成功');
     }
 
     /**

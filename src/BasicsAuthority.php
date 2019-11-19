@@ -116,7 +116,20 @@ class BasicsAuthority
      */
     public function getUserInfo():array
     {
-        return [];
+        return $this->app->Authority->UserInfo;
+    }
+
+    /**
+     * @Author 皮泽培
+     * @Created 2019/11/19 16:34
+     * @title  判断是否是超级管理员
+     * @explain 非必要情况下不建议使用
+     * @return bool
+     * @throws \Exception
+     */
+    public function isSuperAdmin()
+    {
+        return false;
     }
 
 }
