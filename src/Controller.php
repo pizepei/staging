@@ -65,6 +65,8 @@ class Controller
                 # 思考：是否一些时间不需要放到控制器中？
                 # 思考：是否直接访问权限资源对象就可以？
             $this->authExtend = $this->Authority->authExtend;
+
+            $this->UserInfo = $this->Authority->UserInfo;
             $this->Payload = $this->Authority->Payload;
 
         }
