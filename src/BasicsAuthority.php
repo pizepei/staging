@@ -41,6 +41,11 @@ class BasicsAuthority
      * @var string
      */
     protected $methods = '';
+    /**
+     * 用户数据
+     * @var null
+     */
+    protected $UserInfo = null;
 
     /**
      * Authority constructor.

@@ -40,6 +40,11 @@ class Controller
      * @var null
      */
     protected $authResult = null;
+    /**
+     * 用户数据
+     * @var |null
+     */
+    protected $UserInfo = null;
 
     /**
      * Controller constructor.
@@ -64,10 +69,9 @@ class Controller
             # 权限控资源对象中获取必要的数据到控制器中
                 # 思考：是否一些时间不需要放到控制器中？
                 # 思考：是否直接访问权限资源对象就可以？
-            $this->authExtend = $this->Authority->authExtend;
-
-            $this->UserInfo = $this->Authority->UserInfo;
-            $this->Payload = $this->Authority->Payload;
+            $this->authExtend = $app->Authority->authExtend;
+            $this->UserInfo = $app->Authority->UserInfo;
+            $this->Payload = $app->Authority->Payload;
 
         }
     }
