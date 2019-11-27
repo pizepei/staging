@@ -438,6 +438,11 @@ class App extends Container
      */
     public function start()
     {
+        # 规划为应用控制器全部由LocalDeployServic::cliInitDeploy方法创建不在记录在git中，因此在开发模式下在进入路由前执行此方法动态生成控制器
+        #  同时开发模式下可能响应时间会更长
+        if ($this->__EXPLOIT__){
+            LocalDeployServic::cliInitDeploy($this,[]);#动态生成控制器和其他文件
+        }
 
         $this->Response($this);  #响应控制类
         $this->Route($this);    #路由类
