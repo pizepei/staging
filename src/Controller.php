@@ -72,7 +72,7 @@ class Controller
             $this->authExtend = $app->Authority->authExtend;
             $this->UserInfo = $app->Authority->UserInfo;
             $this->Payload = $app->Authority->Payload;
-
+            $this->ACCESS_TOKEN= $app->Authority->ACCESS_TOKEN;
         }
     }
 

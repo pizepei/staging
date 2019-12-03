@@ -46,7 +46,11 @@ class BasicsAuthority
      * @var null
      */
     protected $UserInfo = null;
-
+    /**
+     * 当前用户的ACCESS_TOKEN
+     * @var string
+     */
+    protected $ACCESS_TOKEN = '';
     /**
      * Authority constructor.
      * @param $pattern 模式  比如 jwt模式
