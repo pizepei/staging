@@ -45,6 +45,16 @@ class Controller
      * @var |null
      */
     protected $UserInfo = null;
+    /**
+     * 当前用户的ACCESS_TOKEN
+     * @var string
+     */
+    protected $ACCESS_TOKEN = '';
+    /**
+     * 当前用户jwt签名部分
+     * @var string
+     */
+    protected $ACCESS_SIGNATURE = '';
 
     /**
      * Controller constructor.
@@ -73,6 +83,8 @@ class Controller
             $this->UserInfo = $app->Authority->UserInfo;
             $this->Payload = $app->Authority->Payload;
             $this->ACCESS_TOKEN= $app->Authority->ACCESS_TOKEN;
+            $this->ACCESS_SIGNATURE= $app->Authority->ACCESS_SIGNATURE;
+
         }
     }
 

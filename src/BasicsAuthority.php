@@ -52,6 +52,11 @@ class BasicsAuthority
      */
     protected $ACCESS_TOKEN = '';
     /**
+     * 当前用户jwt签名部分
+     * @var string
+     */
+    protected $ACCESS_SIGNATURE = '';
+    /**
      * Authority constructor.
      * @param $pattern 模式  比如 jwt模式
      * @param App $app
