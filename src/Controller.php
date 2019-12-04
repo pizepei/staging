@@ -176,5 +176,19 @@ class Controller
         return $this->app->Response()->error($msg,$code,$data);
     }
 
-
+    /**
+     * @Author 皮泽培
+     * @Created 2019/12/4 13:02
+     * @param string $url
+     * @param int $code
+     * @title  重定向
+     * @explain 重定向
+     * @throws \Exception
+     */
+    public function redirect(string $url,int $code=302)
+    {
+        header('content-type:text/html;charset=uft-8');
+        header('Location: '.$url);
+        $this->error('重定向');
+    }
 }
