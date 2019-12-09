@@ -567,7 +567,10 @@ class Request
                 }else if($type == 'objectList'){
 
                     if(!is_array($pv)){
-                        throw new \Exception('非法的数据结构:'.$pk.'上级应该是['.$type.']');
+                        $pv = json_decode($pv);
+                        if (!is_array($pv)){
+                            throw new \Exception('非法的数据结构:'.$pk.'上级应该是['.$type.']数据应该是索擎数组');
+                        }
                     }
                     if (!is_int($pk)){unset($data[$pk]);}//删除分索引数组的非法数据
                     foreach($pv as $kk =>&$vv){
