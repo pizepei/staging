@@ -202,7 +202,7 @@ class App extends Container
         if (empty($deployPath)){
             $this->__DEPLOY_CONFIG_PATH__ = $this->DOCUMENT_ROOT.'config'.DIRECTORY_SEPARATOR;
         }else{
-            $this->__DEPLOY_CONFIG_PATH__ = $deployPath;
+            $this->__DEPLOY_CONFIG_PATH__ = $this->DOCUMENT_ROOT.'..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.$deployPath.DIRECTORY_SEPARATOR;
         }
         # 启动Helper容器
 //        $this->Helper();
@@ -226,7 +226,6 @@ class App extends Container
             //error_reporting(0);
             //set_exception_handler(['MyException','production']);
         }
-
         # 设置初始化配置   服务器版本php_uname('s').php_uname('r');
         $path = $this->setDefine($pattern,$path,$deployPath); #关于配置：先读取deploy配置确定当前项目配置是从配置中心获取还是使用本地配置
 
