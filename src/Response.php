@@ -247,7 +247,8 @@ class Response
                 }else{
                     # 控制器直接return的数据
                     # 如果不是error 100 方法的异常   就进行数据过滤
-                    if ($data['statusCode'] !== 100){ $this->app->Request()->returnParamFiltration($data);}
+                    if (!isset($data['statusCode'])){ $this->app->Request()->returnParamFiltration($data);}
+                    if (isset($data['statusCode']) && $data['statusCode'] !== 100){ $this->app->Request()->returnParamFiltration($data);}
                 }
             }else{
                 # 不是array 是控制器return的是字符串 （使用异常或者succeed方法等的$data都是array   但是进入此方法的都是控制器路由定义为返回json的资源)
