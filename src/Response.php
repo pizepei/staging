@@ -307,6 +307,7 @@ class Response
             ob_start(array($this, 'ob_start'));
             echo $data===''?$this->ResponseData:$data;
             ob_end_flush();
+            exit();
         }else{
 
             echo $data===''?$this->ResponseData:$data;
