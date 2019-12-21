@@ -164,7 +164,7 @@ class Request
         }
 
         if(!in_array($type,$this->inputType)){
-            throw new \Exception('错误的类型：'.$type);
+            error('错误的类型：'.$type);
         }
         $TypeS = strtoupper($type);
         /**
@@ -415,13 +415,14 @@ class Request
                                     }
                                 }if(isset($this->app->Route()->ReturnSubjoin[$vvv['fieldRestrain'][0]])){
                                     if(!isset($vvv[$kkk]) || $vvv[$kkk] ==''){
-                                        throw new \Exception($vvv['fieldExplain'].'['.$vvv['fieldRestrain'][0].']是必须的');
+                                        error($vvv['fieldExplain'].'['.$vvv['fieldRestrain'][0].']是必须的');
                                     }
                                     # 如果是 empty 就不判断 ： 本身设置为这些数据类型就是必须不能为空
                                     if($vvv['fieldRestrain'][0] != 'empty'){
                                         preg_match($this->app->Route()->ReturnSubjoin[$vvv['fieldRestrain'][0]][1],$vv[$kkk],$result);
                                         if(empty($result) || $result ==null){
-                                            throw new \Exception($noteData['fieldExplain'].'['.$kkk.']:'.'格式错误');
+
+                                            error($noteData['fieldExplain'].'['.$kkk.']:'.'格式错误');
                                         }
                                     }
                                 }else{
@@ -436,13 +437,13 @@ class Request
                         # 自定义数据留下  如 uuid email 等等    必须的不能为空  如果是return 数据又不希望是必须的可设置为int 或者string
                         if(isset($this->app->Route()->ReturnSubjoin[$noteData['fieldRestrain'][0]])){
                             if(!isset($vv[$key]) || $vv[$key] ==''){
-                                throw new \Exception($noteData['fieldExplain'].'['.$noteData['fieldRestrain'][0].']是必须的');
+                                error($noteData['fieldExplain'].'['.$noteData['fieldRestrain'][0].']是必须的');
                             }
                             # 如果是 empty 就不判断 ： 本身设置为这些数据类型就是必须不能为空
                             if($noteData['fieldRestrain'][0] != 'empty'){
                                 preg_match($this->app->Route()->ReturnSubjoin[$noteData['fieldRestrain'][0]][1],$vv[$key],$result);
                                 if(empty($result) || $result ==null){
-                                    throw new \Exception($noteData['fieldExplain'].'['.$key.']:'.'格式错误');
+                                    error($noteData['fieldExplain'].'['.$key.']:'.'格式错误');
                                 }
                             }
                         }else if (in_array($noteData['fieldRestrain'][0],$this->app->Route()::RequestParamDataType)){
@@ -465,18 +466,18 @@ class Request
                      * 如果存在就类型转换
                      */
                     isset($vv[$key]);
-                    if($fieldRestrain == 'objectList' || empty($vv[$key])) {throw new \Exception($key.'['.$key.']是必须的');}
+                    if($fieldRestrain == 'objectList' || empty($vv[$key])) {error($key.'['.$key.']是必须的');}
                     
                     if(isset($vv[$key])) {settype($vv[$key],$fieldRestrain);}
                     foreach($noteData['fieldRestrain'] as $k=>$v){
                         if(isset($this->app->Route()->ReturnSubjoin[$v])){
                             if(!isset($vv[$key]) || $vv[$key] ==''){
-                                throw new \Exception($noteData['fieldExplain'].'['.$key.']是必须的');
+                                error($noteData['fieldExplain'].'['.$key.']是必须的');
                             }
                             if($this->app->Route()->ReturnSubjoin[$v][1] != 'empty'){
                                 preg_match($this->app->Route()->ReturnSubjoin[$v][1],$vv[$key],$result);
                                 if(empty($result) || $result ==null){
-                                    throw new \Exception($noteData['fieldExplain'].'['.$key.']:'.'格式错误');
+                                    error($noteData['fieldExplain'].'['.$key.']:'.'格式错误');
                                 }
                             }
                         }
@@ -501,12 +502,12 @@ class Request
             foreach($noteData['fieldRestrain'] as $k=>$v){
                 if(isset($this->app->Route()->ReturnSubjoin[$v])){
                     if(!isset($data[$key]) || $data[$key] ==''){
-                        throw new \Exception($noteData['fieldExplain'].'['.$key.']是必须的');
+                        error($noteData['fieldExplain'].'['.$key.']是必须的');
                     }
                     if($this->app->Route()->ReturnSubjoin[$v][1] != 'empty'){
                         preg_match($this->app->Route()->ReturnSubjoin[$v][1],(string)$data[$key],$result);
                         if(empty($result) || $result ==null){
-                            throw new \Exception($noteData['fieldExplain'].'['.$key.']:'.'格式错误');
+                            error($noteData['fieldExplain'].'['.$key.']:'.'格式错误');
                         }
                         # 默认结果是字符串：判断是否需要转换数据类型
                         if ($this->app->Route()->ReturnSubjoin[$v][2] !== 'string' || $this->app->Route()->ReturnSubjoin[$v][2] !== ''){
@@ -553,7 +554,7 @@ class Request
                             }else{
                                 if (!isset($noteData[$pk]['substratum']) && ($noteData[$pk]['fieldRestrain'][0] =='object' || $noteData[$pk]['fieldRestrain'][0] =='objectList'))
                                 {
-                                    throw new \Exception('参数: '.$pk.' ['.$noteData[$pk]['fieldRestrain'][0].']不能没有下级或可使用[raw]忽略参数限制');
+                                    error('参数: '.$pk.' ['.$noteData[$pk]['fieldRestrain'][0].']不能没有下级或可使用[raw]忽略参数限制');
                                 }
                             }
                         }
@@ -569,7 +570,7 @@ class Request
                     if(!is_array($pv)){
                         $pv = json_decode($pv);
                         if (!is_array($pv)){
-                            throw new \Exception('非法的数据结构:'.$pk.'上级应该是['.$type.']数据应该是索擎数组');
+                            error('非法的数据结构:'.$pk.'上级应该是['.$type.']数据应该是索擎数组');
                         }
                     }
                     if (!is_int($pk)){unset($data[$pk]);}//删除分索引数组的非法数据
@@ -646,7 +647,7 @@ class Request
                     foreach($val as $k=>$v){
                         # 安全策略
                         if($i > $this->app->__INIT__['requestParamTier']){
-                            throw new \Exception('请求数据超过限制:xml层级超过限制');
+                            error('请求数据超过限制:xml层级超过限制');
                         }
                         # 策略数据
                         if(is_array($v)){
