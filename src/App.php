@@ -425,6 +425,14 @@ class App extends Container
         $this->__ROUTE__ = \Config::UNIVERSAL['route'];//路由配置
         $this->__DS__ = DIRECTORY_SEPARATOR;//系统路径符
         $this->__TEMPLATE__ = $this->DOCUMENT_ROOT.$this->__APP__.DIRECTORY_SEPARATOR.'template'.DIRECTORY_SEPARATOR;//模板路径
+
+        # 规划为应用控制器全部由LocalDeployServic::cliInitDeploy方法创建不在记录在git中，因此在开发模式下在进入路由前执行此方法动态生成控制器
+        #  同时开发模式下可能响应时间会更长
+        if ($this->__EXPLOIT__ || !file_exists($deployPath.DIRECTORY_SEPARATOR.$this->__APP__.'BaseAuthGroup.php') ||\Deploy::ENVIRONMENT =='develop'){
+            LocalDeployServic::cliInitDeploy($this,['force'=>true]);#动态生成控制器和其他文件
+        }
+        require ($this->__CONFIG_PATH__.'BaseAuthGroup.php');
+
         return $path;
     }
 
@@ -438,11 +446,7 @@ class App extends Container
      */
     public function start()
     {
-        # 规划为应用控制器全部由LocalDeployServic::cliInitDeploy方法创建不在记录在git中，因此在开发模式下在进入路由前执行此方法动态生成控制器
-        #  同时开发模式下可能响应时间会更长
-        if ($this->__EXPLOIT__){
-            LocalDeployServic::cliInitDeploy($this,['force'=>true]);#动态生成控制器和其他文件
-        }
+
 
         $this->Response($this);  #响应控制类
         $this->Route($this);    #路由类

@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace pizepei\staging;
 
 use function AlibabaCloud\Client\value;
-use config\app\BaseAuthGroup;
+
 
 class Route
 {
@@ -505,7 +505,7 @@ class Route
     {
         $data =\Deploy::PERMISSIONS;
         $data['disabled'] = true;
-        foreach (BaseAuthGroup::DATA as $key=>$value)
+        foreach (\BaseAuthGroup::DATA as $key=>$value)
         {
             $children = [];
             foreach ($this->Permissions[$key]??[] as $k=>$v)
@@ -1036,7 +1036,7 @@ class Route
             if (count($value) !==1){
                 return [false,'路由权限组格式错误'];
             }
-            if (!isset(BaseAuthGroup::DATA[$value[0]])){
+            if (!isset(\BaseAuthGroup::DATA[$value[0]])){
                 return [false,'不存在：'.$value[0],''];
             }
             # 处理符合数据：中处理返回的第一层数据 同时不支持objectList raw 格式
