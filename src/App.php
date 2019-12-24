@@ -316,9 +316,10 @@ class App extends Container
                  */
                 $LocalDeployServic = new LocalDeployServic();
                 $data=[
-                    'appid'=>\Deploy::INITIALIZE['appid'],//项目标识
-                    'domain'=>$_SERVER['HTTP_HOST'],//当前域名
-                    'time'=>time(),//
+                    'appid'             =>\Deploy::INITIALIZE['appid'],//项目标识
+                    'domain'            =>$_SERVER['HTTP_HOST'],//当前域名
+                    'MODULE_PREFIX'     =>\Deploy::PROJECT_ID,//项目标识
+                    'time'              =>time(),//
                 ];
                 if(!file_exists($path.'Config.php')){
                     $data['ProcurementType'] = 'Config';//获取类型   Config.php  Dbtabase.php  ErrorOrLogConfig.php
