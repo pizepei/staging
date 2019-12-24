@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 namespace pizepei\staging;
 
+use pizepei\helper\Helper;
+
 class Request
 {
     /**
@@ -517,6 +519,9 @@ class Request
                 }else{
                     if(isset($data[$key])) {
                         if (in_array($v,$this->app->Route()::RequestParamDataType)){
+                            if (is_array($data[$key]) && $v==='string'){
+                                $data[$key] = Helper()->json_encode($data[$key]);
+                            }
                             settype($data[$key],$v);
                         }else{
                             unset($data[$key]);
