@@ -430,9 +430,12 @@ class App extends Container
         # 规划为应用控制器全部由LocalDeployServic::cliInitDeploy方法创建不在记录在git中，因此在开发模式下在进入路由前执行此方法动态生成控制器
         #  同时开发模式下可能响应时间会更长
         if ($this->__EXPLOIT__ || !file_exists($deployPath.DIRECTORY_SEPARATOR.$this->__APP__.'BaseAuthGroup.php') ||\Deploy::ENVIRONMENT =='develop'){
-            LocalDeployServic::cliInitDeploy($this,['force'=>true]);#动态生成控制器和其他文件
+            LocalDeployServic::cliInitDeploy($this,['force'=>true]);    #动态生成控制器和其他文件
+            LocalDeployServic::getMenuTemplate($this,['force'=>true]);  #动态根据依赖包生成菜单文件
         }
+        # 包含引入 权限、菜单类
         require ($this->__CONFIG_PATH__.'BaseAuthGroup.php');
+        require ($this->__CONFIG_PATH__.'BaseMenu.php');
 
         return $path;
     }
