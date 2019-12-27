@@ -12,37 +12,7 @@
         <div class="layui-logo">开发助手</div>
         <!-- 头部区域（可配合layui已有的水平导航） -->
         <ul class="layui-nav layui-layout-left" lay-filter="nav-filter2">
-            <li class="layui-nav-item"><a href="/{{MODULE_PREFIX}}/document/index/document.html">API文档</a></li>
-            <li class="layui-nav-item"><a href="/{{MODULE_PREFIX}}/document/index/authority.html">权限文档</a></li>
-            <li class="layui-nav-item"><a href="/{{MODULE_PREFIX}}/document/index/code.html">状态码文档</a></li>
-            <li class="layui-nav-item">
-                <a href="javascript:;">资源文档</a>
-                <dl class="layui-nav-child">
-                    <dd><a href="">框架文档</a></dd>
-                    <dd><a href="">图标资源</a></dd>
-                    <dd><a href="">公共API</a></dd>
-                    <dd><a href="">授权管理</a></dd>
-                </dl>
-            </li>
-            <li class="layui-nav-item">
-                <a href="javascript:;">控制台</a>
-                <dl class="layui-nav-child">
-                    <dd><a href="">初始化文件</a></dd>
-                    <dd><a href="">交接中心</a></dd>
-                    <dd><a href="">安全中心</a></dd>
-                </dl>
-            </li>
-
-            <li class="layui-nav-item">
-                <a href="javascript:;">项目管理</a>
-                <dl class="layui-nav-child">
-                    <dd><a href="">人员管理</a></dd>
-                    <dd><a href="">角色管理</a></dd>
-                    <dd><a href="">项目配置</a></dd>
-                </dl>
-            </li>
-
-
+            {{_NAV_}}
         </ul>
         <ul class="layui-nav layui-layout-right">
             <li class="layui-nav-item">

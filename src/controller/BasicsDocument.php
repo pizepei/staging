@@ -38,13 +38,14 @@ class BasicsDocument extends Controller
     {
         $name = $Request->path('type')==='index'?'document':$Request->path('type');
         $data = [
+            '_NAV_'=>self::_NAV_,
             'layui.css'=>'https://www.layuicdn.com/layui-v2.5.5/css/layui.css',
             'layui.js'=>'https://www.layuicdn.com/layui-v2.5.5/layui.js',
             'local.layui.css'=>\Deploy::VIEW_RESOURCE_PREFIX.'/start/layui/css/layui.css',
             'local.layui.js'=>\Deploy::VIEW_RESOURCE_PREFIX.'/start/layui/layui.js',
             'VIEW_RESOURCE_PREFIX'=>\Deploy::VIEW_RESOURCE_PREFIX,
             'MODULE_PREFIX'=>\Deploy::MODULE_PREFIX,
-            'jsonDataName'=>$this->app->__INIT__['ReturnJsonData']
+            'jsonDataName'=>$this->app->__INIT__['ReturnJsonData'],
         ];
         $path = dirname(__DIR__).DIRECTORY_SEPARATOR.'template'.DIRECTORY_SEPARATOR.'Document'.DIRECTORY_SEPARATOR;
         return $this->view($name,$data,$path,'html',false);
@@ -315,25 +316,146 @@ class BasicsDocument extends Controller
 
 
 
+    /**
+     * @Author pizepei
+     * @Created 2019/4/23 23:02
+     * @param \pizepei\staging\Request $Request
+     * @return array [json]
+     * @title  框架开发文档菜单
+     * @explain 临时框架开发文档菜单
+     * @router get init-data
+     */
+    public function initData(Request $Request)
+    {
+        /**
+         * 数据构造
+         */
+        $dataStructure =[
+            'ErrorReturnJsonMsg'    => $this->app->__INIT__['ErrorReturnJsonMsg'],
+            'ErrorReturnJsonCode'   => $this->app->__INIT__['ErrorReturnJsonCode'],
+            'SuccessReturnJsonMsg'  => $this->app->__INIT__['SuccessReturnJsonMsg'],
+            'SuccessReturnJsonCode' => $this->app->__INIT__['SuccessReturnJsonCode'],
+            'notLoggedCode'         => $this->app->__INIT__['notLoggedCode'],
+            'ReturnJsonData'        => $this->app->__INIT__['ReturnJsonData'],
+            'ReturnJsonCount'       => $this->app->__INIT__['ReturnJsonCount'],
+            'jurisdictionCode'      => $this->app->__INIT__['jurisdictionCode'],
+        ];
+        return ['dataStructure'=>$dataStructure,'nav'=>self::_NAV_];
+    }
 
+    /**
+     * 文档控制器菜单
+     */
+//    const _NAV_ =[
+//        [
+//            'href'      =>'/document/index/document.html',
+//            'title'     =>'API文档',
+//            'children'  =>[],
+//        ],
+//        [
+//            'href'      =>'/document/index/authority.html',
+//            'title'     =>'权限文档',
+//            'children'  =>[],
+//
+//        ],
+//        [
+//            'href'      =>'/document/index/code.html',
+//            'title'     =>'状态码文档',
+//            'children'  =>[],
+//
+//        ],
+//        [
+//            'href'      =>'javascript:;',
+//            'title'     =>'资源文档',
+//            'children'  =>[
+//                [
+//                    'href'      =>'javascript:;',
+//                    'title'     =>'框架文档',
+//                ],
+//                [
+//                    'href'      =>'javascript:;',
+//                    'title'     =>'图标资源',
+//                ],
+//                [
+//                    'href'      =>'javascript:;',
+//                    'title'     =>'公共API',
+//                ],
+//                [
+//                    'href'      =>'javascript:;',
+//                    'title'     =>'授权管理',
+//                ],
+//            ],
+//        ],
+//        [
+//            'href'      =>'javascript:;',
+//            'title'     =>'控制台',
+//            'children'  =>[
+//                [
+//                    'href'      =>'javascript:;',
+//                    'title'     =>'初始化文件',
+//                ],
+//                [
+//                    'href'      =>'javascript:;',
+//                    'title'     =>'交接中心',
+//                ],
+//                [
+//                    'href'      =>'javascript:;',
+//                    'title'     =>'安全中心',
+//                ],
+//
+//            ],
+//        ],
+//        [
+//            'href'      =>'javascript:;',
+//            'title'     =>'项目管理',
+//            'children'  =>[
+//                [
+//                    'href'      =>'javascript:;',
+//                    'title'     =>'人员管理',
+//                ],
+//                [
+//                    'href'      =>'javascript:;',
+//                    'title'     =>'角色管理',
+//                ],
+//                [
+//                    'href'      =>'javascript:;',
+//                    'title'     =>'项目配置',
+//                ],
+//
+//            ],
+//        ]
+//    ];
+    const _NAV_ = <<<ABC
+<li class="layui-nav-item"><a href="/{{MODULE_PREFIX}}/document/index/document.html">API文档</a></li>
+<li class="layui-nav-item"><a href="/{{MODULE_PREFIX}}/document/index/authority.html">权限文档</a></li>
+<li class="layui-nav-item"><a href="/{{MODULE_PREFIX}}/document/index/code.html">状态码文档</a></li>
+<li class="layui-nav-item"><a href="/{{MODULE_PREFIX}}/document/index/code.html">状态码文档</a></li>
+<li class="layui-nav-item">
+    <a href="javascript:;">资源文档</a>
+    <dl class="layui-nav-child">
+        <dd><a href="">框架文档</a></dd>
+        <dd><a href="">图标资源</a></dd>
+        <dd><a href="">公共API</a></dd>
+        <dd><a href="">授权管理</a></dd>
+    </dl>
+</li>
+<li class="layui-nav-item">
+    <a href="javascript:;">控制台</a>
+    <dl class="layui-nav-child">
+        <dd><a href="">初始化文件</a></dd>
+        <dd><a href="">交接中心</a></dd>
+        <dd><a href="">安全中心</a></dd>
+    </dl>
+</li>
 
+<li class="layui-nav-item">
+    <a href="javascript:;">项目管理</a>
+    <dl class="layui-nav-child">
+        <dd><a href="">人员管理</a></dd>
+        <dd><a href="">角色管理</a></dd>
+        <dd><a href="">项目配置</a></dd>
+    </dl>
+</li>
+ABC;
 
-
-
-
-
-
-
-
-
-
-
-    const fileTemplates_includes_PHP_Function_Doc_Comment=[
-        'content'=><<<ABC
-这里可以是任合内容
-我是历的苛夺基
-本原则叶落归根在运
-输费艰难田￥￥&……
-ABC
-    ];
 }
