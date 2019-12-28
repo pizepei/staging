@@ -255,7 +255,7 @@ class App extends Container
      * @param $namespace
      * @param $deployPath
      * @throws \ReflectionException
-     * @title  方法标题（一般是方法的简称）
+     * @title  获取项目配置
      * @explain 一般是方法功能说明、逻辑说明、注意事项等。
      */
     protected function getInitDefine($path,$namespace,$deployPath)
@@ -293,10 +293,10 @@ class App extends Container
                 # 远程配置中心获取
                 $LocalDeployServic = new LocalDeployServic();
                 $data=[
-                    'appid'             =>\Deploy::INITIALIZE['appid'],//项目标识
-                    'domain'            =>$_SERVER['HTTP_HOST'],//当前域名
-                    'MODULE_PREFIX'     =>\Deploy::PROJECT_ID,//项目标识
-                    'time'              =>time(),//
+                    'appid'             =>  \Deploy::INITIALIZE['appid'],//项目标识
+                    'domain'            =>  $_SERVER['HTTP_HOST'],//当前域名
+                    'MODULE_PREFIX'     =>  \Deploy::PROJECT_ID,//项目标识
+                    'time'              =>  time(),//
                 ];
                 $data['ProcurementType'] = 'Config';//获取类型   Config.php  Dbtabase.php  ErrorOrLogConfig.php
                 $Config = $LocalDeployServic->getConfigCenter($data);
