@@ -176,34 +176,32 @@ class App extends Container
         }else{
             $this->DOCUMENT_ROOT = dirname($_SERVER['SCRIPT_FILENAME'],$this->DOCUMENT_ROOT).DIRECTORY_SEPARATOR;#定义项目根目录
         }
-        $this->__CLIENT_IP__ = terminalInfo::get_ip();  # 客户端 IP
-
         if($this->__PATTERN__ === 'CLI'){
 
         }else{
             $this->__CLI__SQL_LOG__ = $getopt['sqllog']??'false';
         }
-
         $this->__APP__ =  $app_path;            #应用路径
         $this->__EXPLOIT__ = $exploit;          #是否开发调试模式  (使用应用级别的因为在项目级别可能会地址SAAS模式下所有的租户都开启了调试模式)
         $this->__USE_PATTERN__ = $pattern;      #应用模式 ORIGINAL       SAAS
         if (DIRECTORY_SEPARATOR ==='\\'){
             $this->__OS__ = 'widnows';
         }
-        #应用级别配置
-        $pathFof = '';
-        if ($this->__USE_PATTERN__ == 'SAAS'){
-            if (empty($path)){$pathFof = DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'];}
-        }
-        # 应用配置路径
-        $this->__CONFIG_PATH__ = empty($path)?$this->DOCUMENT_ROOT.'config'.$pathFof.DIRECTORY_SEPARATOR.$this->__APP__.DIRECTORY_SEPARATOR:$path;
-
         #项目级别配置
         if (empty($deployPath)){
             $this->__DEPLOY_CONFIG_PATH__ = $this->DOCUMENT_ROOT.'config'.DIRECTORY_SEPARATOR;
         }else{
             $this->__DEPLOY_CONFIG_PATH__ = $this->DOCUMENT_ROOT.'..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.$deployPath.DIRECTORY_SEPARATOR;
         }
+        #应用级别配置
+        $pathFof = '';
+        if ($this->__USE_PATTERN__ == 'SAAS'){
+            if (empty($path)){$pathFof = DIRECTORY_SEPARATOR.$_SERVER['HTTP_HOST'];}
+        }
+
+        # 应用配置路径
+        $this->__CONFIG_PATH__ = empty($path)?$this->DOCUMENT_ROOT.'config'.$pathFof.DIRECTORY_SEPARATOR.$this->__APP__.DIRECTORY_SEPARATOR:$path;
+
         # 启动Helper容器
 //        $this->Helper();
 
@@ -284,7 +282,8 @@ class App extends Container
          */
         require($deployPath.'Deploy.php');
         $this->__EXPLOIT__ = \Deploy::__EXPLOIT__;//设置模式
-
+        terminalInfo::$ipPattern = \Deploy::CDN_AGENCY;
+        $this->__CLIENT_IP__ = terminalInfo::get_ip();  # 客户端 IP
         # 判断获取配置方式
         if(\Deploy::toLoadConfig == 'ConfigCenter')
         {
